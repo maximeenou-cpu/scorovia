@@ -443,9 +443,13 @@ function closeModal() {
   document.getElementById('upload-modal').classList.remove('open');
   document.body.style.overflow = '';
   selectedFile = null;
-  lastX = 0; lastY = 0; imgScale = 1;
+  bgX = 50; bgY = 50; bgZoom = 100;
+  imgDataUrl = null;
   const preview = document.getElementById('modal-preview');
   preview.style.cursor = 'pointer';
+  preview.style.backgroundImage = 'none';
+  preview.style.backgroundSize = '';
+  preview.style.backgroundPosition = '';
   preview.innerHTML = '📸<input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />';
   preview.onclick = triggerUpload;
   document.getElementById('crop-controls').style.display = 'none';
@@ -465,27 +469,25 @@ let posX = 0, posY = 0, zoomScale = 1;
 let isDragging = false, sx = 0, sy = 0;
 let imgDataUrl = null;
 
+let bgX = 50, bgY = 50, bgZoom = 100;
+
 function previewFile(input) {
   if (!input.files || !input.files[0]) return;
   selectedFile = input.files[0];
   const reader = new FileReader();
   reader.onload = e => {
     imgDataUrl = e.target.result;
-    posX = 0; posY = 0; zoomScale = 1;
+    bgX = 50; bgY = 50; bgZoom = 100;
+    posX = 0; posY = 0;
     document.getElementById('zoom-slider').value = 100;
     const preview = document.getElementById('modal-preview');
     preview.onclick = null;
     preview.style.cursor = 'grab';
-    preview.style.background = '#000';
-    preview.innerHTML = `
-      <div id="crop-wrap" style="position:absolute;inset:0;overflow:hidden;border-radius:14px;">
-        <img id="preview-img" src="${e.target.result}"
-          style="position:absolute;width:100%;height:100%;
-                 object-fit:cover;cursor:grab;user-select:none;
-                 left:0;top:0;transform:translate(0px,0px) scale(1);
-                 transform-origin:center;" draggable="false" />
-      </div>
-      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />`;
+    preview.style.backgroundImage = `url('${e.target.result}')`;
+    preview.style.backgroundSize = 'cover';
+    preview.style.backgroundPosition = '50% 50%';
+    preview.style.backgroundRepeat = 'no-repeat';
+    preview.innerHTML = `<input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />`;
     document.getElementById('crop-controls').style.display = 'block';
     setupDragImg();
   };
@@ -493,54 +495,66 @@ function previewFile(input) {
 }
 
 function updateTransform() {
-  const img = document.getElementById('preview-img');
-  if (img) img.style.transform = `translate(${posX}px, ${posY}px) scale(${zoomScale})`;
+  const preview = document.getElementById('modal-preview');
+  if (!preview || !imgDataUrl) return;
+  preview.style.backgroundPosition = `${bgX}% ${bgY}%`;
+  preview.style.backgroundSize = `${bgZoom}%`;
 }
 
 function setupDragImg() {
   const preview = document.getElementById('modal-preview');
+  let startX = 0, startY = 0, startBgX = 50, startBgY = 50;
+
   preview.addEventListener('mousedown', e => {
     if (e.target.id === 'file-input') return;
-    isDragging = true; sx = e.clientX; sy = e.clientY;
+    isDragging = true;
+    startX = e.clientX; startY = e.clientY;
+    startBgX = bgX; startBgY = bgY;
     preview.style.cursor = 'grabbing';
     e.preventDefault();
   });
+
   window.addEventListener('mousemove', e => {
     if (!isDragging) return;
-    posX += e.clientX - sx; posY += e.clientY - sy;
-    sx = e.clientX; sy = e.clientY;
+    const dx = (e.clientX - startX) / preview.offsetWidth * 100;
+    const dy = (e.clientY - startY) / preview.offsetHeight * 100;
+    bgX = Math.max(0, Math.min(100, startBgX - dx));
+    bgY = Math.max(0, Math.min(100, startBgY - dy));
     updateTransform();
   });
+
   window.addEventListener('mouseup', () => {
     isDragging = false;
-    const p = document.getElementById('modal-preview');
-    if (p) p.style.cursor = 'grab';
+    if (preview) preview.style.cursor = 'grab';
   });
+
   preview.addEventListener('touchstart', e => {
-    isDragging = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    isDragging = true;
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+    startBgX = bgX; startBgY = bgY;
   }, {passive:true});
+
   preview.addEventListener('touchmove', e => {
     if (!isDragging) return;
-    posX += e.touches[0].clientX - sx; posY += e.touches[0].clientY - sy;
-    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    const dx = (e.touches[0].clientX - startX) / preview.offsetWidth * 100;
+    const dy = (e.touches[0].clientY - startY) / preview.offsetHeight * 100;
+    bgX = Math.max(0, Math.min(100, startBgX - dx));
+    bgY = Math.max(0, Math.min(100, startBgY - dy));
     updateTransform();
   }, {passive:true});
+
   preview.addEventListener('touchend', () => { isDragging = false; });
 }
 
 function applyZoom(val) {
-  zoomScale = val / 100;
+  bgZoom = val;
   updateTransform();
 }
 
 async function getCroppedBlob() {
   if (!imgDataUrl) return selectedFile;
   const preview = document.getElementById('modal-preview');
-  const img = document.getElementById('preview-img');
-  if (!preview || !img) return selectedFile;
-
-  const pRect = preview.getBoundingClientRect();
-  const iRect = img.getBoundingClientRect();
+  if (!preview) return selectedFile;
 
   const canvas = document.createElement('canvas');
   const SIZE = 600;
@@ -551,13 +565,24 @@ async function getCroppedBlob() {
   natImg.src = imgDataUrl;
   await new Promise(r => { natImg.onload = r; });
 
-  // Calculate what portion of the natural image is visible in the preview box
-  const scaleX = natImg.naturalWidth / iRect.width;
-  const scaleY = natImg.naturalHeight / iRect.height;
-  const cropX = (pRect.left - iRect.left) * scaleX;
-  const cropY = (pRect.top - iRect.top) * scaleY;
-  const cropW = pRect.width * scaleX;
-  const cropH = pRect.height * scaleY;
+  const pW = preview.offsetWidth;
+  const pH = preview.offsetHeight;
+
+  // Calculate background-size in pixels
+  const ratio = Math.max(pW / natImg.naturalWidth, pH / natImg.naturalHeight);
+  const renderedW = natImg.naturalWidth * ratio * (bgZoom / 100);
+  const renderedH = natImg.naturalHeight * ratio * (bgZoom / 100);
+
+  // background-position as pixel offset
+  const offX = (bgX / 100) * (renderedW - pW);
+  const offY = (bgY / 100) * (renderedH - pH);
+
+  // Convert to natural image coordinates
+  const scaleToNat = natImg.naturalWidth / renderedW;
+  const cropX = offX * scaleToNat;
+  const cropY = offY * scaleToNat;
+  const cropW = pW * scaleToNat;
+  const cropH = pH * scaleToNat;
 
   ctx.drawImage(natImg, cropX, cropY, cropW, cropH, 0, 0, SIZE, SIZE);
   return new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
@@ -584,7 +609,7 @@ async function submitPhoto() {
     document.getElementById('progress-label').textContent = 'Upload de la photo...';
 
     // Get cropped blob if image was selected
-    const blob = document.getElementById('preview-img') ? await getCroppedBlob() : selectedFile;
+    const blob = imgDataUrl ? await getCroppedBlob() : selectedFile;
     const uploadFile = blob || selectedFile;
 
     const { data: uploadData, error: uploadError } = await sb.storage
