@@ -175,8 +175,9 @@ body {
 }
 
 .field input:focus, .field select:focus { border-color: rgba(245,200,66,0.35); }
-.field input.error { border-color: rgba(255,77,77,0.5); }
+.field input.error, .field select.error { border-color: rgba(255,77,77,0.5); }
 .field input::placeholder { color: var(--muted); }
+.field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
 .field select option { background: var(--deep); }
 
 .field-row { display: flex; gap: 10px; }
@@ -435,6 +436,17 @@ body {
         </div>
 
         <div class="field">
+          <label>Je suis</label>
+          <select id="signup-genre">
+            <option value="">-- Choisissez --</option>
+            <option value="homme">👨 Un homme</option>
+            <option value="femme">👩 Une femme</option>
+            <option value="autre">🧑 Autre</option>
+          </select>
+          <div class="error-msg" id="signup-genre-err">Veuillez choisir une option</div>
+        </div>
+
+        <div class="field">
           <label>Adresse email</label>
           <input type="email" id="signup-email" placeholder="votre@email.com" />
         </div>
@@ -636,8 +648,14 @@ async function doSignup() {
   const pwd = document.getElementById('signup-pwd').value;
   const terms = document.getElementById('terms').checked;
 
+  const genre = document.getElementById('signup-genre').value;
+
   if (!prenom || !age || !email || !pwd) {
     showAlert('signup-alert', '⚠️ Veuillez remplir tous les champs obligatoires', 'error');
+    return;
+  }
+  if (!genre) {
+    showAlert('signup-alert', '⚠️ Veuillez indiquer votre genre', 'error');
     return;
   }
   if (age < 18) {
@@ -675,6 +693,7 @@ async function doSignup() {
       prenom: prenom,
       ville: ville || null,
       age: age,
+      genre: genre || null,
       points: 20
     });
 
