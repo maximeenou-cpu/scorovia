@@ -552,7 +552,6 @@ async function getCroppedBlob() {
   octx.drawImage(canvasEl, 0, 0, PREVIEW_SIZE, PREVIEW_SIZE, 0, 0, 600, 600);
   return new Promise(r => output.toBlob(r, 'image/jpeg', 0.92));
 }
-}
 
 async function submitPhoto() {
   if (!selectedFile) {
