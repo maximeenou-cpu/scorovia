@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SCOROVIA — Connexion</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -35,26 +36,16 @@ body {
   overflow: hidden;
 }
 
-/* AMBIENT */
-.amb {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
+.amb { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 .amb::before {
   content: '';
-  position: absolute;
-  top: -30%; left: 30%;
+  position: absolute; top: -30%; left: 30%;
   width: 80vw; height: 80vh;
   background: radial-gradient(ellipse, rgba(245,200,66,0.07) 0%, transparent 60%);
 }
-
 .amb::after {
   content: '';
-  position: absolute;
-  bottom: -20%; right: -10%;
+  position: absolute; bottom: -20%; right: -10%;
   width: 60vw; height: 60vh;
   background: radial-gradient(ellipse, rgba(255,77,141,0.05) 0%, transparent 60%);
 }
@@ -64,46 +55,30 @@ body {
   width: 45%;
   background: var(--deep);
   border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 48px;
-  position: relative;
-  z-index: 1;
+  display: flex; flex-direction: column;
+  padding: 48px; position: relative; z-index: 1;
 }
 
 .panel-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 32px;
   letter-spacing: 0.18em;
   background: linear-gradient(135deg, var(--gold), var(--pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: auto; text-decoration: none;
 }
 
-.panel-content {
-  margin: auto 0;
-}
+.panel-content { margin: auto 0; }
 
 .panel-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(34,212,160,0.08);
-  border: 1px solid rgba(34,212,160,0.2);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 11px;
-  color: var(--green);
-  margin-bottom: 28px;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(34,212,160,0.08); border: 1px solid rgba(34,212,160,0.2);
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 11px; color: var(--green); margin-bottom: 28px;
 }
 
 .live-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: pulse 1.8s ease infinite;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); animation: pulse 1.8s ease infinite;
 }
 
 @keyframes pulse {
@@ -114,453 +89,190 @@ body {
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(40px, 5vw, 68px);
-  line-height: 0.92;
-  letter-spacing: 0.04em;
-  margin-bottom: 16px;
+  line-height: 0.92; letter-spacing: 0.04em; margin-bottom: 16px;
 }
 
 .panel-title .gr {
   background: linear-gradient(135deg, var(--gold), var(--pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .panel-sub {
-  font-size: 15px;
-  color: var(--muted);
-  font-weight: 300;
-  line-height: 1.65;
-  max-width: 380px;
-  margin-bottom: 40px;
+  font-size: 15px; color: var(--muted); font-weight: 300;
+  line-height: 1.65; max-width: 380px; margin-bottom: 40px;
 }
 
 .panel-sub strong { color: var(--text); font-weight: 500; }
 
-/* STATS MINI */
-.stats-mini {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-}
+.stats-mini { display: flex; gap: 24px; flex-wrap: wrap; }
 
-.stat-mini {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+.stat-mini { display: flex; flex-direction: column; gap: 2px; }
 
 .stat-mini-val {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  letter-spacing: 0.04em;
-  color: var(--gold2);
+  font-family: 'Bebas Neue', sans-serif; font-size: 28px;
+  letter-spacing: 0.04em; color: var(--gold2);
 }
 
 .stat-mini-label {
-  font-size: 11px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
 }
-
-/* TESTIMONIAL */
-.testimonial {
-  margin-top: 48px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px;
-}
-
-.testimonial-text {
-  font-size: 14px;
-  color: var(--muted);
-  font-style: italic;
-  line-height: 1.6;
-  margin-bottom: 12px;
-  font-weight: 300;
-}
-
-.testimonial-author {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.testimonial-av {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--pink));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-.testimonial-name { font-size: 13px; font-weight: 500; }
-.testimonial-score { font-size: 11px; color: var(--gold2); }
 
 .panel-footer {
-  margin-top: auto;
-  font-size: 11px;
-  color: rgba(240,238,248,0.2);
-  line-height: 1.7;
+  margin-top: auto; font-size: 11px;
+  color: rgba(240,238,248,0.2); line-height: 1.7;
 }
 
-.panel-footer a {
-  color: rgba(240,238,248,0.3);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
+.panel-footer a { color: rgba(240,238,248,0.3); text-decoration: underline; }
 
 /* RIGHT PANEL */
 .right-panel {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 32px;
-  position: relative;
-  z-index: 1;
-  overflow-y: auto;
+  flex: 1; display: flex; align-items: center;
+  justify-content: center; padding: 40px 32px;
+  position: relative; z-index: 1; overflow-y: auto;
 }
 
-.auth-box {
-  width: 100%;
-  max-width: 400px;
-}
+.auth-box { width: 100%; max-width: 400px; }
 
 /* TABS */
 .tabs {
-  display: flex;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 4px;
-  margin-bottom: 28px;
+  display: flex; background: var(--card);
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 4px; margin-bottom: 28px;
 }
 
 .tab {
-  flex: 1;
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  color: var(--muted);
+  flex: 1; padding: 10px; text-align: center;
+  font-size: 14px; font-weight: 500; border-radius: 10px;
+  cursor: pointer; transition: background 0.2s, color 0.2s; color: var(--muted);
 }
 
-.tab.active {
-  background: rgba(245,200,66,0.12);
-  color: var(--gold2);
-}
+.tab.active { background: rgba(245,200,66,0.12); color: var(--gold2); }
 
-/* FORMS */
 .form { display: none; }
 .form.active { display: block; }
 
 .form-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 26px;
+  letter-spacing: 0.08em; margin-bottom: 6px;
 }
 
-.form-sub {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 24px;
-  font-weight: 300;
+.form-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; font-weight: 300; }
+
+/* FIELDS */
+.field { margin-bottom: 14px; }
+
+.field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+
+.field input, .field select {
+  width: 100%; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 13px 16px; color: var(--text);
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  outline: none; transition: border-color 0.3s;
+  appearance: none;
 }
 
-/* SOCIAL BTNS */
-.social-btns {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.btn-social {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 14px 20px;
-  border-radius: 13px;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer;
-  border: none;
-  transition: transform 0.15s, opacity 0.15s;
-}
-
-.btn-social:hover { transform: translateY(-1px); opacity: 0.92; }
-.btn-social:active { transform: scale(0.98); }
-.btn-google { background: #fff; color: #1f1f1f; }
-.btn-facebook { background: #1877F2; color: #fff; }
-
-.or-line {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 11px;
-  color: var(--muted);
-  margin-bottom: 20px;
-}
-
-.or-line::before, .or-line::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* INPUTS */
-.field {
-  margin-bottom: 14px;
-}
-
-.field label {
-  display: block;
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-
-.field input {
-  width: 100%;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 13px 16px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
-  outline: none;
-  transition: border-color 0.3s;
-}
-
-.field input:focus { border-color: rgba(245,200,66,0.35); }
+.field input:focus, .field select:focus { border-color: rgba(245,200,66,0.35); }
 .field input.error { border-color: rgba(255,77,77,0.5); }
 .field input::placeholder { color: var(--muted); }
+.field select option { background: var(--deep); }
 
-.field-row {
-  display: flex;
-  gap: 10px;
-}
-
+.field-row { display: flex; gap: 10px; }
 .field-row .field { flex: 1; }
 
 /* PASSWORD STRENGTH */
-.pwd-strength {
-  margin-top: 6px;
-  display: flex;
-  gap: 4px;
-}
-
-.pwd-bar {
-  flex: 1;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--border);
-  transition: background 0.3s;
-}
-
+.pwd-strength { margin-top: 6px; display: flex; gap: 4px; }
+.pwd-bar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
 .pwd-bar.weak { background: var(--red); }
 .pwd-bar.medium { background: var(--gold); }
 .pwd-bar.strong { background: var(--green); }
+.pwd-label { font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-.pwd-label {
-  font-size: 10px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-/* ERROR MSG */
-.error-msg {
-  font-size: 11px;
-  color: var(--red);
-  margin-top: 4px;
-  display: none;
-}
-
+.error-msg { font-size: 11px; color: var(--red); margin-top: 4px; display: none; }
 .error-msg.show { display: block; }
 
 /* CHECKBOX */
-.checkbox-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 20px;
-}
+.checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+.checkbox-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold); margin-top: 2px; flex-shrink: 0; }
+.checkbox-row label { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.checkbox-row label a { color: var(--gold2); text-decoration: underline; }
 
-.checkbox-row input[type="checkbox"] {
-  width: 16px; height: 16px;
-  border-radius: 4px;
-  accent-color: var(--gold);
-  margin-top: 2px;
-  flex-shrink: 0;
-  cursor: pointer;
+/* AGE WARNING */
+.age-warning {
+  background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2);
+  border-radius: 10px; padding: 10px 14px; font-size: 12px;
+  color: rgba(255,150,150,0.8); margin-bottom: 16px; display: none;
 }
+.age-warning.show { display: block; }
 
-.checkbox-row label {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.5;
-  cursor: pointer;
-}
-
-.checkbox-row label a {
-  color: var(--gold2);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-/* SUBMIT BTN */
+/* BUTTONS */
 .btn-submit {
-  width: 100%;
-  padding: 15px;
+  width: 100%; padding: 15px;
   background: linear-gradient(135deg, var(--gold), #E8A020);
-  border: none;
-  border-radius: 13px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 17px;
-  letter-spacing: 0.1em;
-  color: #000;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
-  margin-bottom: 16px;
+  border: none; border-radius: 13px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 17px;
+  letter-spacing: 0.1em; color: #000; cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s; margin-bottom: 16px;
 }
-
 .btn-submit:hover { opacity: 0.9; }
 .btn-submit:active { transform: scale(0.98); }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* FORGOT */
-.forgot-link {
-  text-align: right;
-  margin-top: -8px;
-  margin-bottom: 16px;
+.forgot-link { text-align: right; margin-top: -8px; margin-bottom: 16px; }
+.forgot-link a { font-size: 12px; color: var(--gold2); text-decoration: none; cursor: pointer; }
+
+.switch-text { text-align: center; font-size: 13px; color: var(--muted); }
+.switch-text a { color: var(--gold2); cursor: pointer; font-weight: 500; }
+
+/* ALERT */
+.alert {
+  padding: 12px 16px; border-radius: 12px;
+  font-size: 13px; margin-bottom: 16px; display: none;
 }
+.alert.show { display: block; }
+.alert.error { background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.25); color: #FF8080; }
+.alert.success { background: rgba(34,212,160,0.1); border: 1px solid rgba(34,212,160,0.25); color: var(--green); }
 
-.forgot-link a {
-  font-size: 12px;
-  color: var(--gold2);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.forgot-link a:hover { opacity: 0.7; }
-
-/* SWITCH */
-.switch-text {
-  text-align: center;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.switch-text a {
-  color: var(--gold2);
-  cursor: pointer;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-/* SUCCESS STATE */
-.success-state {
-  display: none;
-  text-align: center;
-  padding: 20px 0;
-}
-
+/* SUCCESS */
+.success-state { display: none; text-align: center; padding: 20px 0; }
 .success-state.show { display: block; }
-
 .success-emoji { font-size: 56px; margin-bottom: 16px; }
-
-.success-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px;
-  letter-spacing: 0.08em;
-  color: var(--gold2);
-  margin-bottom: 8px;
+.success-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 0.08em; color: var(--gold2); margin-bottom: 8px; }
+.success-sub { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; font-weight: 300; }
+.btn-go {
+  display: inline-block; background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 13px; padding: 14px 32px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 16px;
+  letter-spacing: 0.1em; color: #000; cursor: pointer; text-decoration: none;
 }
 
-.success-sub {
-  font-size: 14px;
-  color: var(--muted);
-  line-height: 1.6;
-  margin-bottom: 24px;
-  font-weight: 300;
+/* LOADING SPINNER */
+.spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(0,0,0,0.3); border-radius: 50%;
+  border-top-color: #000; animation: spin 0.8s linear infinite;
+  margin-right: 8px; vertical-align: middle;
 }
-
-.btn-go-dashboard {
-  display: inline-block;
-  background: linear-gradient(135deg, var(--gold), #E8A020);
-  border: none;
-  border-radius: 13px;
-  padding: 14px 32px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 16px;
-  letter-spacing: 0.1em;
-  color: #000;
-  cursor: pointer;
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-.btn-go-dashboard:hover { opacity: 0.88; }
-
-/* AGE WARNING */
-.age-warning {
-  background: rgba(255,77,77,0.08);
-  border: 1px solid rgba(255,77,77,0.2);
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 12px;
-  color: rgba(255,150,150,0.8);
-  margin-bottom: 16px;
-  display: none;
-}
-
-.age-warning.show { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* TOAST */
 .toast {
-  position: fixed;
-  bottom: 24px; left: 50%;
+  position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(80px);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 20px;
-  font-size: 13px;
-  color: var(--text);
-  z-index: 200;
-  transition: transform 0.3s ease;
-  white-space: nowrap;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 20px;
+  font-size: 13px; color: var(--text);
+  z-index: 200; transition: transform 0.3s ease; white-space: nowrap;
 }
-
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { border-color: rgba(34,212,160,0.3); }
 
-/* RESPONSIVE */
 @media (max-width: 768px) {
   body { flex-direction: column; overflow: auto; }
-  .left-panel {
-    width: 100%;
-    padding: 32px 24px;
-    min-height: auto;
-  }
+  .left-panel { width: 100%; padding: 32px 24px; min-height: auto; }
   .panel-content { margin: 24px 0; }
-  .testimonial { display: none; }
-  .stats-mini { gap: 16px; }
   .right-panel { padding: 32px 20px; align-items: flex-start; }
   .panel-footer { display: none; }
 }
@@ -573,12 +285,12 @@ body {
 
 <!-- LEFT PANEL -->
 <div class="left-panel">
-  <div class="panel-logo">SCOROVIA</div>
+  <a href="index.html" class="panel-logo">SCOROVIA</a>
 
   <div class="panel-content">
     <div class="panel-tag">
       <div class="live-dot"></div>
-      En ligne · 2 841 membres actifs
+      En ligne · Rejoignez la communauté
     </div>
 
     <h1 class="panel-title">
@@ -592,29 +304,12 @@ body {
 
     <div class="stats-mini">
       <div class="stat-mini">
-        <div class="stat-mini-val">2 841</div>
+        <div class="stat-mini-val" id="stat-members">...</div>
         <div class="stat-mini-label">Membres</div>
-      </div>
-      <div class="stat-mini">
-        <div class="stat-mini-val">47K</div>
-        <div class="stat-mini-label">Notes données</div>
       </div>
       <div class="stat-mini">
         <div class="stat-mini-val">7.2</div>
         <div class="stat-mini-label">Note moyenne</div>
-      </div>
-    </div>
-
-    <div class="testimonial">
-      <div class="testimonial-text">
-        "Je voulais savoir ce que les gens pensaient vraiment de moi. J'ai eu ma note en 2 heures. C'est addictif !"
-      </div>
-      <div class="testimonial-author">
-        <div class="testimonial-av">😊</div>
-        <div>
-          <div class="testimonial-name">Marie L.</div>
-          <div class="testimonial-score">⭐ Note : 8.4/10</div>
-        </div>
       </div>
     </div>
   </div>
@@ -622,10 +317,9 @@ body {
   <div class="panel-footer">
     © 2025 SCOROVIA ·
     <a href="#">CGU</a> ·
-    <a href="#">Politique de confidentialité</a> ·
+    <a href="#">Confidentialité</a> ·
     <a href="#">Mentions légales</a><br>
-    Vos données sont protégées conformément au RGPD.
-    Réservé aux personnes majeures (+18 ans).
+    Données protégées RGPD · Réservé aux +18 ans
   </div>
 </div>
 
@@ -633,61 +327,44 @@ body {
 <div class="right-panel">
   <div class="auth-box">
 
-    <!-- SUCCESS STATE -->
+    <!-- SUCCESS -->
     <div class="success-state" id="success-state">
       <div class="success-emoji">🎉</div>
       <div class="success-title">Bienvenue !</div>
-      <div class="success-sub">
-        Votre compte SCOROVIA est créé.<br>
-        Vous allez être redirigé vers votre tableau de bord.
-      </div>
-      <a href="dashboard.html" class="btn-go-dashboard">ACCÉDER À MON ESPACE →</a>
+      <div class="success-sub" id="success-msg">Votre compte est créé. Redirection...</div>
+      <a href="dashboard.html" class="btn-go">ACCÉDER À MON ESPACE →</a>
     </div>
 
     <!-- AUTH FORMS -->
     <div id="auth-forms">
 
-      <!-- TABS -->
       <div class="tabs">
         <div class="tab active" id="tab-login" onclick="switchTab('login')">Se connecter</div>
         <div class="tab" id="tab-signup" onclick="switchTab('signup')">S'inscrire</div>
       </div>
 
-      <!-- LOGIN FORM -->
+      <!-- LOGIN -->
       <div class="form active" id="form-login">
         <div class="form-title">Bon retour 👋</div>
         <div class="form-sub">Connectez-vous pour voir votre note</div>
 
-        <div class="social-btns">
-          <button class="btn-social btn-google" onclick="socialLogin('Google')">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
-            Continuer avec Google
-          </button>
-          <button class="btn-social btn-facebook" onclick="socialLogin('Facebook')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            Continuer avec Facebook
-          </button>
-        </div>
-
-        <div class="or-line">ou par email</div>
+        <div class="alert" id="login-alert"></div>
 
         <div class="field">
           <label>Adresse email</label>
           <input type="email" id="login-email" placeholder="votre@email.com" />
-          <div class="error-msg" id="login-email-err">Email invalide</div>
         </div>
 
         <div class="field">
           <label>Mot de passe</label>
           <input type="password" id="login-pwd" placeholder="••••••••" />
-          <div class="error-msg" id="login-pwd-err">Mot de passe incorrect</div>
         </div>
 
         <div class="forgot-link">
-          <a onclick="showForgot()">Mot de passe oublié ?</a>
+          <a onclick="switchTab('forgot')">Mot de passe oublié ?</a>
         </div>
 
-        <button class="btn-submit" onclick="doLogin()">SE CONNECTER</button>
+        <button class="btn-submit" id="btn-login" onclick="doLogin()">SE CONNECTER</button>
 
         <div class="switch-text">
           Pas encore de compte ?
@@ -695,34 +372,21 @@ body {
         </div>
       </div>
 
-      <!-- SIGNUP FORM -->
+      <!-- SIGNUP -->
       <div class="form" id="form-signup">
         <div class="form-title">Créer un compte 🚀</div>
         <div class="form-sub">Gratuit · Sans carte · En 30 secondes</div>
 
-        <div class="social-btns">
-          <button class="btn-social btn-google" onclick="socialLogin('Google')">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
-            S'inscrire avec Google
-          </button>
-          <button class="btn-social btn-facebook" onclick="socialLogin('Facebook')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            S'inscrire avec Facebook
-          </button>
-        </div>
-
-        <div class="or-line">ou par email</div>
+        <div class="alert" id="signup-alert"></div>
 
         <div class="field-row">
           <div class="field">
             <label>Prénom</label>
             <input type="text" id="signup-first" placeholder="Marie" />
-            <div class="error-msg" id="signup-first-err">Requis</div>
           </div>
           <div class="field">
             <label>Âge</label>
-            <input type="number" id="signup-age" placeholder="25" min="18" max="99" />
-            <div class="error-msg" id="signup-age-err">18+ requis</div>
+            <input type="number" id="signup-age" placeholder="25" min="18" max="99" oninput="checkAge(this.value)" />
           </div>
         </div>
 
@@ -738,41 +402,40 @@ body {
         <div class="field">
           <label>Adresse email</label>
           <input type="email" id="signup-email" placeholder="votre@email.com" />
-          <div class="error-msg" id="signup-email-err">Email invalide</div>
         </div>
 
         <div class="field">
           <label>Mot de passe</label>
           <input type="password" id="signup-pwd" placeholder="8 caractères minimum" oninput="checkPwd(this.value)" />
           <div class="pwd-strength">
-            <div class="pwd-bar" id="pwd-bar-1"></div>
-            <div class="pwd-bar" id="pwd-bar-2"></div>
-            <div class="pwd-bar" id="pwd-bar-3"></div>
-            <div class="pwd-bar" id="pwd-bar-4"></div>
+            <div class="pwd-bar" id="b1"></div>
+            <div class="pwd-bar" id="b2"></div>
+            <div class="pwd-bar" id="b3"></div>
+            <div class="pwd-bar" id="b4"></div>
           </div>
           <div class="pwd-label" id="pwd-label">Entrez un mot de passe</div>
-          <div class="error-msg" id="signup-pwd-err">8 caractères minimum</div>
         </div>
 
         <div class="checkbox-row">
-          <input type="checkbox" id="terms-check" />
-          <label for="terms-check">
-            J'ai lu et j'accepte les <a href="#">Conditions d'utilisation</a> et la <a href="#">Politique de confidentialité</a>. Je confirme avoir au moins 18 ans.
+          <input type="checkbox" id="terms" />
+          <label for="terms">
+            J'accepte les <a href="#">CGU</a> et la <a href="#">Politique de confidentialité</a>. Je confirme avoir au moins 18 ans.
           </label>
         </div>
 
-        <button class="btn-submit" onclick="doSignup()">CRÉER MON COMPTE GRATUIT</button>
+        <button class="btn-submit" id="btn-signup" onclick="doSignup()">CRÉER MON COMPTE GRATUIT</button>
 
         <div class="switch-text">
-          Déjà un compte ?
-          <a onclick="switchTab('login')">Se connecter</a>
+          Déjà un compte ? <a onclick="switchTab('login')">Se connecter</a>
         </div>
       </div>
 
-      <!-- FORGOT FORM -->
+      <!-- FORGOT -->
       <div class="form" id="form-forgot">
         <div class="form-title">Mot de passe oublié</div>
-        <div class="form-sub">Entrez votre email pour recevoir un lien de réinitialisation</div>
+        <div class="form-sub">Recevez un lien de réinitialisation par email</div>
+
+        <div class="alert" id="forgot-alert"></div>
 
         <div class="field">
           <label>Adresse email</label>
@@ -781,7 +444,7 @@ body {
 
         <button class="btn-submit" onclick="doForgot()">ENVOYER LE LIEN</button>
 
-        <div class="switch-text" style="margin-top:12px;">
+        <div class="switch-text">
           <a onclick="switchTab('login')">← Retour à la connexion</a>
         </div>
       </div>
@@ -791,10 +454,33 @@ body {
 </div>
 
 <script>
+// SUPABASE INIT
+const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Check if already logged in
+async function checkSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    window.location.href = 'dashboard.html';
+  }
+}
+checkSession();
+
+// Load member count
+async function loadStats() {
+  const { count } = await sb.from('users').select('*', { count: 'exact', head: true });
+  document.getElementById('stat-members').textContent = count ? count.toLocaleString('fr-FR') : '0';
+}
+loadStats();
+
 // Tab switching
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+  document.querySelectorAll('.alert').forEach(a => { a.classList.remove('show'); });
 
   if (tab === 'login') {
     document.getElementById('tab-login').classList.add('active');
@@ -802,21 +488,16 @@ function switchTab(tab) {
   } else if (tab === 'signup') {
     document.getElementById('tab-signup').classList.add('active');
     document.getElementById('form-signup').classList.add('active');
+  } else if (tab === 'forgot') {
+    document.getElementById('form-forgot').classList.add('active');
   }
-}
-
-function showForgot() {
-  document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
-  document.getElementById('form-forgot').classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
 }
 
 // Password strength
 function checkPwd(val) {
-  const bars = [1,2,3,4].map(i => document.getElementById('pwd-bar-' + i));
+  const bars = ['b1','b2','b3','b4'].map(id => document.getElementById(id));
   const label = document.getElementById('pwd-label');
   bars.forEach(b => b.className = 'pwd-bar');
-
   if (!val) { label.textContent = 'Entrez un mot de passe'; return; }
 
   let score = 0;
@@ -827,158 +508,170 @@ function checkPwd(val) {
 
   const levels = ['', 'Faible', 'Moyen', 'Bon', 'Fort'];
   const classes = ['', 'weak', 'medium', 'strong', 'strong'];
-
-  for (let i = 0; i < score; i++) {
-    bars[i].classList.add(classes[score]);
-  }
-
+  for (let i = 0; i < score; i++) bars[i].classList.add(classes[score]);
   label.textContent = score > 0 ? `Mot de passe ${levels[score]}` : 'Trop court';
   label.style.color = score >= 3 ? 'var(--green)' : score >= 2 ? 'var(--gold)' : 'var(--red)';
 }
 
 // Age check
-document.getElementById('signup-age')?.addEventListener('input', function() {
-  const age = parseInt(this.value);
+function checkAge(val) {
   const warning = document.getElementById('age-warning');
-  if (age && age < 18) {
-    warning.classList.add('show');
-  } else {
-    warning.classList.remove('show');
-  }
-});
+  warning.classList.toggle('show', val && parseInt(val) < 18);
+}
 
-// Login
-function doLogin() {
+// Show alert
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = `alert ${type} show`;
+}
+
+// LOGIN
+async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pwd = document.getElementById('login-pwd').value;
-  let valid = true;
 
-  document.getElementById('login-email-err').classList.remove('show');
-  document.getElementById('login-pwd-err').classList.remove('show');
-  document.getElementById('login-email').classList.remove('error');
-  document.getElementById('login-pwd').classList.remove('error');
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    document.getElementById('login-email-err').classList.add('show');
-    document.getElementById('login-email').classList.add('error');
-    valid = false;
-  }
-
-  if (pwd.length < 6) {
-    document.getElementById('login-pwd-err').classList.add('show');
-    document.getElementById('login-pwd').classList.add('error');
-    valid = false;
-  }
-
-  if (!valid) return;
-
-  const btn = document.querySelector('#form-login .btn-submit');
-  btn.textContent = 'Connexion...';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    showSuccess();
-  }, 1200);
-}
-
-// Signup
-function doSignup() {
-  const first = document.getElementById('signup-first').value.trim();
-  const age = parseInt(document.getElementById('signup-age').value);
-  const email = document.getElementById('signup-email').value.trim();
-  const pwd = document.getElementById('signup-pwd').value;
-  const terms = document.getElementById('terms-check').checked;
-  let valid = true;
-
-  // Reset
-  ['first','age','email','pwd'].forEach(f => {
-    document.getElementById('signup-' + f + '-err').classList.remove('show');
-    document.getElementById('signup-' + f)?.classList.remove('error');
-  });
-
-  if (!first) {
-    document.getElementById('signup-first-err').classList.add('show');
-    document.getElementById('signup-first').classList.add('error');
-    valid = false;
-  }
-
-  if (!age || age < 18) {
-    document.getElementById('signup-age-err').classList.add('show');
-    document.getElementById('signup-age').classList.add('error');
-    document.getElementById('age-warning').classList.add('show');
-    valid = false;
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    document.getElementById('signup-email-err').classList.add('show');
-    document.getElementById('signup-email').classList.add('error');
-    valid = false;
-  }
-
-  if (pwd.length < 8) {
-    document.getElementById('signup-pwd-err').classList.add('show');
-    document.getElementById('signup-pwd').classList.add('error');
-    valid = false;
-  }
-
-  if (!terms) {
-    showToast('⚠️ Veuillez accepter les conditions d\'utilisation');
-    valid = false;
-  }
-
-  if (!valid) return;
-
-  const btn = document.querySelector('#form-signup .btn-submit');
-  btn.textContent = 'Création du compte...';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    showSuccess();
-  }, 1500);
-}
-
-// Social login
-function socialLogin(provider) {
-  showToast('🔗 Connexion ' + provider + ' en cours...');
-  setTimeout(() => showSuccess(), 1500);
-}
-
-// Forgot
-function doForgot() {
-  const email = document.getElementById('forgot-email').value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    showToast('⚠️ Email invalide');
+  if (!email || !pwd) {
+    showAlert('login-alert', '⚠️ Veuillez remplir tous les champs', 'error');
     return;
   }
-  showToast('✅ Lien envoyé à ' + email);
-  setTimeout(() => switchTab('login'), 2000);
+
+  const btn = document.getElementById('btn-login');
+  btn.innerHTML = '<span class="spinner"></span>Connexion...';
+  btn.disabled = true;
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+
+  if (error) {
+    showAlert('login-alert', '❌ Email ou mot de passe incorrect', 'error');
+    btn.innerHTML = 'SE CONNECTER';
+    btn.disabled = false;
+    return;
+  }
+
+  // Save user info in localStorage
+  localStorage.setItem('scorovia_user', JSON.stringify({
+    id: data.user.id,
+    email: data.user.email,
+  }));
+
+  showSuccess('Connexion réussie ! Redirection...');
+}
+
+// SIGNUP
+async function doSignup() {
+  const prenom = document.getElementById('signup-first').value.trim();
+  const age = parseInt(document.getElementById('signup-age').value);
+  const ville = document.getElementById('signup-city').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pwd = document.getElementById('signup-pwd').value;
+  const terms = document.getElementById('terms').checked;
+
+  if (!prenom || !age || !email || !pwd) {
+    showAlert('signup-alert', '⚠️ Veuillez remplir tous les champs obligatoires', 'error');
+    return;
+  }
+  if (age < 18) {
+    showAlert('signup-alert', '⚠️ Vous devez avoir au moins 18 ans', 'error');
+    return;
+  }
+  if (pwd.length < 8) {
+    showAlert('signup-alert', '⚠️ Le mot de passe doit faire au moins 8 caractères', 'error');
+    return;
+  }
+  if (!terms) {
+    showAlert('signup-alert', '⚠️ Veuillez accepter les conditions d\'utilisation', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-signup');
+  btn.innerHTML = '<span class="spinner"></span>Création du compte...';
+  btn.disabled = true;
+
+  // Create auth user
+  const { data, error } = await sb.auth.signUp({ email, password: pwd });
+
+  if (error) {
+    showAlert('signup-alert', '❌ ' + (error.message === 'User already registered' ? 'Cet email est déjà utilisé' : error.message), 'error');
+    btn.innerHTML = 'CRÉER MON COMPTE GRATUIT';
+    btn.disabled = false;
+    return;
+  }
+
+  // Insert user profile
+  if (data.user) {
+    await sb.from('users').insert({
+      id: data.user.id,
+      email: email,
+      prenom: prenom,
+      ville: ville || null,
+      age: age,
+      points: 20
+    });
+
+    // Add points history
+    await sb.from('points_history').insert({
+      user_id: data.user.id,
+      action: 'Bonus inscription',
+      points: 20
+    });
+
+    localStorage.setItem('scorovia_user', JSON.stringify({
+      id: data.user.id,
+      email: email,
+      prenom: prenom,
+      ville: ville,
+      points: 20
+    }));
+  }
+
+  showSuccess(`Bienvenue ${prenom} ! Votre compte est créé avec 20 points de bienvenue 🎉`);
+}
+
+// FORGOT PASSWORD
+async function doForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) {
+    showAlert('forgot-alert', '⚠️ Entrez votre adresse email', 'error');
+    return;
+  }
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/login.html'
+  });
+
+  if (error) {
+    showAlert('forgot-alert', '❌ Erreur : ' + error.message, 'error');
+    return;
+  }
+
+  showAlert('forgot-alert', '✅ Lien envoyé ! Vérifiez votre boîte mail.', 'success');
 }
 
 // Show success
-function showSuccess() {
+function showSuccess(msg) {
   document.getElementById('auth-forms').style.display = 'none';
+  document.getElementById('success-msg').textContent = msg;
   document.getElementById('success-state').classList.add('show');
-  setTimeout(() => {
-    window.location.href = 'dashboard.html';
-  }, 3000);
+  setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
 }
 
 // Toast
-function showToast(msg) {
+function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
+  t.className = 'toast ' + (type || '');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // Enter key
 document.addEventListener('keypress', e => {
-  if (e.key === 'Enter') {
-    const activeForm = document.querySelector('.form.active');
-    if (activeForm?.id === 'form-login') doLogin();
-    else if (activeForm?.id === 'form-signup') doSignup();
-    else if (activeForm?.id === 'form-forgot') doForgot();
-  }
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.form.active');
+  if (active?.id === 'form-login') doLogin();
+  else if (active?.id === 'form-signup') doSignup();
+  else if (active?.id === 'form-forgot') doForgot();
 });
 </script>
 </body>
