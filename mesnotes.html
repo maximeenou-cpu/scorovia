@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOROVIA — Mes Notes</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #F5C842;
+  --gold2: #FFE27A;
+  --pink: #FF4D8D;
+  --dark: #07070F;
+  --deep: #0D0D1A;
+  --card: #13131E;
+  --card2: #18182A;
+  --border: rgba(255,255,255,0.07);
+  --text: #F0EEF8;
+  --muted: rgba(240,238,248,0.42);
+  --green: #22D4A0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--deep);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 40;
+  transition: transform 0.3s;
+}
+
+.sidebar-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 32px;
+  padding-left: 8px;
+  text-decoration: none;
+  display: block;
+}
+
+.nav-section {
+  font-size: 10px;
+  color: rgba(240,238,248,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 20px 0 8px 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 2px;
+  text-decoration: none;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.nav-item.active { background: rgba(245,200,66,0.1); color: var(--gold2); }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-bottom {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.user-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+
+.user-mini:hover { background: rgba(255,255,255,0.04); }
+
+.user-av-sm {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.user-name-sm { font-size: 13px; font-weight: 500; color: var(--text); }
+.user-pts-sm { font-size: 11px; color: var(--gold2); }
+
+/* MAIN */
+.main {
+  margin-left: 220px;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOPBAR */
+.topbar {
+  background: rgba(7,7,15,0.8);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.topbar-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.pts-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,200,66,0.1);
+  border: 1px solid rgba(245,200,66,0.2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--gold2);
+  font-weight: 500;
+}
+
+/* CONTENT */
+.content { padding: 32px; }
+
+/* MY SCORE BANNER */
+.score-banner {
+  background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(255,77,141,0.06));
+  border: 1px solid rgba(245,200,66,0.15);
+  border-radius: 20px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.score-banner-left h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.score-banner-left p {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.score-banner-stats {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.score-stat {
+  text-align: center;
+}
+
+.score-stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--gold2), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.score-stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* UPLOAD SECTION */
+.upload-section { margin-bottom: 28px; }
+
+.upload-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-zone {
+  border: 2px dashed rgba(245,200,66,0.2);
+  border-radius: 18px;
+  padding: 36px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: rgba(245,200,66,0.02);
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-zone:hover {
+  border-color: rgba(245,200,66,0.4);
+  background: rgba(245,200,66,0.04);
+}
+
+.upload-zone.dragover {
+  border-color: var(--gold);
+  background: rgba(245,200,66,0.08);
+}
+
+.upload-icon { font-size: 44px; margin-bottom: 14px; }
+.upload-zone h3 { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+.upload-zone p { font-size: 13px; color: var(--muted); margin-bottom: 18px; font-weight: 300; }
+
+.upload-details {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.upload-detail {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.upload-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,200,66,0.1);
+  border: 1px solid rgba(245,200,66,0.2);
+  padding: 7px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--gold2);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upload-cost:hover { background: rgba(245,200,66,0.16); }
+
+/* MODAL UPLOAD */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(7,7,15,0.9);
+  backdrop-filter: blur(10px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-bg.open { display: flex; }
+
+.modal-box {
+  background: var(--deep);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 32px;
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+  animation: fadeDown 0.3s ease both;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px; right: 20px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; font-weight: 300; }
+
+.modal-preview {
+  width: 100%;
+  height: 200px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  overflow: hidden;
+}
+
+.modal-preview:hover { background: var(--card2); }
+
+.modal-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.modal-field {
+  margin-bottom: 14px;
+}
+
+.modal-field label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.modal-field select,
+.modal-field input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.3s;
+  appearance: none;
+}
+
+.modal-field select:focus,
+.modal-field input:focus { border-color: rgba(245,200,66,0.3); }
+
+.modal-field select option { background: var(--deep); }
+
+.modal-cost-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(245,200,66,0.06);
+  border: 1px solid rgba(245,200,66,0.15);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.modal-cost-label { color: var(--muted); }
+.modal-cost-val { color: var(--gold2); font-weight: 600; }
+
+.btn-confirm {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none;
+  border-radius: 13px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  color: #000;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-confirm:hover { opacity: 0.88; }
+
+/* PHOTOS GRID */
+.photos-section { margin-bottom: 28px; }
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-title { font-size: 14px; font-weight: 500; }
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+/* PHOTO DETAIL CARD */
+.photo-detail-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+
+.photo-detail-card:hover {
+  border-color: rgba(245,200,66,0.18);
+  transform: translateY(-2px);
+}
+
+.photo-thumb {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  position: relative;
+}
+
+.photo-status-badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-active { background: rgba(34,212,160,0.15); color: var(--green); border: 1px solid rgba(34,212,160,0.25); }
+.badge-pending { background: rgba(245,200,66,0.12); color: var(--gold2); border: 1px solid rgba(245,200,66,0.2); }
+.badge-ended { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+
+.photo-votes-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(7,7,15,0.9));
+  padding: 20px 14px 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.photo-score-big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 40px;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--gold2), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.photo-votes-count { font-size: 12px; color: var(--muted); text-align: right; }
+
+.photo-info { padding: 16px; }
+
+/* PROGRESS BAR */
+.score-bar-wrap {
+  margin-bottom: 14px;
+}
+
+.score-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.score-bar-bg {
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  height: 5px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--gold), var(--pink));
+}
+
+/* DISTRIBUTION */
+.distribution { margin-bottom: 14px; }
+
+.dist-title { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.dist-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 40px;
+}
+
+.dist-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  gap: 2px;
+}
+
+.dist-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--gold), rgba(245,200,66,0.3));
+  transition: height 0.5s ease;
+  min-height: 2px;
+}
+
+.dist-label {
+  font-size: 8px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* VOTER PREVIEW */
+.voter-preview { margin-bottom: 14px; }
+
+.voter-preview-title {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.voter-mini-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.voter-mini-row:last-child { border-bottom: none; }
+.voter-mini-av { font-size: 18px; }
+.voter-mini-name { flex: 1; color: var(--muted); }
+.voter-mini-score { font-weight: 600; color: var(--gold2); }
+
+.voter-locked {
+  position: relative;
+}
+
+.voter-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(7,7,15,0.85);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.voter-lock-pill {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #000;
+  cursor: pointer;
+}
+
+/* CARD ACTIONS */
+.photo-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-photo-action {
+  flex: 1;
+  padding: 9px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btn-share {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.btn-share:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+.btn-delete {
+  background: rgba(255,77,141,0.08);
+  border: 1px solid rgba(255,77,141,0.15);
+  color: var(--pink);
+}
+
+.btn-delete:hover { background: rgba(255,77,141,0.14); }
+
+/* TIPS SECTION */
+.tips-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 28px;
+}
+
+.tips-title { font-size: 14px; font-weight: 500; margin-bottom: 16px; }
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.tip-item {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.tip-icon { font-size: 22px; margin-bottom: 8px; }
+.tip-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.tip-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--text);
+  z-index: 300;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.gold { border-color: rgba(245,200,66,0.3); }
+.toast.success { border-color: rgba(34,212,160,0.3); }
+
+/* MOBILE */
+.menu-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px; right: 20px;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 60;
+  box-shadow: 0 4px 20px rgba(245,200,66,0.3);
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .menu-btn { display: flex; }
+  .content { padding: 20px 16px; }
+  .score-banner { flex-direction: column; }
+  .topbar { padding: 14px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL UPLOAD -->
+<div class="modal-bg" id="upload-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Soumettre une photo</div>
+    <div class="modal-sub">Choisissez votre meilleure photo pour être noté par la communauté</div>
+
+    <div class="modal-preview" id="modal-preview" onclick="triggerUpload()">
+      📸
+      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />
+    </div>
+
+    <div class="modal-field">
+      <label>Catégorie</label>
+      <select id="photo-category">
+        <option value="portrait">Portrait / Selfie</option>
+        <option value="casual">Look casual</option>
+        <option value="sport">Sport / Fitness</option>
+        <option value="soiree">Tenue de soirée</option>
+        <option value="nature">Photo en nature</option>
+      </select>
+    </div>
+
+    <div class="modal-field">
+      <label>Description (optionnel)</label>
+      <input type="text" placeholder="Ex: Photo de plage cet été..." maxlength="80" />
+    </div>
+
+    <div class="modal-cost-row">
+      <span class="modal-cost-label">⚡ Points requis</span>
+      <span class="modal-cost-val">10 points (solde : 240 pts)</span>
+    </div>
+
+    <button class="btn-confirm" onclick="submitPhoto()">SOUMETTRE MA PHOTO (-10 pts)</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <a href="index.html" class="sidebar-logo">SCOROVIA</a>
+
+  <div class="nav-section">Principal</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Tableau de bord</a>
+  <a class="nav-item" href="noter.html"><span class="nav-icon">⭐</span> Noter</a>
+  <a class="nav-item active"><span class="nav-icon">📊</span> Mes notes</a>
+
+  <div class="nav-section">Communauté</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏆</span> Classement</a>
+  <a class="nav-item" href="dashboard.html">
+    <span class="nav-icon">💬</span> Messages
+    <span style="margin-left:auto;background:var(--pink);color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;">3</span>
+  </a>
+
+  <div class="nav-section">Compte</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚡</span> Mes points</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">👤</span> Mon profil</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚙️</span> Paramètres</a>
+
+  <div class="sidebar-bottom">
+    <a class="user-mini" href="dashboard.html">
+      <div class="user-av-sm">😊</div>
+      <div>
+        <div class="user-name-sm">Alexandre D.</div>
+        <div class="user-pts-sm">⚡ 240 pts</div>
+      </div>
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">📊 Mes Notes</div>
+    <div class="topbar-right">
+      <div class="pts-pill">⚡ 240 pts</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- SCORE BANNER -->
+    <div class="score-banner">
+      <div class="score-banner-left">
+        <h2>Ma note globale</h2>
+        <p>Moyenne pondérée sur toutes vos photos actives · Mise à jour en temps réel</p>
+      </div>
+      <div class="score-banner-stats">
+        <div class="score-stat">
+          <div class="score-stat-num">7.8</div>
+          <div class="score-stat-label">Note moyenne</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-num">1 159</div>
+          <div class="score-stat-label">Votes reçus</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-num">#347</div>
+          <div class="score-stat-label">Rang global</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-num">Top 12%</div>
+          <div class="score-stat-label">Percentile</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="upload-section">
+      <div class="upload-title">📸 Soumettre une nouvelle photo</div>
+      <div class="upload-zone" id="upload-zone"
+        ondragover="handleDragOver(event)"
+        ondragleave="handleDragLeave(event)"
+        ondrop="handleDrop(event)"
+        onclick="openModal()">
+        <div class="upload-icon">📸</div>
+        <h3>Glissez votre photo ici</h3>
+        <p>ou cliquez pour choisir depuis votre appareil</p>
+        <div class="upload-details">
+          <div class="upload-detail">✓ JPG, PNG, WEBP</div>
+          <div class="upload-detail">✓ Max 10 MB</div>
+          <div class="upload-detail">✓ Visage visible</div>
+          <div class="upload-detail">✓ Contenu approprié</div>
+        </div>
+        <div class="upload-cost">⚡ Coût : 10 points · Solde : 240 pts</div>
+      </div>
+    </div>
+
+    <!-- MY PHOTOS -->
+    <div class="photos-section">
+      <div class="section-header">
+        <div class="section-title">Mes photos (2 actives)</div>
+        <div style="font-size:12px;color:var(--muted);">Maximum 5 photos simultanées</div>
+      </div>
+
+      <div class="photos-grid">
+
+        <!-- Photo 1 -->
+        <div class="photo-detail-card">
+          <div class="photo-thumb" style="background:linear-gradient(160deg,#1E1235,#0D1B2A)">
+            😊
+            <div class="photo-status-badge badge-active">● Active</div>
+            <div class="photo-votes-overlay">
+              <div class="photo-score-big">7.8</div>
+              <div class="photo-votes-count">847 votes<br><span style="color:var(--green);font-size:10px">↑ +12 aujourd'hui</span></div>
+            </div>
+          </div>
+          <div class="photo-info">
+            <div class="score-bar-wrap">
+              <div class="score-bar-label">
+                <span>Note : 7.8/10</span>
+                <span style="color:var(--green)">Top 12%</span>
+              </div>
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width:78%"></div>
+              </div>
+            </div>
+
+            <div class="distribution">
+              <div class="dist-title">Distribution des votes</div>
+              <div class="dist-bars">
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:8%"></div><div class="dist-label">1</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:5%"></div><div class="dist-label">2</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:4%"></div><div class="dist-label">3</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:6%"></div><div class="dist-label">4</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:10%"></div><div class="dist-label">5</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:15%"></div><div class="dist-label">6</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:20%"></div><div class="dist-label">7</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:100%"></div><div class="dist-label">8</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:60%"></div><div class="dist-label">9</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:30%"></div><div class="dist-label">10</div></div>
+              </div>
+            </div>
+
+            <div class="voter-preview">
+              <div class="voter-preview-title">Qui m'a noté</div>
+              <div class="voter-mini-row">
+                <div class="voter-mini-av">👤</div>
+                <div class="voter-mini-name">Lucas M. · Paris</div>
+                <div class="voter-mini-score">9/10</div>
+              </div>
+              <div class="voter-mini-row voter-locked" style="position:relative">
+                <div class="voter-mini-av">👤</div>
+                <div class="voter-mini-name">???? · ????</div>
+                <div class="voter-mini-score">10/10</div>
+                <div class="voter-lock-overlay">
+                  <div class="voter-lock-pill" onclick="showToast('👑 Premium requis pour voir les votants !','gold')">🔒 Premium</div>
+                </div>
+              </div>
+              <div class="voter-mini-row voter-locked" style="position:relative">
+                <div class="voter-mini-av">👤</div>
+                <div class="voter-mini-name">???? · ????</div>
+                <div class="voter-mini-score">8/10</div>
+                <div class="voter-lock-overlay">
+                  <div class="voter-lock-pill" onclick="showToast('👑 Premium requis pour voir les votants !','gold')">🔒 Premium</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="photo-actions">
+              <button class="btn-photo-action btn-share" onclick="sharePhoto()">📤 Partager</button>
+              <button class="btn-photo-action btn-delete" onclick="deletePhoto(1)">🗑️ Supprimer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo 2 -->
+        <div class="photo-detail-card">
+          <div class="photo-thumb" style="background:linear-gradient(160deg,#0D2A1E,#071507)">
+            🤳
+            <div class="photo-status-badge badge-active">● Active</div>
+            <div class="photo-votes-overlay">
+              <div class="photo-score-big">6.4</div>
+              <div class="photo-votes-count">312 votes<br><span style="color:var(--muted);font-size:10px">Stable</span></div>
+            </div>
+          </div>
+          <div class="photo-info">
+            <div class="score-bar-wrap">
+              <div class="score-bar-label">
+                <span>Note : 6.4/10</span>
+                <span style="color:var(--muted)">Top 35%</span>
+              </div>
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width:64%"></div>
+              </div>
+            </div>
+
+            <div class="distribution">
+              <div class="dist-title">Distribution des votes</div>
+              <div class="dist-bars">
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:5%"></div><div class="dist-label">1</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:8%"></div><div class="dist-label">2</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:12%"></div><div class="dist-label">3</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:18%"></div><div class="dist-label">4</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:25%"></div><div class="dist-label">5</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:100%"></div><div class="dist-label">6</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:80%"></div><div class="dist-label">7</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:40%"></div><div class="dist-label">8</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:15%"></div><div class="dist-label">9</div></div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="height:8%"></div><div class="dist-label">10</div></div>
+              </div>
+            </div>
+
+            <div class="voter-preview">
+              <div class="voter-preview-title">Qui m'a noté</div>
+              <div class="voter-mini-row">
+                <div class="voter-mini-av">👤</div>
+                <div class="voter-mini-name">Sophie R. · Lyon</div>
+                <div class="voter-mini-score">7/10</div>
+              </div>
+              <div class="voter-mini-row voter-locked" style="position:relative">
+                <div class="voter-mini-av">👤</div>
+                <div class="voter-mini-name">???? · ????</div>
+                <div class="voter-mini-score">6/10</div>
+                <div class="voter-lock-overlay">
+                  <div class="voter-lock-pill" onclick="showToast('👑 Premium requis !','gold')">🔒 Premium</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="photo-actions">
+              <button class="btn-photo-action btn-share" onclick="sharePhoto()">📤 Partager</button>
+              <button class="btn-photo-action btn-delete" onclick="deletePhoto(2)">🗑️ Supprimer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slot vide 1 -->
+        <div class="photo-detail-card" style="border:2px dashed rgba(245,200,66,0.15);cursor:pointer;background:rgba(245,200,66,0.02);" onclick="openModal()">
+          <div class="photo-thumb" style="background:transparent;flex-direction:column;gap:8px">
+            <div style="font-size:36px;color:rgba(240,238,248,0.15)">+</div>
+            <div style="font-size:13px;color:var(--muted);font-weight:400;">Ajouter une photo</div>
+            <div style="font-size:11px;color:rgba(245,200,66,0.5);">⚡ 10 points</div>
+          </div>
+          <div class="photo-info" style="text-align:center;padding:12px;">
+            <div style="font-size:12px;color:var(--muted);">Slot disponible (3/5)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="tips-card">
+      <div class="tips-title">💡 Conseils pour améliorer votre note</div>
+      <div class="tips-grid">
+        <div class="tip-item">
+          <div class="tip-icon">☀️</div>
+          <div class="tip-title">Bonne lumière</div>
+          <div class="tip-desc">Les photos bien éclairées reçoivent en moyenne +1.2 points de plus.</div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">😊</div>
+          <div class="tip-title">Souriez !</div>
+          <div class="tip-desc">Un sourire naturel augmente votre note de 0.8 point en moyenne.</div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">🎯</div>
+          <div class="tip-title">Fond simple</div>
+          <div class="tip-desc">Un arrière-plan épuré met votre visage en valeur et améliore les notes.</div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">📸</div>
+          <div class="tip-title">Haute résolution</div>
+          <div class="tip-desc">Les photos nettes et détaillées inspirent plus confiance aux votants.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<script>
+// Modal
+function openModal() {
+  document.getElementById('upload-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('upload-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('upload-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('upload-modal')) closeModal();
+});
+
+// File upload
+function triggerUpload() {
+  document.getElementById('file-input').click();
+}
+
+function previewFile(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById('modal-preview');
+      preview.innerHTML = `<img src="${e.target.result}" alt="Preview" />
+        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />`;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Drag & drop
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+  document.getElementById('upload-zone').classList.remove('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('dragover');
+  openModal();
+}
+
+// Submit photo
+function submitPhoto() {
+  closeModal();
+  showToast('✅ Photo soumise ! Elle sera visible dans quelques minutes.', 'success');
+}
+
+// Delete
+function deletePhoto(id) {
+  if (confirm(`Supprimer cette photo ? Cette action est irréversible.`)) {
+    showToast('🗑️ Photo supprimée', '');
+  }
+}
+
+// Share
+function sharePhoto() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'Ma note sur SCOROVIA',
+      text: 'J\'ai obtenu 7.8/10 sur SCOROVIA ! Découvrez votre note.',
+      url: window.location.href
+    });
+  } else {
+    navigator.clipboard.writeText('scorovia.com').then(() => {
+      showToast('🔗 Lien copié !', 'success');
+    });
+  }
+}
+
+// Toast
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Sidebar
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  const sidebar = document.getElementById('sidebar');
+  const btn = document.getElementById('menu-btn');
+  if (window.innerWidth <= 768 && !sidebar.contains(e.target) && e.target !== btn) {
+    sidebar.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
