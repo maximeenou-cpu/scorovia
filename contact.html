@@ -340,23 +340,32 @@ async function submitForm() {
     // Get reCAPTCHA token
     const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact' });
 
-    // Send via Formspree (free form service — no backend needed)
-    const response = await fetch('https://formspree.io/f/contact-scorovia', {
+    // Send via Formspree
+    const response = await fetch('https://formspree.io/f/xbdqkgjo', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
-        prenom, email, sujet, message,
+        prenom,
+        email,
+        sujet,
+        message,
         'g-recaptcha-response': token,
         _subject: `[SCOROVIA] ${sujet} - ${prenom}`
       })
     });
 
-    // Show success regardless (Formspree needs config)
-    showSuccess();
+    const data = await response.json();
+
+    if (response.ok) {
+      showSuccess();
+    } else {
+      throw new Error(data.error || 'Erreur envoi');
+    }
 
   } catch (err) {
-    // Show success anyway for demo — in production connect to real backend
-    showSuccess();
+    btn.innerHTML = 'ENVOYER MON MESSAGE';
+    btn.disabled = false;
+    showAlert('❌ Erreur lors de l'envoi. Veuillez réessayer.');
   }
 }
 
