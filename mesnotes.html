@@ -189,33 +189,22 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
     <div class="modal-title">Soumettre une photo</div>
     <div class="modal-sub">Choisissez votre meilleure photo pour être noté par la communauté</div>
 
-    <div class="modal-preview" id="modal-preview" onclick="triggerUpload()" style="overflow:hidden;position:relative;">
+    <div id="modal-preview" onclick="triggerUpload()" style="width:100%;height:220px;border-radius:16px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:48px;cursor:pointer;overflow:hidden;position:relative;margin-bottom:12px;">
       📸
       <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />
     </div>
 
     <!-- CROP CONTROLS -->
     <div id="crop-controls" style="display:none;margin-bottom:14px;">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">🎯 Recadrez votre photo</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-        <button onclick="setCropMode('cover')" id="btn-cover" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(245,200,66,0.4);background:rgba(245,200,66,0.15);color:var(--gold2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">✂️ Remplir</button>
-        <button onclick="setCropMode('contain')" id="btn-contain" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">🖼️ Tout voir</button>
-        <button onclick="setCropMode('square')" id="btn-square" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">⬜ Carré</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:12px;color:var(--muted);">↔️ Glissez pour recadrer</div>
+        <button onclick="triggerUpload()" style="font-size:11px;color:var(--gold2);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Changer de photo</button>
       </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">🔍 Zoom</div>
-      <input type="range" id="zoom-slider" min="100" max="300" value="100" oninput="applyZoom(this.value)" style="width:100%;accent-color:var(--gold);margin-bottom:4px;" />
+      <input type="range" id="zoom-slider" min="100" max="300" value="100" oninput="applyZoom(this.value)" style="width:100%;accent-color:var(--gold);" />
     </div>
 
-    <div class="modal-field">
-      <label>Catégorie</label>
-      <select id="photo-category">
-        <option value="portrait">Portrait / Selfie</option>
-        <option value="casual">Look casual</option>
-        <option value="sport">Sport / Fitness</option>
-        <option value="soiree">Tenue de soirée</option>
-        <option value="nature">Photo en nature</option>
-      </select>
-    </div>
+
 
     <div class="upload-progress" id="upload-progress">
       <div class="progress-bar-bg">
@@ -454,7 +443,12 @@ function closeModal() {
   document.getElementById('upload-modal').classList.remove('open');
   document.body.style.overflow = '';
   selectedFile = null;
-  document.getElementById('modal-preview').innerHTML = '📸<input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />';
+  lastX = 0; lastY = 0; imgScale = 1;
+  const preview = document.getElementById('modal-preview');
+  preview.style.cursor = 'pointer';
+  preview.innerHTML = '📸<input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />';
+  preview.onclick = triggerUpload;
+  document.getElementById('crop-controls').style.display = 'none';
 }
 
 document.getElementById('upload-modal').addEventListener('click', e => {
@@ -465,59 +459,90 @@ function triggerUpload() {
   document.getElementById('file-input').click();
 }
 
-let currentCropMode = 'cover';
-let currentZoom = 100;
+let imgOffsetX = 0, imgOffsetY = 0, imgScale = 1;
+let isDragging = false, dragStartX = 0, dragStartY = 0, lastX = 0, lastY = 0;
+let croppedBlob = null;
 
 function previewFile(input) {
-  if (input.files && input.files[0]) {
-    selectedFile = input.files[0];
-    const reader = new FileReader();
-    reader.onload = e => {
-      const preview = document.getElementById('modal-preview');
-      preview.innerHTML = `
-        <img id="preview-img" src="${e.target.result}" alt="Preview" style="width:100%;height:100%;object-fit:cover;transform:scale(1);transition:transform 0.2s;cursor:move;" />
-        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />`;
-      preview.onclick = null;
-      document.getElementById('crop-controls').style.display = 'block';
-      document.getElementById('zoom-slider').value = 100;
-      currentZoom = 100;
-      currentCropMode = 'cover';
-      updateCropButtons('cover');
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
+  if (!input.files || !input.files[0]) return;
+  selectedFile = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    imgOffsetX = 0; imgOffsetY = 0; imgScale = 1;
+    const preview = document.getElementById('modal-preview');
+    preview.style.cursor = 'grab';
+    preview.style.background = '#07070F';
+    preview.onclick = null;
+    preview.innerHTML = `
+      <img id="preview-img" src="${e.target.result}" alt="Preview"
+        style="position:absolute;width:auto;height:100%;min-width:100%;object-fit:cover;
+               transform:translate(0px,0px) scale(1);transform-origin:center;
+               transition:none;pointer-events:none;user-select:none;" />
+      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />`;
+    document.getElementById('crop-controls').style.display = 'block';
+    document.getElementById('zoom-slider').value = 100;
+    setupDrag(preview);
+  };
+  reader.readAsDataURL(input.files[0]);
 }
 
-function setCropMode(mode) {
-  currentCropMode = mode;
+function setupDrag(preview) {
+  preview.addEventListener('mousedown', startDrag);
+  preview.addEventListener('touchstart', e => startDrag(e.touches[0]), {passive:true});
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('touchmove', e => onDrag(e.touches[0]), {passive:true});
+  document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchend', endDrag);
+}
+
+function startDrag(e) {
+  isDragging = true;
+  dragStartX = e.clientX - lastX;
+  dragStartY = e.clientY - lastY;
+  document.getElementById('modal-preview').style.cursor = 'grabbing';
+}
+
+function onDrag(e) {
+  if (!isDragging) return;
+  lastX = e.clientX - dragStartX;
+  lastY = e.clientY - dragStartY;
   const img = document.getElementById('preview-img');
-  if (!img) return;
-  if (mode === 'cover') img.style.objectFit = 'cover';
-  else if (mode === 'contain') { img.style.objectFit = 'contain'; document.getElementById('modal-preview').style.background = '#07070F'; }
-  else if (mode === 'square') { img.style.objectFit = 'cover'; img.style.width = '100%'; img.style.height = '100%'; }
-  updateCropButtons(mode);
+  if (img) img.style.transform = `translate(${lastX}px,${lastY}px) scale(${imgScale})`;
 }
 
-function updateCropButtons(active) {
-  ['cover','contain','square'].forEach(m => {
-    const btn = document.getElementById('btn-' + m);
-    if (!btn) return;
-    if (m === active) {
-      btn.style.border = '1px solid rgba(245,200,66,0.4)';
-      btn.style.background = 'rgba(245,200,66,0.15)';
-      btn.style.color = 'var(--gold2)';
-    } else {
-      btn.style.border = '1px solid var(--border)';
-      btn.style.background = 'transparent';
-      btn.style.color = 'var(--muted)';
-    }
-  });
+function endDrag() {
+  isDragging = false;
+  const preview = document.getElementById('modal-preview');
+  if (preview) preview.style.cursor = 'grab';
 }
 
 function applyZoom(val) {
-  currentZoom = val;
+  imgScale = val / 100;
   const img = document.getElementById('preview-img');
-  if (img) img.style.transform = `scale(${val / 100})`;
+  if (img) img.style.transform = `translate(${lastX}px,${lastY}px) scale(${imgScale})`;
+}
+
+async function getCroppedBlob() {
+  const img = document.getElementById('preview-img');
+  const preview = document.getElementById('modal-preview');
+  if (!img || !preview) return selectedFile;
+  const rect = preview.getBoundingClientRect();
+  const imgRect = img.getBoundingClientRect();
+  const canvas = document.createElement('canvas');
+  const size = 600;
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const naturalImg = new Image();
+  naturalImg.src = img.src;
+  await new Promise(r => { naturalImg.onload = r; });
+  const scaleX = naturalImg.naturalWidth / imgRect.width;
+  const scaleY = naturalImg.naturalHeight / imgRect.height;
+  const cropX = (rect.left - imgRect.left) * scaleX;
+  const cropY = (rect.top - imgRect.top) * scaleY;
+  const cropW = rect.width * scaleX;
+  const cropH = rect.height * scaleY;
+  ctx.drawImage(naturalImg, cropX, cropY, cropW, cropH, 0, 0, size, size);
+  return new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
 }
 
 async function submitPhoto() {
@@ -540,9 +565,13 @@ async function submitPhoto() {
     document.getElementById('progress-fill').style.width = '30%';
     document.getElementById('progress-label').textContent = 'Upload de la photo...';
 
+    // Get cropped blob if image was selected
+    const blob = document.getElementById('preview-img') ? await getCroppedBlob() : selectedFile;
+    const uploadFile = blob || selectedFile;
+
     const { data: uploadData, error: uploadError } = await sb.storage
       .from('photos')
-      .upload(fileName, selectedFile, { cacheControl: '3600', upsert: false });
+      .upload(fileName, uploadFile, { cacheControl: '3600', upsert: false });
 
     if (uploadError) throw uploadError;
 
