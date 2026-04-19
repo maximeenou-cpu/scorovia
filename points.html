@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOROVIA — Mes Points</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #F5C842;
+  --gold2: #FFE27A;
+  --pink: #FF4D8D;
+  --dark: #07070F;
+  --deep: #0D0D1A;
+  --card: #13131E;
+  --card2: #18182A;
+  --border: rgba(255,255,255,0.07);
+  --text: #F0EEF8;
+  --muted: rgba(240,238,248,0.42);
+  --green: #22D4A0;
+  --purple: #8B5CF6;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--dark); color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh; display: flex;
+}
+
+.sidebar {
+  width: 220px; flex-shrink: 0; background: var(--deep);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 24px 16px;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 40; transition: transform 0.3s;
+}
+
+.sidebar-logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 26px;
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 32px; padding-left: 8px;
+  text-decoration: none; display: block;
+}
+
+.nav-section { font-size: 10px; color: rgba(240,238,248,0.2); text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 8px 8px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; font-size: 13px;
+  color: var(--muted); cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 2px; text-decoration: none;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.nav-item.active { background: rgba(245,200,66,0.1); color: var(--gold2); }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-bottom { margin-top: auto; border-top: 1px solid var(--border); padding-top: 16px; }
+
+.user-mini {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 10px;
+  cursor: pointer; transition: background 0.2s; text-decoration: none;
+}
+.user-mini:hover { background: rgba(255,255,255,0.04); }
+.user-av-sm {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.user-name-sm { font-size: 13px; font-weight: 500; color: var(--text); }
+.user-pts-sm { font-size: 11px; color: var(--gold2); }
+
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+.topbar {
+  background: rgba(7,7,15,0.8); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 32px; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 30;
+}
+.topbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.08em; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.pts-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2);
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 13px; color: var(--gold2); font-weight: 500;
+}
+
+.content { padding: 32px; }
+
+/* BALANCE CARD */
+.balance-card {
+  background: linear-gradient(135deg, rgba(245,200,66,0.1), rgba(255,77,141,0.07));
+  border: 1px solid rgba(245,200,66,0.2);
+  border-radius: 24px; padding: 32px;
+  text-align: center; margin-bottom: 28px;
+  position: relative; overflow: hidden;
+}
+
+.balance-card::before {
+  content: '';
+  position: absolute; top: -50%; right: -20%;
+  width: 300px; height: 300px;
+  background: radial-gradient(ellipse, rgba(245,200,66,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.balance-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
+
+.balance-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 80px; line-height: 1;
+  color: var(--gold2); letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.balance-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; font-weight: 300; }
+
+.balance-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+.btn-buy {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 12px; padding: 12px 24px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 15px;
+  letter-spacing: 0.08em; color: #000; cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.btn-buy:hover { opacity: 0.88; }
+.btn-buy:active { transform: scale(0.98); }
+
+.btn-watch {
+  background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25);
+  border-radius: 12px; padding: 12px 24px;
+  font-size: 14px; font-weight: 500; color: #A78BFA;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+}
+.btn-watch:hover { background: rgba(139,92,246,0.2); }
+
+.btn-invite {
+  background: rgba(34,212,160,0.1); border: 1px solid rgba(34,212,160,0.2);
+  border-radius: 12px; padding: 12px 24px;
+  font-size: 14px; font-weight: 500; color: var(--green);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+}
+.btn-invite:hover { background: rgba(34,212,160,0.16); }
+
+/* EARN METHODS */
+.earn-section { margin-bottom: 28px; }
+.section-title { font-size: 14px; font-weight: 500; margin-bottom: 16px; }
+
+.earn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.earn-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px;
+  transition: border-color 0.3s, transform 0.2s;
+  cursor: pointer;
+}
+
+.earn-card:hover { border-color: rgba(245,200,66,0.2); transform: translateY(-2px); }
+
+.earn-card-icon { font-size: 28px; margin-bottom: 10px; }
+.earn-card-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.earn-card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+.earn-card-pts {
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+  letter-spacing: 0.06em;
+}
+.pts-green { color: var(--green); }
+.pts-purple { color: #A78BFA; }
+.pts-gold { color: var(--gold2); }
+.pts-pink { color: var(--pink); }
+
+/* AD MODAL */
+.ad-modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(7,7,15,0.92); backdrop-filter: blur(10px);
+  z-index: 200; align-items: center; justify-content: center; padding: 20px;
+}
+.ad-modal-bg.open { display: flex; }
+
+.ad-modal {
+  background: var(--deep); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 32px; width: 100%; max-width: 400px;
+  text-align: center; animation: fadeIn 0.3s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.ad-icon { font-size: 48px; margin-bottom: 16px; }
+.ad-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.08em; margin-bottom: 6px; }
+.ad-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; font-weight: 300; }
+
+.ad-progress-wrap { background: rgba(255,255,255,0.06); border-radius: 6px; height: 6px; margin-bottom: 8px; overflow: hidden; }
+.ad-progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--pink)); border-radius: 6px; transition: width 0.1s linear; }
+.ad-timer { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+.btn-skip-ad {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 20px;
+  font-size: 13px; color: var(--muted); cursor: not-allowed;
+  font-family: 'DM Sans', sans-serif; width: 100%;
+  transition: all 0.3s;
+}
+.btn-skip-ad.ready { background: rgba(34,212,160,0.1); border-color: rgba(34,212,160,0.2); color: var(--green); cursor: pointer; }
+
+/* PACKS */
+.packs-section { margin-bottom: 28px; }
+
+.packs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.pack-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 22px 16px;
+  text-align: center; cursor: pointer;
+  transition: border-color 0.3s, transform 0.2s;
+  position: relative; overflow: hidden;
+}
+
+.pack-card:hover { border-color: rgba(245,200,66,0.25); transform: translateY(-2px); }
+.pack-card.featured { border-color: rgba(245,200,66,0.3); }
+
+.pack-popular {
+  position: absolute; top: -10px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold); color: #000;
+  font-size: 9px; font-weight: 700;
+  padding: 3px 12px; border-radius: 10px;
+  white-space: nowrap; letter-spacing: 0.06em;
+}
+
+.pack-icon { font-size: 24px; margin-bottom: 10px; }
+.pack-pts { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--gold2); letter-spacing: 0.04em; }
+.pack-pts-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+.pack-price { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+.pack-per { font-size: 11px; color: var(--muted); }
+
+.pack-bonus {
+  display: inline-block; background: rgba(34,212,160,0.1);
+  border: 1px solid rgba(34,212,160,0.2);
+  color: var(--green); font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 6px; margin-top: 6px;
+}
+
+/* PREMIUM */
+.premium-section { margin-bottom: 28px; }
+
+.premium-card {
+  background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(255,77,141,0.06));
+  border: 1px solid rgba(245,200,66,0.2);
+  border-radius: 20px; padding: 24px;
+}
+
+.premium-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.premium-icon { font-size: 28px; }
+.premium-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; color: var(--gold2); }
+.premium-sub { font-size: 13px; color: var(--muted); font-weight: 300; }
+
+.premium-features {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 20px;
+}
+
+.premium-feature {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--muted);
+}
+
+.premium-feature::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+.premium-price-row {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+
+.premium-price {
+  font-family: 'Bebas Neue', sans-serif; font-size: 32px;
+  letter-spacing: 0.04em; color: var(--gold2);
+}
+.premium-price span { font-size: 16px; color: var(--muted); }
+
+.btn-premium {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 13px; padding: 13px 28px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 16px;
+  letter-spacing: 0.08em; color: #000; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-premium:hover { opacity: 0.88; }
+
+/* HISTORY */
+.history-section { margin-bottom: 28px; }
+
+.history-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; overflow: hidden;
+}
+
+.history-header {
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.history-filter {
+  display: flex; gap: 6px;
+}
+
+.filter-btn {
+  padding: 5px 12px; border-radius: 8px; font-size: 11px;
+  font-weight: 500; cursor: pointer; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+.filter-btn.active { background: rgba(245,200,66,0.1); border-color: rgba(245,200,66,0.2); color: var(--gold2); }
+
+.history-list { padding: 8px 12px; }
+
+.history-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 10px; border-bottom: 1px solid var(--border);
+  border-radius: 10px; transition: background 0.2s;
+}
+.history-item:last-child { border-bottom: none; }
+.history-item:hover { background: rgba(255,255,255,0.02); }
+
+.h-icon {
+  width: 38px; height: 38px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+
+.h-info { flex: 1; }
+.h-title { font-size: 13px; font-weight: 500; }
+.h-date { font-size: 11px; color: var(--muted); }
+
+.h-pts { font-size: 15px; font-weight: 600; flex-shrink: 0; }
+.h-pts.plus { color: var(--green); }
+.h-pts.minus { color: var(--pink); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 20px;
+  font-size: 13px; color: var(--text);
+  z-index: 300; transition: transform 0.3s ease; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.gold { border-color: rgba(245,200,66,0.3); }
+.toast.success { border-color: rgba(34,212,160,0.3); }
+
+.menu-btn {
+  display: none; position: fixed; bottom: 20px; right: 20px;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; font-size: 22px; cursor: pointer; z-index: 60;
+  box-shadow: 0 4px 20px rgba(245,200,66,0.3);
+  align-items: center; justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .menu-btn { display: flex; }
+  .content { padding: 20px 16px; }
+  .topbar { padding: 14px 16px; }
+  .premium-features { grid-template-columns: 1fr; }
+  .balance-actions { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- AD MODAL -->
+<div class="ad-modal-bg" id="ad-modal">
+  <div class="ad-modal">
+    <div class="ad-icon">📺</div>
+    <div class="ad-title">Publicité en cours</div>
+    <div class="ad-sub">Regardez jusqu'à la fin pour recevoir vos 5 points</div>
+    <div class="ad-progress-wrap">
+      <div class="ad-progress-fill" id="ad-fill" style="width:0%"></div>
+    </div>
+    <div class="ad-timer" id="ad-timer">30 secondes restantes</div>
+    <button class="btn-skip-ad" id="btn-skip" onclick="finishAd()">Patienter...</button>
+  </div>
+</div>
+
+<aside class="sidebar" id="sidebar">
+  <a href="index.html" class="sidebar-logo">SCOROVIA</a>
+  <div class="nav-section">Principal</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Tableau de bord</a>
+  <a class="nav-item" href="noter.html"><span class="nav-icon">⭐</span> Noter</a>
+  <a class="nav-item" href="mesnotes.html"><span class="nav-icon">📊</span> Mes notes</a>
+  <div class="nav-section">Communauté</div>
+  <a class="nav-item" href="classement.html"><span class="nav-icon">🏆</span> Classement</a>
+  <a class="nav-item" href="dashboard.html">
+    <span class="nav-icon">💬</span> Messages
+    <span style="margin-left:auto;background:var(--pink);color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;">3</span>
+  </a>
+  <div class="nav-section">Compte</div>
+  <a class="nav-item active"><span class="nav-icon">⚡</span> Mes points</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">👤</span> Mon profil</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚙️</span> Paramètres</a>
+  <div class="sidebar-bottom">
+    <a class="user-mini" href="dashboard.html">
+      <div class="user-av-sm">😊</div>
+      <div>
+        <div class="user-name-sm">Alexandre D.</div>
+        <div class="user-pts-sm">⚡ <span id="sidebar-pts">240</span> pts</div>
+      </div>
+    </a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">⚡ Mes Points</div>
+    <div class="topbar-right">
+      <div class="pts-pill">⚡ <span id="pts-display">240</span> pts</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- BALANCE -->
+    <div class="balance-card">
+      <div class="balance-label">Mon solde actuel</div>
+      <div class="balance-num" id="balance-num">240</div>
+      <div class="balance-sub">points disponibles · Valeur : ~2,40€</div>
+      <div class="balance-actions">
+        <button class="btn-buy" onclick="scrollToPacks()">💳 Acheter des points</button>
+        <button class="btn-watch" onclick="openAd()">📺 Regarder une pub (+5 pts)</button>
+        <button class="btn-invite" onclick="copyInvite()">👥 Inviter un ami (+50 pts)</button>
+      </div>
+    </div>
+
+    <!-- EARN METHODS -->
+    <div class="earn-section">
+      <div class="section-title">Comment gagner des points</div>
+      <div class="earn-grid">
+        <div class="earn-card" onclick="window.location.href='noter.html'">
+          <div class="earn-card-icon">⭐</div>
+          <div class="earn-card-title">Noter quelqu'un</div>
+          <div class="earn-card-desc">Notez des profils de 1 à 10 et gagnez des points à chaque note.</div>
+          <div class="earn-card-pts pts-green">+3 pts / note</div>
+        </div>
+        <div class="earn-card" onclick="openAd()">
+          <div class="earn-card-icon">📺</div>
+          <div class="earn-card-title">Regarder une pub</div>
+          <div class="earn-card-desc">Regardez une vidéo de 30 secondes pour gagner des points instantanément.</div>
+          <div class="earn-card-pts pts-purple">+5 pts / pub</div>
+        </div>
+        <div class="earn-card" onclick="copyInvite()">
+          <div class="earn-card-icon">👥</div>
+          <div class="earn-card-title">Inviter un ami</div>
+          <div class="earn-card-desc">Partagez votre lien unique. Vous gagnez 50 pts quand votre ami s'inscrit.</div>
+          <div class="earn-card-pts pts-gold">+50 pts / ami</div>
+        </div>
+        <div class="earn-card" onclick="showToast('🎯 Complétez votre profil pour +20 pts !', 'gold')">
+          <div class="earn-card-icon">✅</div>
+          <div class="earn-card-title">Compléter son profil</div>
+          <div class="earn-card-desc">Renseignez toutes vos informations pour recevoir un bonus de bienvenue.</div>
+          <div class="earn-card-pts pts-pink">+20 pts</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACKS -->
+    <div class="packs-section" id="packs-section">
+      <div class="section-title">Acheter des points</div>
+      <div class="packs-grid">
+        <div class="pack-card" onclick="buyPack(100, 0.99)">
+          <div class="pack-icon">⚡</div>
+          <div class="pack-pts">100</div>
+          <div class="pack-pts-label">points</div>
+          <div class="pack-price">0,99€</div>
+          <div class="pack-per">0,99€/100 pts</div>
+        </div>
+        <div class="pack-card" onclick="buyPack(300, 2.49)">
+          <div class="pack-icon">⚡</div>
+          <div class="pack-pts">300</div>
+          <div class="pack-pts-label">points</div>
+          <div class="pack-price">2,49€</div>
+          <div class="pack-per">0,83€/100 pts</div>
+          <div class="pack-bonus">-16%</div>
+        </div>
+        <div class="pack-card featured" onclick="buyPack(500, 3.99)">
+          <div class="pack-popular">⭐ POPULAIRE</div>
+          <div class="pack-icon">⚡</div>
+          <div class="pack-pts">500</div>
+          <div class="pack-pts-label">points</div>
+          <div class="pack-price">3,99€</div>
+          <div class="pack-per">0,80€/100 pts</div>
+          <div class="pack-bonus">-20%</div>
+        </div>
+        <div class="pack-card" onclick="buyPack(1500, 8.99)">
+          <div class="pack-icon">⚡</div>
+          <div class="pack-pts">1500</div>
+          <div class="pack-pts-label">points</div>
+          <div class="pack-price">8,99€</div>
+          <div class="pack-per">0,60€/100 pts</div>
+          <div class="pack-bonus">-40%</div>
+        </div>
+        <div class="pack-card" onclick="buyPack(5000, 19.99)">
+          <div class="pack-icon">⚡</div>
+          <div class="pack-pts">5000</div>
+          <div class="pack-pts-label">points</div>
+          <div class="pack-price">19,99€</div>
+          <div class="pack-per">0,40€/100 pts</div>
+          <div class="pack-bonus">-60%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="premium-section">
+      <div class="section-title">Abonnement Premium</div>
+      <div class="premium-card">
+        <div class="premium-header">
+          <div class="premium-icon">👑</div>
+          <div>
+            <div class="premium-title">SCOROVIA PREMIUM</div>
+            <div class="premium-sub">L'expérience complète sans limites</div>
+          </div>
+        </div>
+        <div class="premium-features">
+          <div class="premium-feature">Voir qui vous a noté</div>
+          <div class="premium-feature">Messagerie illimitée</div>
+          <div class="premium-feature">Classement par ville</div>
+          <div class="premium-feature">Classement par genre</div>
+          <div class="premium-feature">Photos illimitées</div>
+          <div class="premium-feature">Pas de pub obligatoire</div>
+          <div class="premium-feature">Badge Premium visible</div>
+          <div class="premium-feature">Support prioritaire</div>
+        </div>
+        <div class="premium-price-row">
+          <div>
+            <div class="premium-price">9,99€ <span>/ mois</span></div>
+            <div style="font-size:12px;color:var(--muted)">Sans engagement · Annulable à tout moment</div>
+          </div>
+          <button class="btn-premium" onclick="showToast('👑 Redirection vers le paiement Stripe...', 'gold')">
+            PASSER PREMIUM
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="history-section">
+      <div class="history-card">
+        <div class="history-header">
+          <div class="section-title" style="margin-bottom:0">Historique</div>
+          <div class="history-filter">
+            <button class="filter-btn active" onclick="filterHistory('tous', this)">Tous</button>
+            <button class="filter-btn" onclick="filterHistory('gains', this)">Gains</button>
+            <button class="filter-btn" onclick="filterHistory('depenses', this)">Dépenses</button>
+          </div>
+        </div>
+        <div class="history-list" id="history-list">
+          <!-- Items injected by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<script>
+let pts = 240;
+let adTimer = null;
+let adSeconds = 30;
+
+const historyData = [
+  { icon: '⭐', bg: 'rgba(245,200,66,0.1)', title: 'Note donnée', date: 'Aujourd\'hui à 16h42', pts: 3, type: 'gain' },
+  { icon: '⭐', bg: 'rgba(245,200,66,0.1)', title: 'Note donnée', date: 'Aujourd\'hui à 16h38', pts: 3, type: 'gain' },
+  { icon: '📺', bg: 'rgba(139,92,246,0.1)', title: 'Pub regardée', date: 'Aujourd\'hui à 15h20', pts: 5, type: 'gain' },
+  { icon: '📸', bg: 'rgba(255,77,141,0.1)', title: 'Photo soumise', date: 'Hier à 20h05', pts: -10, type: 'depense' },
+  { icon: '👥', bg: 'rgba(34,212,160,0.1)', title: 'Parrainage — Lucas M.', date: 'Il y a 3 jours', pts: 50, type: 'gain' },
+  { icon: '⭐', bg: 'rgba(245,200,66,0.1)', title: 'Note donnée', date: 'Il y a 3 jours', pts: 3, type: 'gain' },
+  { icon: '💳', bg: 'rgba(245,200,66,0.15)', title: 'Achat pack 500 pts', date: 'Il y a 5 jours', pts: 500, type: 'gain' },
+  { icon: '📸', bg: 'rgba(255,77,141,0.1)', title: 'Photo soumise', date: 'Il y a 5 jours', pts: -10, type: 'depense' },
+  { icon: '✅', bg: 'rgba(34,212,160,0.1)', title: 'Bonus profil complété', date: 'Il y a 7 jours', pts: 20, type: 'gain' },
+  { icon: '🎁', bg: 'rgba(245,200,66,0.1)', title: 'Bonus inscription', date: 'Il y a 8 jours', pts: 20, type: 'gain' },
+];
+
+let currentFilter = 'tous';
+
+function renderHistory(filter) {
+  const list = document.getElementById('history-list');
+  const filtered = filter === 'tous' ? historyData :
+    historyData.filter(h => h.type === filter);
+
+  list.innerHTML = filtered.map(h => `
+    <div class="history-item">
+      <div class="h-icon" style="background:${h.bg}">${h.icon}</div>
+      <div class="h-info">
+        <div class="h-title">${h.title}</div>
+        <div class="h-date">${h.date}</div>
+      </div>
+      <div class="h-pts ${h.pts > 0 ? 'plus' : 'minus'}">${h.pts > 0 ? '+' : ''}${h.pts} pts</div>
+    </div>
+  `).join('');
+}
+
+function filterHistory(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderHistory(filter);
+}
+
+// Update pts display
+function updatePts() {
+  document.getElementById('pts-display').textContent = pts;
+  document.getElementById('sidebar-pts').textContent = pts;
+  document.getElementById('balance-num').textContent = pts;
+}
+
+// Buy pack
+function buyPack(amount, price) {
+  showToast(`💳 Paiement Stripe — Pack ${amount} pts / ${price}€`, 'gold');
+}
+
+// Ad
+function openAd() {
+  document.getElementById('ad-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  adSeconds = 30;
+  document.getElementById('btn-skip').textContent = 'Patienter...';
+  document.getElementById('btn-skip').classList.remove('ready');
+  document.getElementById('ad-fill').style.width = '0%';
+  document.getElementById('ad-timer').textContent = '30 secondes restantes';
+
+  adTimer = setInterval(() => {
+    adSeconds--;
+    const progress = ((30 - adSeconds) / 30) * 100;
+    document.getElementById('ad-fill').style.width = progress + '%';
+    document.getElementById('ad-timer').textContent = adSeconds + ' secondes restantes';
+
+    if (adSeconds <= 0) {
+      clearInterval(adTimer);
+      document.getElementById('btn-skip').textContent = '✓ Récupérer mes 5 points';
+      document.getElementById('btn-skip').classList.add('ready');
+      document.getElementById('ad-timer').textContent = 'Pub terminée !';
+    }
+  }, 100); // Fast for demo
+}
+
+function finishAd() {
+  if (!document.getElementById('btn-skip').classList.contains('ready')) return;
+  clearInterval(adTimer);
+  document.getElementById('ad-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  pts += 5;
+  updatePts();
+  historyData.unshift({ icon: '📺', bg: 'rgba(139,92,246,0.1)', title: 'Pub regardée', date: 'À l\'instant', pts: 5, type: 'gain' });
+  renderHistory(currentFilter);
+  showToast('⚡ +5 points crédités !', 'success');
+}
+
+// Invite
+function copyInvite() {
+  const link = 'scorovia.com/ref/alexandred';
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('🔗 Lien copié : ' + link, 'success');
+  }).catch(() => {
+    showToast('🔗 scorovia.com/ref/alexandred', 'success');
+  });
+}
+
+// Scroll to packs
+function scrollToPacks() {
+  document.getElementById('packs-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Toast
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Sidebar
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Init
+renderHistory('tous');
+</script>
+</body>
+</html>
