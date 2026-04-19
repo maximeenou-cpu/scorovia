@@ -443,7 +443,7 @@ function closeModal() {
   document.getElementById('upload-modal').classList.remove('open');
   document.body.style.overflow = '';
   selectedFile = null;
-  imgDataUrl = null; img_nat = null; cropCanvas = null; cropCtx = null;
+  imgDataUrl = null; c_img = null; c_canvas = null; c_ctx = null;
   c_ox = 0; c_oy = 0; c_scale = 1;
   const preview = document.getElementById('modal-preview');
   preview.style.cursor = 'pointer';
@@ -462,12 +462,12 @@ function triggerUpload() {
 }
 
 // CROP — CSS preview + canvas export
-// CROP SYSTEM — canvas based (same as working widget)
-let img_nat = null, c_scale = 1, c_ox = 0, c_oy = 0;
+// CROP — Instagram/Tinder style
+let c_img = null, c_scale = 1, c_ox = 0, c_oy = 0;
 let c_drag = false, c_sx = 0, c_sy = 0;
-let cropCanvas = null, cropCtx = null;
+let c_canvas = null, c_ctx = null;
 let imgDataUrl = null;
-const CS = 340; // canvas size px
+const CS = 300;
 
 function previewFile(input) {
   if (!input.files || !input.files[0]) return;
@@ -477,25 +477,22 @@ function previewFile(input) {
     imgDataUrl = e.target.result;
     const image = new Image();
     image.onload = () => {
-      img_nat = image;
-      const base = Math.max(CS / image.naturalWidth, CS / image.naturalHeight);
-      c_scale = base;
-      c_ox = (image.naturalWidth * base - CS) / 2;
-      c_oy = (image.naturalHeight * base - CS) / 2;
+      c_img = image;
+      // Scale so image COVERS the square — no black borders ever
+      c_scale = Math.max(CS / image.width, CS / image.height);
+      // Center
+      c_ox = (image.width * c_scale - CS) / 2;
+      c_oy = (image.height * c_scale - CS) / 2;
       document.getElementById('zoom-slider').value = 100;
 
       const preview = document.getElementById('modal-preview');
       preview.onclick = null;
       preview.style.cursor = 'grab';
-      preview.innerHTML = `
-        <canvas id="crop-canvas" width="${CS}" height="${CS}"
-          style="width:100%;height:100%;display:block;border-radius:14px;cursor:grab;touch-action:none;"></canvas>
-        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />`;
-
-      cropCanvas = document.getElementById('crop-canvas');
-      cropCtx = cropCanvas.getContext('2d');
-      cropDraw();
-      cropSetupDrag();
+      preview.innerHTML = `<canvas id="cc" width="${CS}" height="${CS}" style="display:block;width:100%;height:100%;border-radius:14px;cursor:grab;touch-action:none;"></canvas><input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />`;
+      c_canvas = document.getElementById('cc');
+      c_ctx = c_canvas.getContext('2d');
+      c_draw();
+      c_setupDrag();
       document.getElementById('crop-controls').style.display = 'block';
     };
     image.src = e.target.result;
@@ -503,69 +500,61 @@ function previewFile(input) {
   reader.readAsDataURL(input.files[0]);
 }
 
-function cropDraw() {
-  if (!cropCtx || !img_nat) return;
-  cropCtx.clearRect(0, 0, CS, CS);
-  cropCtx.drawImage(img_nat,
-    0, 0, img_nat.naturalWidth, img_nat.naturalHeight,
-    -c_ox, -c_oy, img_nat.naturalWidth * c_scale, img_nat.naturalHeight * c_scale);
+function c_draw() {
+  if (!c_ctx || !c_img) return;
+  c_ctx.clearRect(0, 0, CS, CS);
+  c_ctx.drawImage(c_img, 0, 0, c_img.width, c_img.height,
+    -c_ox, -c_oy, c_img.width * c_scale, c_img.height * c_scale);
 }
 
-function cropClamp() {
-  const w = img_nat.naturalWidth * c_scale;
-  const h = img_nat.naturalHeight * c_scale;
+function c_clamp() {
+  const w = c_img.width * c_scale;
+  const h = c_img.height * c_scale;
   c_ox = Math.max(0, Math.min(c_ox, Math.max(0, w - CS)));
   c_oy = Math.max(0, Math.min(c_oy, Math.max(0, h - CS)));
 }
 
-function cropSetupDrag() {
-  cropCanvas.addEventListener('mousedown', e => {
+function c_setupDrag() {
+  c_canvas.addEventListener('mousedown', e => {
     c_drag = true; c_sx = e.clientX; c_sy = e.clientY;
-    cropCanvas.style.cursor = 'grabbing';
-    e.preventDefault();
+    c_canvas.style.cursor = 'grabbing'; e.preventDefault();
   });
   window.addEventListener('mousemove', e => {
-    if (!c_drag || !img_nat) return;
+    if (!c_drag || !c_img) return;
     c_ox -= e.clientX - c_sx; c_oy -= e.clientY - c_sy;
     c_sx = e.clientX; c_sy = e.clientY;
-    cropClamp(); cropDraw();
+    c_clamp(); c_draw();
   });
-  window.addEventListener('mouseup', () => {
-    c_drag = false;
-    if (cropCanvas) cropCanvas.style.cursor = 'grab';
-  });
-  cropCanvas.addEventListener('touchstart', e => {
-    c_drag = true; c_sx = e.touches[0].clientX; c_sy = e.touches[0].clientY;
-    e.preventDefault();
+  window.addEventListener('mouseup', () => { c_drag = false; if (c_canvas) c_canvas.style.cursor = 'grab'; });
+  c_canvas.addEventListener('touchstart', e => {
+    c_drag = true; c_sx = e.touches[0].clientX; c_sy = e.touches[0].clientY; e.preventDefault();
   }, {passive:false});
-  cropCanvas.addEventListener('touchmove', e => {
-    if (!c_drag || !img_nat) return;
+  c_canvas.addEventListener('touchmove', e => {
+    if (!c_drag || !c_img) return;
     c_ox -= e.touches[0].clientX - c_sx; c_oy -= e.touches[0].clientY - c_sy;
     c_sx = e.touches[0].clientX; c_sy = e.touches[0].clientY;
-    cropClamp(); cropDraw();
-    e.preventDefault();
+    c_clamp(); c_draw(); e.preventDefault();
   }, {passive:false});
-  cropCanvas.addEventListener('touchend', () => { c_drag = false; });
+  c_canvas.addEventListener('touchend', () => { c_drag = false; });
 }
 
 function applyZoom(val) {
-  if (!img_nat) return;
-  const base = Math.max(CS / img_nat.naturalWidth, CS / img_nat.naturalHeight);
-  const newScale = base * (val / 100);
-  const cx = c_ox + CS / 2;
-  const cy = c_oy + CS / 2;
-  const ratio = newScale / c_scale;
-  c_scale = newScale;
-  c_ox = cx * ratio - CS / 2;
-  c_oy = cy * ratio - CS / 2;
-  cropClamp(); cropDraw();
+  if (!c_img) return;
+  const base = Math.max(CS / c_img.width, CS / c_img.height);
+  const ns = base * (val / 100);
+  const cx = c_ox + CS / 2, cy = c_oy + CS / 2;
+  const r = ns / c_scale;
+  c_scale = ns;
+  c_ox = cx * r - CS / 2;
+  c_oy = cy * r - CS / 2;
+  c_clamp(); c_draw();
 }
 
 async function getCroppedBlob() {
-  if (!cropCanvas) return selectedFile;
+  if (!c_canvas) return selectedFile;
   const out = document.createElement('canvas');
   out.width = 600; out.height = 600;
-  out.getContext('2d').drawImage(cropCanvas, 0, 0, CS, CS, 0, 0, 600, 600);
+  out.getContext('2d').drawImage(c_canvas, 0, 0, CS, CS, 0, 0, 600, 600);
   return new Promise(r => out.toBlob(r, 'image/jpeg', 0.92));
 }
 
@@ -590,7 +579,7 @@ async function submitPhoto() {
     document.getElementById('progress-label').textContent = 'Upload de la photo...';
 
     // Get cropped blob if image was selected
-    const blob = cropCanvas ? await getCroppedBlob() : selectedFile;
+    const blob = c_canvas ? await getCroppedBlob() : selectedFile;
     const uploadFile = blob || selectedFile;
 
     const { data: uploadData, error: uploadError } = await sb.storage
