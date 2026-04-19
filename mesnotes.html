@@ -473,10 +473,10 @@ function previewFile(input) {
     const img = new Image();
     img.onload = () => {
       naturalImage = img;
-      const baseScale = Math.max(PREVIEW_SIZE / img.width, PREVIEW_SIZE / img.height);
+      const baseScale = Math.max(PREVIEW_SIZE / img.naturalWidth, PREVIEW_SIZE / img.naturalHeight);
       cropScale = baseScale;
-      ox = (img.width * cropScale - PREVIEW_SIZE) / 2;
-      oy = (img.height * cropScale - PREVIEW_SIZE) / 2;
+      ox = (img.naturalWidth * cropScale - PREVIEW_SIZE) / 2;
+      oy = (img.naturalHeight * cropScale - PREVIEW_SIZE) / 2;
       document.getElementById('zoom-slider').value = 100;
       const preview = document.getElementById('modal-preview');
       preview.onclick = null;
@@ -496,13 +496,16 @@ function previewFile(input) {
 function draw() {
   if (!ctx || !naturalImage) return;
   ctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
-  ctx.drawImage(naturalImage, 0, 0, naturalImage.width, naturalImage.height,
-    -ox, -oy, naturalImage.width * cropScale, naturalImage.height * cropScale);
+  // Maintain natural aspect ratio
+  const drawW = naturalImage.naturalWidth * cropScale;
+  const drawH = naturalImage.naturalHeight * cropScale;
+  ctx.drawImage(naturalImage, 0, 0, naturalImage.naturalWidth, naturalImage.naturalHeight,
+    -ox, -oy, drawW, drawH);
 }
 
 function clamp() {
-  const w = naturalImage.width * cropScale;
-  const h = naturalImage.height * cropScale;
+  const w = naturalImage.naturalWidth * cropScale;
+  const h = naturalImage.naturalHeight * cropScale;
   ox = Math.max(0, Math.min(ox, Math.max(0, w - PREVIEW_SIZE)));
   oy = Math.max(0, Math.min(oy, Math.max(0, h - PREVIEW_SIZE)));
 }
@@ -533,7 +536,7 @@ function endDrag() {}
 
 function applyZoom(val) {
   if (!naturalImage) return;
-  const base = Math.max(PREVIEW_SIZE / naturalImage.width, PREVIEW_SIZE / naturalImage.height);
+  const base = Math.max(PREVIEW_SIZE / naturalImage.naturalWidth, PREVIEW_SIZE / naturalImage.naturalHeight);
   const newScale = base * (val / 100);
   const cx = ox + PREVIEW_SIZE / 2;
   const cy = oy + PREVIEW_SIZE / 2;
