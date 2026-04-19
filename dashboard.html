@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCOROVIA — Mon Espace</title>
+<title>SCOROVIA — Tableau de bord</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -34,245 +35,164 @@ body {
   display: flex;
 }
 
+/* LOADING SCREEN */
+.loading-screen {
+  position: fixed; inset: 0;
+  background: var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+  z-index: 100;
+}
+
+.loading-logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 36px;
+  letter-spacing: 0.18em;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.loading-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(245,200,66,0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* SIDEBAR */
 .sidebar {
-  width: 220px;
-  flex-shrink: 0;
+  width: 220px; flex-shrink: 0;
   background: var(--deep);
   border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   padding: 24px 16px;
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
-  z-index: 40;
-  transition: transform 0.3s;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 40; transition: transform 0.3s;
 }
 
 .sidebar-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 26px;
   letter-spacing: 0.15em;
   background: linear-gradient(135deg, var(--gold), var(--pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 32px;
-  padding-left: 8px;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 32px; padding-left: 8px;
+  text-decoration: none; display: block;
 }
 
-.nav-section {
-  font-size: 10px;
-  color: rgba(240,238,248,0.2);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin: 20px 0 8px 8px;
-}
+.nav-section { font-size: 10px; color: rgba(240,238,248,0.2); text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 8px 8px; }
 
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; font-size: 13px;
+  color: var(--muted); cursor: pointer;
   transition: background 0.2s, color 0.2s;
-  margin-bottom: 2px;
-  text-decoration: none;
+  margin-bottom: 2px; text-decoration: none;
 }
 
 .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
 .nav-item.active { background: rgba(245,200,66,0.1); color: var(--gold2); }
-.nav-item.active .nav-icon { color: var(--gold); }
-
 .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-.sidebar-bottom {
-  margin-top: auto;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
-}
+.sidebar-bottom { margin-top: auto; border-top: 1px solid var(--border); padding-top: 16px; }
 
 .user-mini {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 10px;
+  cursor: pointer; transition: background 0.2s; text-decoration: none;
 }
 
 .user-mini:hover { background: rgba(255,255,255,0.04); }
 
 .user-av-sm {
-  width: 32px; height: 32px;
-  border-radius: 50%;
+  width: 32px; height: 32px; border-radius: 50%;
   background: linear-gradient(135deg, var(--gold), var(--pink));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
 }
 
-.user-name-sm { font-size: 13px; font-weight: 500; flex: 1; }
+.user-name-sm { font-size: 13px; font-weight: 500; color: var(--text); }
 .user-pts-sm { font-size: 11px; color: var(--gold2); }
 
 /* MAIN */
-.main {
-  margin-left: 220px;
-  flex: 1;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
 
-/* TOP BAR */
+/* TOPBAR */
 .topbar {
-  background: rgba(7,7,15,0.8);
-  backdrop-filter: blur(16px);
+  background: rgba(7,7,15,0.8); backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
-  padding: 14px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 30;
+  padding: 14px 32px; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 30;
 }
 
-.topbar-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
-  letter-spacing: 0.08em;
-  color: var(--text);
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.topbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.08em; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
 
 .pts-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(245,200,66,0.1);
-  border: 1px solid rgba(245,200,66,0.2);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  color: var(--gold2);
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2);
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 13px; color: var(--gold2); font-weight: 500; cursor: pointer;
 }
-
-.pts-pill:hover { background: rgba(245,200,66,0.15); }
 
 .notif-btn {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.2s;
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
 }
 
-.notif-btn:hover { background: var(--card2); }
+/* CONTENT */
+.content { padding: 32px; }
 
-.notif-badge {
-  position: absolute;
-  top: -3px; right: -3px;
-  width: 14px; height: 14px;
-  background: var(--pink);
-  border-radius: 50%;
-  font-size: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 700;
-  border: 2px solid var(--dark);
-}
-
-/* PAGES */
-.page { display: none; padding: 32px; }
-.page.active { display: block; }
-
-/* DASHBOARD */
+/* WELCOME BANNER */
 .welcome-banner {
-  background: linear-gradient(135deg, rgba(245,200,66,0.08) 0%, rgba(255,77,141,0.06) 100%);
+  background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(255,77,141,0.06));
   border: 1px solid rgba(245,200,66,0.15);
-  border-radius: 20px;
-  padding: 28px 32px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  border-radius: 20px; padding: 28px 32px;
+  margin-bottom: 24px; display: flex;
+  align-items: center; justify-content: space-between; gap: 20px;
 }
 
 .welcome-left h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  letter-spacing: 0.06em;
-  margin-bottom: 6px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 28px;
+  letter-spacing: 0.06em; margin-bottom: 6px;
 }
 
 .welcome-left h2 span {
   background: linear-gradient(135deg, var(--gold), var(--pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .welcome-left p { font-size: 13px; color: var(--muted); font-weight: 300; }
 
-.welcome-score {
-  text-align: center;
-  flex-shrink: 0;
-}
+.welcome-score { text-align: center; flex-shrink: 0; }
 
 .welcome-score-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 56px;
-  line-height: 1;
+  font-family: 'Bebas Neue', sans-serif; font-size: 56px; line-height: 1;
   background: linear-gradient(135deg, var(--gold2), var(--pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .welcome-score-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-/* STATS GRID */
+/* STATS */
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 14px;
-  margin-bottom: 24px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px; margin-bottom: 24px;
 }
 
 .stat-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px;
   transition: border-color 0.3s;
 }
 
 .stat-card:hover { border-color: rgba(245,200,66,0.15); }
-
 .stat-icon { font-size: 20px; margin-bottom: 10px; }
 .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
 .stat-value { font-size: 24px; font-weight: 500; }
@@ -280,679 +200,139 @@ body {
 .stat-up { color: var(--green); }
 .stat-gold { color: var(--gold2); }
 
-/* TWO COLUMNS */
-.two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 24px;
-}
+/* TWO COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
 
-@media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+.section-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 22px; }
 
-.section-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 22px;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.section-action {
-  font-size: 12px;
-  color: var(--gold2);
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.section-action:hover { opacity: 0.7; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-title { font-size: 14px; font-weight: 500; }
+.section-action { font-size: 12px; color: var(--gold2); cursor: pointer; text-decoration: none; }
 
 /* VOTER ROWS */
 .voter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
 }
-
 .voter-row:last-child { border-bottom: none; }
-
-.voter-av {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
+.voter-av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 .voter-info { flex: 1; }
 .voter-name { font-size: 13px; font-weight: 500; }
 .voter-time { font-size: 11px; color: var(--muted); }
 .voter-score { font-size: 18px; font-weight: 600; color: var(--gold2); }
 
-.voter-row.locked { position: relative; overflow: hidden; }
-
 .lock-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(7,7,15,0.85);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
+  position: absolute; inset: 0;
+  background: rgba(7,7,15,0.85); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; border-radius: 8px;
 }
 
 .lock-pill {
   background: linear-gradient(135deg, var(--gold), #E8A020);
-  padding: 5px 14px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #000;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  padding: 5px 14px; border-radius: 10px; font-size: 11px;
+  font-weight: 700; color: #000; cursor: pointer;
 }
 
 /* EARN ROWS */
 .earn-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: opacity 0.2s;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: opacity 0.2s; text-decoration: none;
 }
-
 .earn-row:hover { opacity: 0.8; }
 .earn-row:last-child { border-bottom: none; }
-
-.earn-icon-wrap {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
+.earn-icon-wrap { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 .earn-info { flex: 1; }
-.earn-title { font-size: 13px; font-weight: 500; }
+.earn-title { font-size: 13px; font-weight: 500; color: var(--text); }
 .earn-desc { font-size: 11px; color: var(--muted); }
 .earn-pts { font-size: 14px; font-weight: 600; color: var(--green); }
-
-/* UPLOAD PHOTO SECTION */
-.upload-zone {
-  border: 2px dashed rgba(245,200,66,0.2);
-  border-radius: 16px;
-  padding: 40px 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.3s, background 0.3s;
-  margin-bottom: 20px;
-}
-
-.upload-zone:hover {
-  border-color: rgba(245,200,66,0.4);
-  background: rgba(245,200,66,0.03);
-}
-
-.upload-icon { font-size: 40px; margin-bottom: 12px; }
-.upload-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
-.upload-desc { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-.upload-cost { font-size: 12px; color: var(--gold2); background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2); padding: 4px 12px; border-radius: 10px; display: inline-block; }
-
-/* MY PHOTOS */
-.photos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 14px;
-}
-
-.photo-card {
-  background: var(--card2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: border-color 0.3s, transform 0.3s;
-}
-
-.photo-card:hover { border-color: rgba(245,200,66,0.2); transform: translateY(-2px); }
-
-.photo-thumb {
-  height: 140px;
-  background: linear-gradient(160deg, #1E1235, #0D1B2A);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-}
-
-.photo-info { padding: 10px 12px; }
-.photo-score { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold2); letter-spacing: 0.05em; }
-.photo-votes { font-size: 10px; color: var(--muted); }
-.photo-status { font-size: 10px; margin-top: 4px; }
-.status-active { color: var(--green); }
-.status-pending { color: var(--gold); }
-
-/* RATE PAGE */
-.rate-container {
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-.rate-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.rate-photo {
-  height: 280px;
-  background: linear-gradient(160deg, #1E1235, #0D1B2A);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  position: relative;
-}
-
-.rate-photo-av { font-size: 70px; }
-.rate-photo-name { font-size: 20px; font-weight: 500; }
-.rate-photo-loc { font-size: 13px; color: var(--muted); }
-
-.rate-photo-tag {
-  position: absolute;
-  top: 14px; right: 14px;
-  background: rgba(7,7,15,0.7);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 4px 10px;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.rate-controls { padding: 20px; }
-
-.rate-label {
-  font-size: 11px;
-  color: var(--muted);
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 14px;
-}
-
-.stars-row {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 20px;
-}
-
-.star-btn {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  border: 1px solid rgba(245,200,66,0.15);
-  background: rgba(245,200,66,0.06);
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'DM Sans', sans-serif;
-}
-
-.star-btn:hover { background: rgba(245,200,66,0.15); color: var(--gold2); border-color: rgba(245,200,66,0.3); }
-.star-btn.selected { background: var(--gold); border-color: var(--gold); color: #000; transform: scale(1.1); }
-.star-btn.filled { background: rgba(245,200,66,0.2); border-color: rgba(245,200,66,0.3); color: var(--gold2); }
-
-.rate-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-skip {
-  flex: 1;
-  padding: 13px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--muted);
-  font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-  text-align: center;
-}
-
-.btn-skip:hover { background: rgba(255,255,255,0.08); }
-
-.btn-rate {
-  flex: 2;
-  padding: 13px;
-  background: linear-gradient(135deg, var(--gold), #E8A020);
-  border: none;
-  border-radius: 12px;
-  color: #000;
-  font-size: 14px;
-  font-weight: 700;
-  font-family: 'Bebas Neue', sans-serif;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
-}
-
-.btn-rate:hover { opacity: 0.9; }
-.btn-rate:active { transform: scale(0.98); }
-
-.rate-progress {
-  text-align: center;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 10px;
-}
-
-/* PROFILE PAGE */
-.profile-hero {
-  background: linear-gradient(135deg, rgba(245,200,66,0.07) 0%, rgba(255,77,141,0.05) 100%);
-  border: 1px solid rgba(245,200,66,0.12);
-  border-radius: 20px;
-  padding: 32px;
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  margin-bottom: 24px;
-}
-
-.profile-av {
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--pink));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  flex-shrink: 0;
-  box-shadow: 0 0 30px rgba(245,200,66,0.2);
-}
-
-.profile-info h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  letter-spacing: 0.06em;
-  margin-bottom: 4px;
-}
-
-.profile-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(245,200,66,0.1);
-  border: 1px solid rgba(245,200,66,0.2);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  color: var(--gold2);
-  margin-bottom: 8px;
-}
-
-.profile-meta { font-size: 12px; color: var(--muted); }
-
-.profile-score-big {
-  margin-left: auto;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.psb-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 64px;
-  line-height: 1;
-  background: linear-gradient(135deg, var(--gold2), var(--pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.psb-den { font-size: 14px; color: var(--muted); }
-.psb-rank { font-size: 12px; color: var(--green); margin-top: 4px; }
-
-/* RANKING */
-.rank-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.rank-item:last-child { border-bottom: none; }
-
-.rank-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
-  width: 32px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.rank-num.gold { color: var(--gold); }
-.rank-num.silver { color: #C0C0C0; }
-.rank-num.bronze { color: #CD7F32; }
-.rank-num.me { color: var(--green); }
-
-.rank-av {
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.rank-info { flex: 1; }
-.rank-name { font-size: 13px; font-weight: 500; }
-.rank-location { font-size: 11px; color: var(--muted); }
-.rank-score { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold2); letter-spacing: 0.05em; }
-
-.rank-item.is-me {
-  background: rgba(34,212,160,0.05);
-  border-radius: 12px;
-  padding: 14px 12px;
-  border: 1px solid rgba(34,212,160,0.15);
-  margin: 4px -12px;
-}
 
 /* PREMIUM BANNER */
 .premium-banner {
   background: linear-gradient(135deg, rgba(245,200,66,0.1), rgba(255,77,141,0.08));
   border: 1px solid rgba(245,200,66,0.2);
-  border-radius: 18px;
-  padding: 22px 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  cursor: pointer;
-  transition: border-color 0.3s;
+  border-radius: 18px; padding: 22px 24px;
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px; cursor: pointer;
 }
-
-.premium-banner:hover { border-color: rgba(245,200,66,0.35); }
 .premium-icon { font-size: 28px; flex-shrink: 0; }
 .premium-text h3 { font-size: 15px; font-weight: 500; color: var(--gold2); margin-bottom: 3px; }
 .premium-text p { font-size: 12px; color: var(--muted); }
-
 .btn-premium {
-  margin-left: auto;
-  background: linear-gradient(135deg, var(--gold), #E8A020);
-  border: none;
-  border-radius: 10px;
-  padding: 10px 20px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  color: #000;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: opacity 0.2s;
-}
-
-.btn-premium:hover { opacity: 0.88; }
-
-/* POINTS PAGE */
-.pts-header-card {
-  background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(255,77,141,0.05));
-  border: 1px solid rgba(245,200,66,0.15);
-  border-radius: 20px;
-  padding: 28px;
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.pts-big {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 72px;
-  line-height: 1;
-  color: var(--gold2);
-  letter-spacing: 0.04em;
-}
-
-.pts-big-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
-
-.pts-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-.btn-buy-pts {
-  background: linear-gradient(135deg, var(--gold), #E8A020);
-  border: none;
-  border-radius: 12px;
-  padding: 11px 22px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  color: #000;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn-buy-pts:hover { opacity: 0.88; }
-
-.btn-watch-ad {
-  background: rgba(139,92,246,0.15);
-  border: 1px solid rgba(139,92,246,0.3);
-  border-radius: 12px;
-  padding: 11px 22px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #A78BFA;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  transition: background 0.2s;
-}
-
-.btn-watch-ad:hover { background: rgba(139,92,246,0.22); }
-
-/* PACKS */
-.packs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.pack-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.3s, transform 0.2s;
-  position: relative;
-}
-
-.pack-card:hover { border-color: rgba(245,200,66,0.25); transform: translateY(-2px); }
-.pack-card.featured { border-color: rgba(245,200,66,0.35); }
-
-.pack-popular {
-  position: absolute;
-  top: -10px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--gold);
-  color: #000;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 10px;
-  white-space: nowrap;
-}
-
-.pack-pts { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--gold2); letter-spacing: 0.05em; }
-.pack-pts-label { font-size: 10px; color: var(--muted); margin-bottom: 10px; }
-.pack-price { font-size: 16px; font-weight: 500; }
-
-/* HISTORY */
-.history-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.history-item:last-child { border-bottom: none; }
-
-.history-icon {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.history-info { flex: 1; }
-.history-title { font-size: 13px; font-weight: 500; }
-.history-date { font-size: 11px; color: var(--muted); }
-.history-pts { font-size: 14px; font-weight: 600; }
-.history-pts.plus { color: var(--green); }
-.history-pts.minus { color: var(--pink); }
-
-/* MOBILE MENU BTN */
-.menu-btn {
-  display: none;
-  position: fixed;
-  bottom: 20px; right: 20px;
-  width: 52px; height: 52px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), #E8A020);
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  z-index: 60;
-  box-shadow: 0 4px 20px rgba(245,200,66,0.3);
+  margin-left: auto; background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 10px; padding: 10px 20px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 14px;
+  letter-spacing: 0.08em; color: #000; cursor: pointer; white-space: nowrap; flex-shrink: 0;
 }
 
 /* TOAST */
 .toast {
-  position: fixed;
-  bottom: 30px; left: 50%;
+  position: fixed; bottom: 30px; left: 50%;
   transform: translateX(-50%) translateY(100px);
-  background: var(--card2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 20px;
-  font-size: 13px;
-  color: var(--text);
-  z-index: 200;
-  transition: transform 0.3s ease;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 20px;
+  font-size: 13px; color: var(--text);
+  z-index: 200; transition: transform 0.3s ease; white-space: nowrap;
 }
-
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { border-color: rgba(34,212,160,0.3); }
 .toast.gold { border-color: rgba(245,200,66,0.3); }
 
-/* RESPONSIVE */
+/* MENU BTN */
+.menu-btn {
+  display: none; position: fixed; bottom: 20px; right: 20px;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; font-size: 22px; cursor: pointer; z-index: 60;
+  box-shadow: 0 4px 20px rgba(245,200,66,0.3);
+  align-items: center; justify-content: center;
+}
+
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; }
-  .menu-btn { display: flex; align-items: center; justify-content: center; }
-  .page { padding: 20px 16px; }
+  .menu-btn { display: flex; }
+  .content { padding: 20px 16px; }
   .welcome-banner { flex-direction: column; text-align: center; }
-  .profile-hero { flex-direction: column; text-align: center; }
-  .profile-score-big { margin-left: 0; }
   .two-col { grid-template-columns: 1fr; }
-  .stars-row { gap: 4px; }
-  .star-btn { width: 28px; height: 28px; font-size: 11px; }
+  .topbar { padding: 14px 16px; }
 }
 </style>
 </head>
 <body>
 
-<!-- TOAST -->
+<!-- LOADING -->
+<div class="loading-screen" id="loading">
+  <div class="loading-logo">SCOROVIA</div>
+  <div class="loading-spinner"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <a href="index.html" style="text-decoration:none"><div class="sidebar-logo">SCOROVIA</div></a>
-
+  <a href="index.html" class="sidebar-logo">SCOROVIA</a>
   <div class="nav-section">Principal</div>
-  <a class="nav-item active" onclick="showPage('dashboard', this)">
-    <span class="nav-icon">🏠</span> Tableau de bord
-  </a>
-  <a class="nav-item" href="noter.html">
-    <span class="nav-icon">⭐</span> Noter
-  </a>
-  <a class="nav-item" href="mesnotes.html">
-    <span class="nav-icon">📊</span> Mes notes
-  </a>
-
+  <a class="nav-item active" href="dashboard.html"><span class="nav-icon">🏠</span> Tableau de bord</a>
+  <a class="nav-item" href="noter.html"><span class="nav-icon">⭐</span> Noter</a>
+  <a class="nav-item" href="mesnotes.html"><span class="nav-icon">📊</span> Mes notes</a>
   <div class="nav-section">Communauté</div>
-  <a class="nav-item" href="classement.html">
-    <span class="nav-icon">🏆</span> Classement
-  </a>
-  <a class="nav-item" onclick="showPage('messages', this)">
+  <a class="nav-item" href="classement.html"><span class="nav-icon">🏆</span> Classement</a>
+  <a class="nav-item" href="dashboard.html">
     <span class="nav-icon">💬</span> Messages
     <span style="margin-left:auto;background:var(--pink);color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;">3</span>
   </a>
-
   <div class="nav-section">Compte</div>
-  <a class="nav-item" href="points.html">
-    <span class="nav-icon">⚡</span> Mes points
-  </a>
-  <a class="nav-item" onclick="showPage('profil', this)">
-    <span class="nav-icon">👤</span> Mon profil
-  </a>
-  <a class="nav-item" onclick="showPage('parametres', this)">
-    <span class="nav-icon">⚙️</span> Paramètres
-  </a>
-
+  <a class="nav-item" href="points.html"><span class="nav-icon">⚡</span> Mes points</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">👤</span> Mon profil</a>
+  <a class="nav-item" onclick="doLogout()" style="cursor:pointer"><span class="nav-icon">🚪</span> Déconnexion</a>
   <div class="sidebar-bottom">
     <div class="user-mini">
-      <div class="user-av-sm">😊</div>
+      <div class="user-av-sm" id="user-avatar">😊</div>
       <div>
-        <div class="user-name-sm">Alexandre D.</div>
-        <div class="user-pts-sm">⚡ 240 pts</div>
+        <div class="user-name-sm" id="user-name">Chargement...</div>
+        <div class="user-pts-sm">⚡ <span id="user-pts">—</span> pts</div>
       </div>
     </div>
   </div>
@@ -960,100 +340,76 @@ body {
 
 <!-- MAIN -->
 <main class="main">
-
-  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="topbar-title" id="page-title">Tableau de bord</div>
+    <div class="topbar-title">Tableau de bord</div>
     <div class="topbar-right">
-      <div class="pts-pill" onclick="showPage('points', null)">⚡ <span id="pts-display">240</span> pts</div>
-      <div class="notif-btn">🔔<div class="notif-badge">3</div></div>
+      <div class="pts-pill" onclick="window.location.href='points.html'">⚡ <span id="pts-display">—</span> pts</div>
+      <div class="notif-btn">🔔</div>
     </div>
   </div>
 
-  <!-- PAGE: DASHBOARD -->
-  <div class="page active" id="page-dashboard">
+  <div class="content">
 
+    <!-- WELCOME -->
     <div class="welcome-banner">
       <div class="welcome-left">
-        <h2>Bonjour, <span>Alexandre</span> 👋</h2>
-        <p>Vous avez reçu <strong style="color:var(--gold2)">12 nouvelles notes</strong> aujourd'hui.<br>Votre score a progressé de +0.3 ce mois-ci.</p>
+        <h2>Bonjour, <span id="welcome-name">...</span> 👋</h2>
+        <p id="welcome-sub">Chargement de vos données...</p>
       </div>
       <div class="welcome-score">
-        <div class="welcome-score-num">7.8</div>
-        <div class="welcome-score-label">/10 — Top 12%</div>
+        <div class="welcome-score-num" id="welcome-score">—</div>
+        <div class="welcome-score-label">/10 — Votre note</div>
       </div>
     </div>
 
+    <!-- STATS -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">⭐</div>
         <div class="stat-label">Ma note</div>
-        <div class="stat-value">7.8<span style="font-size:14px;color:var(--muted)">/10</span></div>
-        <div class="stat-sub stat-up">↑ +0.3 ce mois</div>
+        <div class="stat-value" id="stat-note">—</div>
+        <div class="stat-sub">sur 10</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">🗳️</div>
         <div class="stat-label">Votes reçus</div>
-        <div class="stat-value">847</div>
-        <div class="stat-sub stat-up">↑ +12 aujourd'hui</div>
+        <div class="stat-value" id="stat-votes">0</div>
+        <div class="stat-sub">depuis votre inscription</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">🏆</div>
         <div class="stat-label">Mon rang</div>
-        <div class="stat-value">#347</div>
-        <div class="stat-sub">sur 2 841 membres</div>
+        <div class="stat-value" id="stat-rang">—</div>
+        <div class="stat-sub" id="stat-rang-sub">en cours de calcul</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">⚡</div>
         <div class="stat-label">Mes points</div>
-        <div class="stat-value stat-gold">240</div>
-        <div class="stat-sub">+15 cette semaine</div>
+        <div class="stat-value stat-gold" id="stat-pts">—</div>
+        <div class="stat-sub">disponibles</div>
       </div>
     </div>
 
-    <div class="premium-banner" onclick="showToast('🚀 Passez Premium pour débloquer toutes les fonctionnalités !', 'gold')">
+    <!-- PREMIUM -->
+    <div class="premium-banner">
       <div class="premium-icon">👑</div>
       <div class="premium-text">
         <h3>Passez Premium — 9,99€/mois</h3>
         <p>Voyez qui vous a noté, écrivez-leur, accédez au classement avancé</p>
       </div>
-      <button class="btn-premium">DÉBLOQUER</button>
+      <button class="btn-premium" onclick="showToast('🚀 Bientôt disponible !', 'gold')">DÉBLOQUER</button>
     </div>
 
+    <!-- TWO COL -->
     <div class="two-col">
       <div class="section-card">
         <div class="section-header">
           <div class="section-title">Qui m'a noté récemment</div>
-          <div class="section-action" onclick="showPage('mesnotes', null)">Voir tout →</div>
+          <a href="mesnotes.html" class="section-action">Voir tout →</a>
         </div>
-        <div class="voter-row">
-          <div class="voter-av" style="background:linear-gradient(135deg,#2D1F5E,#1A3A5E)">👤</div>
-          <div class="voter-info">
-            <div class="voter-name">Lucas M.</div>
-            <div class="voter-time">Il y a 3 min</div>
-          </div>
-          <div class="voter-score">9/10</div>
-        </div>
-        <div class="voter-row locked">
-          <div class="voter-av" style="background:linear-gradient(135deg,#5E2D7A,#2D1F5E)">👤</div>
-          <div class="voter-info">
-            <div class="voter-name">????</div>
-            <div class="voter-time">Il y a 8 min</div>
-          </div>
-          <div class="voter-score">10/10</div>
-          <div class="lock-overlay">
-            <div class="lock-pill" onclick="showToast('👑 Passez Premium pour voir qui vous note !', 'gold')">🔒 Premium</div>
-          </div>
-        </div>
-        <div class="voter-row locked">
-          <div class="voter-av" style="background:linear-gradient(135deg,#1A3A5E,#0D1B2A)">👤</div>
-          <div class="voter-info">
-            <div class="voter-name">????</div>
-            <div class="voter-time">Il y a 22 min</div>
-          </div>
-          <div class="voter-score">8/10</div>
-          <div class="lock-overlay">
-            <div class="lock-pill" onclick="showToast('👑 Passez Premium pour voir qui vous note !', 'gold')">🔒 Premium</div>
+        <div id="voters-list">
+          <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">
+            Soumettez une photo pour recevoir des notes !
           </div>
         </div>
       </div>
@@ -1061,25 +417,25 @@ body {
       <div class="section-card">
         <div class="section-header">
           <div class="section-title">Gagner des points</div>
-          <div class="section-action" onclick="showPage('points', null)">Tout voir →</div>
+          <a href="points.html" class="section-action">Tout voir →</a>
         </div>
-        <div class="earn-row" onclick="showPage('noter', null)">
+        <a class="earn-row" href="noter.html">
           <div class="earn-icon-wrap" style="background:rgba(245,200,66,0.1)">⭐</div>
           <div class="earn-info">
             <div class="earn-title">Noter quelqu'un</div>
             <div class="earn-desc">Notez des profils</div>
           </div>
           <div class="earn-pts">+3 pts</div>
-        </div>
-        <div class="earn-row" onclick="watchAd()">
+        </a>
+        <a class="earn-row" href="points.html">
           <div class="earn-icon-wrap" style="background:rgba(139,92,246,0.1)">📺</div>
           <div class="earn-info">
             <div class="earn-title">Regarder une pub</div>
             <div class="earn-desc">Vidéo de 30 secondes</div>
           </div>
           <div class="earn-pts">+5 pts</div>
-        </div>
-        <div class="earn-row" onclick="showToast('🔗 Lien de parrainage copié !', 'success')">
+        </a>
+        <div class="earn-row" onclick="copyInvite()">
           <div class="earn-icon-wrap" style="background:rgba(34,212,160,0.1)">👥</div>
           <div class="earn-info">
             <div class="earn-title">Inviter un ami</div>
@@ -1089,428 +445,136 @@ body {
         </div>
       </div>
     </div>
+
   </div>
-
-  <!-- PAGE: NOTER -->
-  <div class="page" id="page-noter">
-    <div class="rate-container">
-      <div class="rate-card">
-        <div class="rate-photo">
-          <div class="rate-photo-av" id="rate-av">👤</div>
-          <div class="rate-photo-name" id="rate-name">Sarah, 24</div>
-          <div class="rate-photo-loc" id="rate-loc">📍 Paris</div>
-          <div class="rate-photo-tag" id="rate-tag">🇫🇷 France</div>
-        </div>
-        <div class="rate-controls">
-          <div class="rate-label">Donnez votre note sur 10</div>
-          <div class="stars-row" id="stars-row">
-            <button class="star-btn" onclick="selectStar(1)">1</button>
-            <button class="star-btn" onclick="selectStar(2)">2</button>
-            <button class="star-btn" onclick="selectStar(3)">3</button>
-            <button class="star-btn" onclick="selectStar(4)">4</button>
-            <button class="star-btn" onclick="selectStar(5)">5</button>
-            <button class="star-btn" onclick="selectStar(6)">6</button>
-            <button class="star-btn" onclick="selectStar(7)">7</button>
-            <button class="star-btn" onclick="selectStar(8)">8</button>
-            <button class="star-btn" onclick="selectStar(9)">9</button>
-            <button class="star-btn" onclick="selectStar(10)">10</button>
-          </div>
-          <div class="rate-actions">
-            <button class="btn-skip" onclick="nextProfile()">Passer</button>
-            <button class="btn-rate" onclick="submitRate()">✓ NOTER (+3 pts)</button>
-          </div>
-          <div class="rate-progress" id="rate-progress">Photo 1 sur 10 disponibles</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: MES NOTES -->
-  <div class="page" id="page-mesnotes">
-    <div class="upload-zone" onclick="showToast('📸 Upload de photo — 10 pts requis', 'gold')">
-      <div class="upload-icon">📸</div>
-      <div class="upload-title">Soumettre une nouvelle photo</div>
-      <div class="upload-desc">Choisissez votre meilleure photo et recevez des notes de la communauté</div>
-      <div class="upload-cost">⚡ Coût : 10 points</div>
-    </div>
-    <div style="margin-bottom:16px;font-size:14px;font-weight:500;">Mes photos (2)</div>
-    <div class="photos-grid">
-      <div class="photo-card">
-        <div class="photo-thumb">😊</div>
-        <div class="photo-info">
-          <div class="photo-score">7.8/10</div>
-          <div class="photo-votes">847 votes</div>
-          <div class="photo-status status-active">● Active</div>
-        </div>
-      </div>
-      <div class="photo-card">
-        <div class="photo-thumb">🤳</div>
-        <div class="photo-info">
-          <div class="photo-score">6.4/10</div>
-          <div class="photo-votes">312 votes</div>
-          <div class="photo-status status-active">● Active</div>
-        </div>
-      </div>
-      <div class="photo-card" onclick="showToast('📸 Upload de photo — 10 pts requis', 'gold')" style="border:2px dashed rgba(245,200,66,0.2);cursor:pointer;">
-        <div class="photo-thumb" style="font-size:28px;color:var(--muted)">+</div>
-        <div class="photo-info">
-          <div style="font-size:12px;color:var(--muted);text-align:center;">Ajouter une photo</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: CLASSEMENT -->
-  <div class="page" id="page-classement">
-    <div class="premium-banner" style="margin-bottom:20px">
-      <div class="premium-icon">🏆</div>
-      <div class="premium-text">
-        <h3>Classement par ville disponible en Premium</h3>
-        <p>Voyez votre rang à Paris, Lyon, Marseille...</p>
-      </div>
-      <button class="btn-premium">DÉBLOQUER</button>
-    </div>
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">🌍 Classement global — Top 10</div>
-        <div style="font-size:11px;color:var(--muted)">2 841 membres</div>
-      </div>
-      <div class="rank-item">
-        <div class="rank-num gold">1</div>
-        <div class="rank-av" style="background:linear-gradient(135deg,#FFD700,#FFA500)">👤</div>
-        <div class="rank-info"><div class="rank-name">Emma L.</div><div class="rank-location">Lyon</div></div>
-        <div class="rank-score">9.4/10</div>
-      </div>
-      <div class="rank-item">
-        <div class="rank-num silver">2</div>
-        <div class="rank-av" style="background:linear-gradient(135deg,#C0C0C0,#808080)">👤</div>
-        <div class="rank-info"><div class="rank-name">Noah B.</div><div class="rank-location">Paris</div></div>
-        <div class="rank-score">9.1/10</div>
-      </div>
-      <div class="rank-item">
-        <div class="rank-num bronze">3</div>
-        <div class="rank-av" style="background:linear-gradient(135deg,#CD7F32,#8B4513)">👤</div>
-        <div class="rank-info"><div class="rank-name">Sofia M.</div><div class="rank-location">Marseille</div></div>
-        <div class="rank-score">8.9/10</div>
-      </div>
-      <div class="rank-item">
-        <div class="rank-num" style="color:var(--muted)">4</div>
-        <div class="rank-av" style="background:linear-gradient(135deg,#2D1F5E,#1A3A5E)">👤</div>
-        <div class="rank-info"><div class="rank-name">Lucas P.</div><div class="rank-location">Bordeaux</div></div>
-        <div class="rank-score">8.7/10</div>
-      </div>
-      <div class="rank-item">
-        <div class="rank-num" style="color:var(--muted)">5</div>
-        <div class="rank-av" style="background:linear-gradient(135deg,#5E2D7A,#2D1F5E)">👤</div>
-        <div class="rank-info"><div class="rank-name">Chloé R.</div><div class="rank-location">Nantes</div></div>
-        <div class="rank-score">8.5/10</div>
-      </div>
-      <div style="text-align:center;padding:12px;color:var(--muted);font-size:12px;">· · ·</div>
-      <div class="rank-item is-me">
-        <div class="rank-num me">#347</div>
-        <div class="rank-av" style="background:linear-gradient(135deg,var(--gold),var(--pink))">😊</div>
-        <div class="rank-info"><div class="rank-name">Alexandre D. <span style="font-size:10px;color:var(--green)">(vous)</span></div><div class="rank-location">Rouen</div></div>
-        <div class="rank-score">7.8/10</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: MESSAGES -->
-  <div class="page" id="page-messages">
-    <div class="premium-banner">
-      <div class="premium-icon">💬</div>
-      <div class="premium-text">
-        <h3>Messagerie disponible en Premium</h3>
-        <p>Écrivez aux personnes qui vous ont noté</p>
-      </div>
-      <button class="btn-premium">DÉBLOQUER</button>
-    </div>
-    <div class="section-card" style="text-align:center;padding:48px 24px;">
-      <div style="font-size:48px;margin-bottom:16px;">💬</div>
-      <div style="font-size:16px;font-weight:500;margin-bottom:8px;">Vos messages arrivent ici</div>
-      <div style="font-size:13px;color:var(--muted)">Passez Premium pour envoyer et recevoir des messages des personnes qui vous ont noté.</div>
-    </div>
-  </div>
-
-  <!-- PAGE: POINTS -->
-  <div class="page" id="page-points">
-    <div class="pts-header-card">
-      <div class="pts-big" id="pts-big">240</div>
-      <div class="pts-big-label">points disponibles</div>
-      <div class="pts-actions">
-        <button class="btn-buy-pts" onclick="showToast('💳 Paiement Stripe en cours...', 'gold')">💳 Acheter des points</button>
-        <button class="btn-watch-ad" onclick="watchAd()">📺 Regarder une pub (+5 pts)</button>
-      </div>
-    </div>
-
-    <div style="margin-bottom:16px;font-size:14px;font-weight:500;">Packs de points</div>
-    <div class="packs-grid">
-      <div class="pack-card" onclick="showToast('💳 Pack 100 pts — 0,99€', 'gold')">
-        <div class="pack-pts">100</div>
-        <div class="pack-pts-label">points</div>
-        <div class="pack-price">0,99€</div>
-      </div>
-      <div class="pack-card featured" onclick="showToast('💳 Pack 500 pts — 3,99€', 'gold')">
-        <div class="pack-popular">⭐ Populaire</div>
-        <div class="pack-pts">500</div>
-        <div class="pack-pts-label">points</div>
-        <div class="pack-price">3,99€</div>
-      </div>
-      <div class="pack-card" onclick="showToast('💳 Pack 1500 pts — 8,99€', 'gold')">
-        <div class="pack-pts">1500</div>
-        <div class="pack-pts-label">points</div>
-        <div class="pack-price">8,99€</div>
-      </div>
-      <div class="pack-card" onclick="showToast('💳 Pack 5000 pts — 19,99€', 'gold')">
-        <div class="pack-pts">5000</div>
-        <div class="pack-pts-label">points</div>
-        <div class="pack-price">19,99€</div>
-      </div>
-    </div>
-
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">Historique des points</div>
-      </div>
-      <div class="history-item">
-        <div class="history-icon" style="background:rgba(245,200,66,0.1)">⭐</div>
-        <div class="history-info"><div class="history-title">Note donnée</div><div class="history-date">Aujourd'hui à 15h32</div></div>
-        <div class="history-pts plus">+3 pts</div>
-      </div>
-      <div class="history-item">
-        <div class="history-icon" style="background:rgba(139,92,246,0.1)">📺</div>
-        <div class="history-info"><div class="history-title">Pub regardée</div><div class="history-date">Aujourd'hui à 14h18</div></div>
-        <div class="history-pts plus">+5 pts</div>
-      </div>
-      <div class="history-item">
-        <div class="history-icon" style="background:rgba(255,77,141,0.1)">📸</div>
-        <div class="history-info"><div class="history-title">Photo soumise</div><div class="history-date">Hier à 20h05</div></div>
-        <div class="history-pts minus">-10 pts</div>
-      </div>
-      <div class="history-item">
-        <div class="history-icon" style="background:rgba(34,212,160,0.1)">👥</div>
-        <div class="history-info"><div class="history-title">Parrainage accepté</div><div class="history-date">Il y a 3 jours</div></div>
-        <div class="history-pts plus">+50 pts</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: PROFIL -->
-  <div class="page" id="page-profil">
-    <div class="profile-hero">
-      <div class="profile-av">😊</div>
-      <div class="profile-info">
-        <h2>Alexandre D.</h2>
-        <div class="profile-badge">⭐ Membre vérifié</div>
-        <div class="profile-meta">Membre depuis avril 2025 · Rouen, France</div>
-      </div>
-      <div class="profile-score-big">
-        <div class="psb-num">7.8</div>
-        <div class="psb-den">/10</div>
-        <div class="psb-rank">↑ Top 12%</div>
-      </div>
-    </div>
-
-    <div class="stats-grid" style="margin-bottom:24px;">
-      <div class="stat-card">
-        <div class="stat-icon">🗳️</div>
-        <div class="stat-label">Votes reçus</div>
-        <div class="stat-value">847</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">📸</div>
-        <div class="stat-label">Photos</div>
-        <div class="stat-value">2</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">⭐</div>
-        <div class="stat-label">Notes données</div>
-        <div class="stat-value">134</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🏆</div>
-        <div class="stat-label">Rang global</div>
-        <div class="stat-value">#347</div>
-      </div>
-    </div>
-
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title">Modifier mon profil</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Prénom</div>
-          <input type="text" value="Alexandre" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" />
-        </div>
-        <div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Ville</div>
-          <input type="text" value="Rouen" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" />
-        </div>
-        <div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Email</div>
-          <input type="email" value="alexandre@gmail.com" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" />
-        </div>
-        <button onclick="showToast('✅ Profil mis à jour !', 'success')" style="background:linear-gradient(135deg,var(--gold),#E8A020);border:none;border-radius:12px;padding:13px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:0.08em;color:#000;cursor:pointer;width:100%;">ENREGISTRER</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: PARAMETRES -->
-  <div class="page" id="page-parametres">
-    <div class="section-card" style="margin-bottom:16px;">
-      <div class="section-title" style="margin-bottom:16px;">Notifications</div>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-size:13px;font-weight:500;">Nouvelle note reçue</div><div style="font-size:11px;color:var(--muted);">Quand quelqu'un vous note</div></div>
-          <div style="width:44px;height:24px;background:var(--gold);border-radius:12px;cursor:pointer;position:relative;"><div style="width:18px;height:18px;background:#000;border-radius:50%;position:absolute;right:3px;top:3px;"></div></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-size:13px;font-weight:500;">Nouveau message</div><div style="font-size:11px;color:var(--muted);">Messages des votants (Premium)</div></div>
-          <div style="width:44px;height:24px;background:var(--gold);border-radius:12px;cursor:pointer;position:relative;"><div style="width:18px;height:18px;background:#000;border-radius:50%;position:absolute;right:3px;top:3px;"></div></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-size:13px;font-weight:500;">Rappel quotidien</div><div style="font-size:11px;color:var(--muted);">Pour noter et gagner des points</div></div>
-          <div style="width:44px;height:24px;background:rgba(255,255,255,0.1);border-radius:12px;cursor:pointer;position:relative;"><div style="width:18px;height:18px;background:var(--muted);border-radius:50%;position:absolute;left:3px;top:3px;"></div></div>
-        </div>
-      </div>
-    </div>
-    <div class="section-card" style="margin-bottom:16px;">
-      <div class="section-title" style="margin-bottom:16px;">Confidentialité</div>
-      <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;">
-        <div style="padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;color:var(--muted);">Supprimer mes photos →</div>
-        <div style="padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;color:var(--muted);">Télécharger mes données →</div>
-        <div style="padding:12px 0;cursor:pointer;color:var(--pink);">Supprimer mon compte</div>
-      </div>
-    </div>
-    <div class="section-card">
-      <div style="text-align:center;padding:8px 0;">
-        <button onclick="window.location.href='login.html'" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;padding:12px 32px;color:var(--muted);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;width:100%;">Se déconnecter</button>
-      </div>
-    </div>
-  </div>
-
 </main>
 
-<!-- MOBILE MENU -->
 <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
 
 <script>
-let currentPts = 240;
-let selectedStar = 0;
-let profileIndex = 0;
+// SUPABASE
+const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const profiles = [
-  { av: '👤', name: 'Sarah, 24', loc: '📍 Paris', tag: '🇫🇷 France' },
-  { av: '👤', name: 'Thomas, 28', loc: '📍 Lyon', tag: '🇫🇷 France' },
-  { av: '👤', name: 'Emma, 22', loc: '📍 Marseille', tag: '🇫🇷 France' },
-  { av: '👤', name: 'Lucas, 26', loc: '📍 Bordeaux', tag: '🇫🇷 France' },
-  { av: '👤', name: 'Chloé, 25', loc: '📍 Nantes', tag: '🇫🇷 France' },
-];
+let currentUser = null;
 
-// Navigation
-function showPage(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
+// INIT
+async function init() {
+  // Check session
+  const { data: { session } } = await sb.auth.getSession();
 
-  const titles = {
-    dashboard: 'Tableau de bord',
-    noter: 'Noter',
-    mesnotes: 'Mes notes',
-    classement: 'Classement',
-    messages: 'Messages',
-    points: 'Mes points',
-    profil: 'Mon profil',
-    parametres: 'Paramètres'
-  };
-
-  document.getElementById('page-title').textContent = titles[id] || id;
-
-  if (el) {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    el.classList.add('active');
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
   }
 
-  // Close sidebar on mobile
-  document.getElementById('sidebar').classList.remove('open');
-  window.scrollTo(0, 0);
+  currentUser = session.user;
+
+  // Load user profile
+  const { data: profile } = await sb.from('users')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (!profile) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // Load votes count
+  const { data: photos } = await sb.from('photos')
+    .select('nb_votes, note_moyenne')
+    .eq('user_id', currentUser.id)
+    .eq('active', true);
+
+  const totalVotes = photos ? photos.reduce((sum, p) => sum + (p.nb_votes || 0), 0) : 0;
+  const avgNote = photos && photos.length > 0
+    ? (photos.reduce((sum, p) => sum + (p.note_moyenne || 0), 0) / photos.length).toFixed(1)
+    : null;
+
+  // Load total members for rank
+  const { count: totalMembers } = await sb.from('users')
+    .select('*', { count: 'exact', head: true });
+
+  // UPDATE UI
+  const prenom = profile.prenom || 'Membre';
+  const pts = profile.points || 0;
+  const initiale = prenom.charAt(0).toUpperCase();
+
+  // Avatar
+  document.getElementById('user-avatar').textContent = initiale;
+
+  // Names
+  document.getElementById('user-name').textContent = prenom + ' ' + (profile.ville ? `· ${profile.ville}` : '');
+  document.getElementById('user-pts').textContent = pts;
+  document.getElementById('pts-display').textContent = pts;
+  document.getElementById('welcome-name').textContent = prenom;
+
+  // Welcome sub
+  if (totalVotes > 0) {
+    document.getElementById('welcome-sub').innerHTML = `Vous avez reçu <strong style="color:var(--gold2)">${totalVotes} votes</strong> au total.`;
+  } else {
+    document.getElementById('welcome-sub').innerHTML = `Bienvenue sur SCOROVIA ! <strong style="color:var(--gold2)">Soumettez votre première photo</strong> pour commencer.`;
+  }
+
+  // Score
+  if (avgNote) {
+    document.getElementById('welcome-score').textContent = avgNote;
+    document.getElementById('stat-note').textContent = avgNote + '/10';
+  } else {
+    document.getElementById('welcome-score').textContent = '—';
+    document.getElementById('stat-note').textContent = '—';
+  }
+
+  // Stats
+  document.getElementById('stat-votes').textContent = totalVotes;
+  document.getElementById('stat-pts').textContent = pts;
+
+  // Rang
+  if (totalMembers) {
+    document.getElementById('stat-rang').textContent = '#' + totalMembers;
+    document.getElementById('stat-rang-sub').textContent = `sur ${totalMembers} membres`;
+  }
+
+  // Hide loading
+  document.getElementById('loading').style.display = 'none';
 }
 
-// Stars
-function selectStar(n) {
-  selectedStar = n;
-  document.querySelectorAll('.star-btn').forEach((btn, i) => {
-    btn.classList.remove('selected', 'filled');
-    if (i + 1 === n) btn.classList.add('selected');
-    else if (i + 1 < n) btn.classList.add('filled');
+// LOGOUT
+async function doLogout() {
+  await sb.auth.signOut();
+  localStorage.removeItem('scorovia_user');
+  window.location.href = 'login.html';
+}
+
+// COPY INVITE
+function copyInvite() {
+  const link = `scorovia.com/login.html?ref=${currentUser?.id?.slice(0,8) || 'user'}`;
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('🔗 Lien de parrainage copié !', 'success');
+  }).catch(() => {
+    showToast('🔗 ' + link, 'success');
   });
 }
 
-function submitRate() {
-  if (!selectedStar) {
-    showToast('⭐ Choisissez une note de 1 à 10', 'gold');
-    return;
-  }
-  currentPts += 3;
-  updatePts();
-  showToast('✅ Note envoyée ! +3 points', 'success');
-  selectedStar = 0;
-  setTimeout(() => {
-    nextProfile();
-    document.querySelectorAll('.star-btn').forEach(btn => btn.classList.remove('selected', 'filled'));
-  }, 800);
-}
-
-function nextProfile() {
-  profileIndex = (profileIndex + 1) % profiles.length;
-  const p = profiles[profileIndex];
-  document.getElementById('rate-av').textContent = p.av;
-  document.getElementById('rate-name').textContent = p.name;
-  document.getElementById('rate-loc').textContent = p.loc;
-  document.getElementById('rate-tag').textContent = p.tag;
-  document.getElementById('rate-progress').textContent = `Photo ${profileIndex + 1} sur ${profiles.length} disponibles`;
-  selectedStar = 0;
-  document.querySelectorAll('.star-btn').forEach(btn => btn.classList.remove('selected', 'filled'));
-}
-
-function watchAd() {
-  showToast('📺 Pub en cours... +5 pts dans 30s', 'success');
-  setTimeout(() => {
-    currentPts += 5;
-    updatePts();
-    showToast('⚡ +5 points crédités !', 'gold');
-  }, 3000);
-}
-
-function updatePts() {
-  document.getElementById('pts-display').textContent = currentPts;
-  if (document.getElementById('pts-big')) {
-    document.getElementById('pts-big').textContent = currentPts;
-  }
-}
-
-// Toast
-function showToast(msg, type = '') {
+// TOAST
+function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast ' + type;
+  t.className = 'toast ' + (type || '');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// Sidebar mobile
+// SIDEBAR
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
 }
 
-// Click outside sidebar on mobile
-document.addEventListener('click', e => {
-  const sidebar = document.getElementById('sidebar');
-  const menuBtn = document.getElementById('menu-btn');
-  if (window.innerWidth <= 768 && !sidebar.contains(e.target) && e.target !== menuBtn) {
-    sidebar.classList.remove('open');
-  }
-});
+// START
+init();
 </script>
 </body>
 </html>
