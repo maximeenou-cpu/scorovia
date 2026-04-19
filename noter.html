@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOROVIA — Noter</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #F5C842;
+  --gold2: #FFE27A;
+  --pink: #FF4D8D;
+  --dark: #07070F;
+  --deep: #0D0D1A;
+  --card: #13131E;
+  --border: rgba(255,255,255,0.07);
+  --text: #F0EEF8;
+  --muted: rgba(240,238,248,0.42);
+  --green: #22D4A0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* SIDEBAR — même que dashboard */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--deep);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 40;
+  transition: transform 0.3s;
+}
+
+.sidebar-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 32px;
+  padding-left: 8px;
+  text-decoration: none;
+  display: block;
+}
+
+.nav-section {
+  font-size: 10px;
+  color: rgba(240,238,248,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 20px 0 8px 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 2px;
+  text-decoration: none;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.nav-item.active { background: rgba(245,200,66,0.1); color: var(--gold2); }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-bottom {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.user-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+
+.user-mini:hover { background: rgba(255,255,255,0.04); }
+.user-av-sm {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.user-name-sm { font-size: 13px; font-weight: 500; color: var(--text); }
+.user-pts-sm { font-size: 11px; color: var(--gold2); }
+
+/* MAIN */
+.main {
+  margin-left: 220px;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOPBAR */
+.topbar {
+  background: rgba(7,7,15,0.8);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.topbar-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.pts-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,200,66,0.1);
+  border: 1px solid rgba(245,200,66,0.2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--gold2);
+  font-weight: 500;
+}
+
+/* CONTENT */
+.content {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px;
+  gap: 28px;
+}
+
+/* CARD STACK */
+.card-stack-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.card-stack {
+  position: relative;
+  width: 340px;
+  height: 440px;
+}
+
+/* PROFILE CARDS */
+.profile-card {
+  position: absolute;
+  width: 340px;
+  height: 440px;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  transition: transform 0.15s ease;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.profile-card:active { cursor: grabbing; }
+
+.profile-card.card-1 {
+  z-index: 3;
+  transform: rotate(0deg);
+}
+
+.profile-card.card-2 {
+  z-index: 2;
+  transform: rotate(2deg) translateY(8px) scale(0.96);
+  pointer-events: none;
+}
+
+.profile-card.card-3 {
+  z-index: 1;
+  transform: rotate(-2deg) translateY(16px) scale(0.92);
+  pointer-events: none;
+}
+
+/* SWIPE INDICATORS */
+.swipe-like {
+  position: absolute;
+  top: 24px; left: 20px;
+  background: rgba(34,212,160,0.9);
+  color: #000;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  border-radius: 10px;
+  border: 3px solid var(--green);
+  transform: rotate(-12deg);
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 10;
+}
+
+.swipe-pass {
+  position: absolute;
+  top: 24px; right: 20px;
+  background: rgba(255,77,141,0.9);
+  color: #fff;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  border-radius: 10px;
+  border: 3px solid var(--pink);
+  transform: rotate(12deg);
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 10;
+}
+
+/* PHOTO BG */
+.card-photo {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #1E1235 0%, #0D1B2A 60%, #07070F 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.card-avatar { font-size: 90px; margin-bottom: 10px; }
+
+/* CARD OVERLAY */
+.card-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(7,7,15,0.95));
+  padding: 60px 20px 20px;
+}
+
+.card-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.card-meta { font-size: 13px; color: var(--muted); }
+.card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* RATING SECTION */
+.rating-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+  width: 340px;
+}
+
+.rating-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.stars-grid {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.star-btn {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(245,200,66,0.15);
+  background: rgba(245,200,66,0.05);
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.star-btn:hover {
+  background: rgba(245,200,66,0.15);
+  color: var(--gold2);
+  border-color: rgba(245,200,66,0.3);
+  transform: scale(1.05);
+}
+
+.star-btn.filled {
+  background: rgba(245,200,66,0.15);
+  border-color: rgba(245,200,66,0.25);
+  color: var(--gold2);
+}
+
+.star-btn.selected {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #000;
+  transform: scale(1.12);
+  box-shadow: 0 0 16px rgba(245,200,66,0.3);
+}
+
+.selected-score {
+  text-align: center;
+  margin-bottom: 14px;
+  height: 28px;
+}
+
+.selected-score-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, var(--gold2), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.action-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-pass {
+  flex: 1;
+  padding: 13px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-pass:hover { background: rgba(255,77,141,0.08); color: var(--pink); border-color: rgba(255,77,141,0.2); }
+
+.btn-noter {
+  flex: 2;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none;
+  border-radius: 12px;
+  color: #000;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-noter:hover { opacity: 0.9; }
+.btn-noter:active { transform: scale(0.98); }
+.btn-noter:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* RIGHT PANEL */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 280px;
+  flex-shrink: 0;
+}
+
+/* PROGRESS */
+.progress-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.progress-title { font-size: 13px; font-weight: 500; }
+.progress-count { font-size: 13px; color: var(--gold2); font-weight: 500; }
+
+.progress-bar-wrap {
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  height: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--pink));
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* SESSION STATS */
+.session-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.session-title { font-size: 13px; font-weight: 500; margin-bottom: 14px; }
+
+.session-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.session-stat:last-child { border-bottom: none; }
+.session-stat-label { color: var(--muted); }
+.session-stat-val { font-weight: 500; }
+.session-stat-val.green { color: var(--green); }
+.session-stat-val.gold { color: var(--gold2); }
+
+/* EARN CARD */
+.earn-card {
+  background: linear-gradient(135deg, rgba(245,200,66,0.07), rgba(255,77,141,0.05));
+  border: 1px solid rgba(245,200,66,0.15);
+  border-radius: 18px;
+  padding: 18px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.earn-card:hover { border-color: rgba(245,200,66,0.25); }
+
+.earn-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gold2);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.earn-card-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+
+.earn-card-btn {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* HISTORY MINI */
+.history-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.history-title { font-size: 13px; font-weight: 500; margin-bottom: 12px; }
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.history-row:last-child { border-bottom: none; }
+.history-av { font-size: 18px; }
+.history-info { flex: 1; color: var(--muted); }
+.history-score { font-weight: 600; color: var(--gold2); }
+
+/* EMPTY STATE */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
+  width: 340px;
+}
+
+.empty-emoji { font-size: 60px; margin-bottom: 16px; }
+.empty-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.06em; color: var(--gold2); margin-bottom: 8px; }
+.empty-sub { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; font-weight: 300; }
+
+.btn-reload {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none;
+  border-radius: 12px;
+  padding: 13px 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: #000;
+  cursor: pointer;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--text);
+  z-index: 200;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(34,212,160,0.3); }
+.toast.gold { border-color: rgba(245,200,66,0.3); }
+
+/* MOBILE */
+.menu-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px; right: 20px;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 60;
+  box-shadow: 0 4px 20px rgba(245,200,66,0.3);
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .right-panel { display: none; }
+  .content { padding: 20px 16px; justify-content: center; }
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .menu-btn { display: flex; }
+  .card-stack, .profile-card, .rating-section { width: 100%; max-width: 360px; }
+  .card-stack { height: 400px; }
+  .profile-card { height: 400px; }
+  .stars-grid { gap: 4px; }
+  .star-btn { width: 34px; height: 34px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <a href="index.html" class="sidebar-logo">SCOROVIA</a>
+
+  <div class="nav-section">Principal</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Tableau de bord</a>
+  <a class="nav-item active"><span class="nav-icon">⭐</span> Noter</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Mes notes</a>
+
+  <div class="nav-section">Communauté</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏆</span> Classement</a>
+  <a class="nav-item" href="dashboard.html">
+    <span class="nav-icon">💬</span> Messages
+    <span style="margin-left:auto;background:var(--pink);color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;">3</span>
+  </a>
+
+  <div class="nav-section">Compte</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚡</span> Mes points</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">👤</span> Mon profil</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚙️</span> Paramètres</a>
+
+  <div class="sidebar-bottom">
+    <a class="user-mini" href="dashboard.html">
+      <div class="user-av-sm">😊</div>
+      <div>
+        <div class="user-name-sm">Alexandre D.</div>
+        <div class="user-pts-sm">⚡ <span id="sidebar-pts">240</span> pts</div>
+      </div>
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">⭐ Noter</div>
+    <div class="topbar-right">
+      <div class="pts-pill">⚡ <span id="pts-display">240</span> pts</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- LEFT: CARD STACK + RATING -->
+    <div class="card-stack-wrap">
+
+      <!-- CARD STACK -->
+      <div class="card-stack" id="card-stack">
+
+        <!-- Card 3 (behind) -->
+        <div class="profile-card card-3" id="card-3">
+          <div class="card-photo">
+            <div class="card-avatar" id="av-3">👤</div>
+            <div class="card-overlay">
+              <div class="card-name" id="name-3">Emma, 22</div>
+              <div class="card-meta" id="meta-3">Marseille · Étudiante</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 (middle) -->
+        <div class="profile-card card-2" id="card-2">
+          <div class="card-photo">
+            <div class="card-avatar" id="av-2">👤</div>
+            <div class="card-overlay">
+              <div class="card-name" id="name-2">Thomas, 28</div>
+              <div class="card-meta" id="meta-2">Lyon · Ingénieur</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 1 (front — active) -->
+        <div class="profile-card card-1" id="card-1">
+          <div class="swipe-like" id="swipe-like">TOP ✓</div>
+          <div class="swipe-pass" id="swipe-pass">PASS ✗</div>
+          <div class="card-photo">
+            <div class="card-avatar" id="av-1">👤</div>
+            <div class="card-overlay">
+              <div class="card-name" id="name-1">Sarah, 24</div>
+              <div class="card-meta" id="meta-1">Paris · Designer</div>
+              <div class="card-tag">🇫🇷 France · 📸 3 photos</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-emoji">🎉</div>
+        <div class="empty-title">Session terminée !</div>
+        <div class="empty-sub">Vous avez noté tous les profils disponibles.<br>Revenez dans quelques heures pour en découvrir de nouveaux.</div>
+        <button class="btn-reload" onclick="resetSession()">VOIR DE NOUVEAUX PROFILS</button>
+      </div>
+
+      <!-- RATING -->
+      <div class="rating-section" id="rating-section">
+        <div class="rating-label">Donnez votre note sur 10</div>
+        <div class="stars-grid">
+          <button class="star-btn" onclick="selectStar(1)">1</button>
+          <button class="star-btn" onclick="selectStar(2)">2</button>
+          <button class="star-btn" onclick="selectStar(3)">3</button>
+          <button class="star-btn" onclick="selectStar(4)">4</button>
+          <button class="star-btn" onclick="selectStar(5)">5</button>
+          <button class="star-btn" onclick="selectStar(6)">6</button>
+          <button class="star-btn" onclick="selectStar(7)">7</button>
+          <button class="star-btn" onclick="selectStar(8)">8</button>
+          <button class="star-btn" onclick="selectStar(9)">9</button>
+          <button class="star-btn" onclick="selectStar(10)">10</button>
+        </div>
+        <div class="selected-score">
+          <div class="selected-score-num" id="score-display" style="display:none"></div>
+        </div>
+        <div class="action-btns">
+          <button class="btn-pass" onclick="doPass()">✗ Passer</button>
+          <button class="btn-noter" id="btn-noter" onclick="doRate()" disabled>
+            ✓ NOTER <span id="btn-pts-label">(+3 pts)</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+      <!-- Progress -->
+      <div class="progress-card">
+        <div class="progress-header">
+          <div class="progress-title">Session du jour</div>
+          <div class="progress-count"><span id="rated-count">0</span> / <span id="total-count">10</span></div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="progress-stats">
+          <span>Points gagnés : <strong style="color:var(--green)" id="pts-earned">0</strong></span>
+          <span>Passés : <strong id="passed-count">0</strong></span>
+        </div>
+      </div>
+
+      <!-- Session stats -->
+      <div class="session-card">
+        <div class="session-title">📊 Cette session</div>
+        <div class="session-stat">
+          <span class="session-stat-label">Note moyenne donnée</span>
+          <span class="session-stat-val gold" id="avg-given">—</span>
+        </div>
+        <div class="session-stat">
+          <span class="session-stat-label">Note la plus haute</span>
+          <span class="session-stat-val green" id="max-given">—</span>
+        </div>
+        <div class="session-stat">
+          <span class="session-stat-label">Note la plus basse</span>
+          <span class="session-stat-val" id="min-given">—</span>
+        </div>
+        <div class="session-stat">
+          <span class="session-stat-label">Points gagnés</span>
+          <span class="session-stat-val green" id="total-pts-earned">+0 pts</span>
+        </div>
+      </div>
+
+      <!-- Earn more -->
+      <div class="earn-card" onclick="watchAd()">
+        <div class="earn-card-title">📺 Regarder une pub</div>
+        <div class="earn-card-desc">Gagnez 5 points supplémentaires en regardant une courte vidéo</div>
+        <button class="earn-card-btn">+5 pts — Regarder maintenant</button>
+      </div>
+
+      <!-- History mini -->
+      <div class="history-card">
+        <div class="history-title">🕐 Notes récentes</div>
+        <div id="history-list">
+          <div style="font-size:12px;color:var(--muted);text-align:center;padding:16px 0;">Vos notes apparaîtront ici</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<script>
+let pts = 240;
+let selectedStar = 0;
+let ratedCount = 0;
+let passedCount = 0;
+let totalRated = 10;
+let givenScores = [];
+let historyItems = [];
+
+const profiles = [
+  { av: '👤', name: 'Sarah, 24', meta: 'Paris · Designer', bg: 'linear-gradient(160deg,#1E1235,#0D1B2A)' },
+  { av: '👤', name: 'Thomas, 28', meta: 'Lyon · Ingénieur', bg: 'linear-gradient(160deg,#0D2A1E,#071507)' },
+  { av: '👤', name: 'Emma, 22', meta: 'Marseille · Étudiante', bg: 'linear-gradient(160deg,#2A1E0D,#150D07)' },
+  { av: '👤', name: 'Lucas, 26', meta: 'Bordeaux · Photographe', bg: 'linear-gradient(160deg,#1E0D2A,#0D0715)' },
+  { av: '👤', name: 'Chloé, 25', meta: 'Nantes · Architecte', bg: 'linear-gradient(160deg,#0D1E2A,#070F15)' },
+  { av: '👤', name: 'Noah, 30', meta: 'Lille · Entrepreneur', bg: 'linear-gradient(160deg,#2A0D1E,#150710)' },
+  { av: '👤', name: 'Léa, 23', meta: 'Toulouse · Infirmière', bg: 'linear-gradient(160deg,#1A2A0D,#0D1507)' },
+  { av: '👤', name: 'Hugo, 27', meta: 'Nice · Chef cuisinier', bg: 'linear-gradient(160deg,#2A1A0D,#150D07)' },
+  { av: '👤', name: 'Inès, 21', meta: 'Strasbourg · Étudiante', bg: 'linear-gradient(160deg,#0D0D2A,#070715)' },
+  { av: '👤', name: 'Maxime, 29', meta: 'Rennes · Développeur', bg: 'linear-gradient(160deg,#1E2A0D,#0F1507)' },
+];
+
+let currentIndex = 0;
+
+// Init cards
+function loadProfile(cardId, profileIdx) {
+  if (profileIdx >= profiles.length) return;
+  const p = profiles[profileIdx % profiles.length];
+  const suffix = cardId.replace('card-', '');
+  document.getElementById('av-' + suffix).textContent = p.av;
+  document.getElementById('name-' + suffix).textContent = p.name;
+  if (document.getElementById('meta-' + suffix)) {
+    document.getElementById('meta-' + suffix).textContent = p.meta;
+  }
+  document.getElementById(cardId).querySelector('.card-photo').style.background = p.bg;
+}
+
+// Select star
+function selectStar(n) {
+  selectedStar = n;
+  const buttons = document.querySelectorAll('.star-btn');
+  buttons.forEach((btn, i) => {
+    btn.classList.remove('selected', 'filled');
+    if (i + 1 === n) btn.classList.add('selected');
+    else if (i + 1 < n) btn.classList.add('filled');
+  });
+  const display = document.getElementById('score-display');
+  display.style.display = 'block';
+  display.textContent = n + ' / 10';
+  document.getElementById('btn-noter').disabled = false;
+}
+
+// Rate
+function doRate() {
+  if (!selectedStar) return;
+
+  // Animate card out to left (positive)
+  animateCard('left', selectedStar);
+}
+
+// Pass
+function doPass() {
+  animateCard('right', 0);
+  passedCount++;
+  document.getElementById('passed-count').textContent = passedCount;
+  showToast('⏭️ Profil passé', '');
+}
+
+// Animate card
+function animateCard(direction, score) {
+  const card = document.getElementById('card-1');
+  const tx = direction === 'left' ? -500 : 500;
+  const rotate = direction === 'left' ? -20 : 20;
+
+  card.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+  card.style.transform = `translateX(${tx}px) rotate(${rotate}deg)`;
+  card.style.opacity = '0';
+
+  setTimeout(() => {
+    if (score > 0) {
+      // Credit points
+      pts += 3;
+      updatePts();
+      givenScores.push(score);
+      ratedCount++;
+      updateStats();
+      addToHistory(profiles[currentIndex % profiles.length], score);
+      showToast(`⭐ Note ${score}/10 envoyée ! +3 pts`, 'gold');
+    }
+
+    currentIndex++;
+
+    if (currentIndex >= totalRated) {
+      showEmptyState();
+      return;
+    }
+
+    // Reset card
+    card.style.transition = 'none';
+    card.style.transform = '';
+    card.style.opacity = '1';
+
+    // Load new profiles
+    loadProfile('card-1', currentIndex);
+    loadProfile('card-2', currentIndex + 1);
+    loadProfile('card-3', currentIndex + 2);
+
+    // Animate cards up
+    document.getElementById('card-2').style.transition = 'transform 0.3s ease';
+    document.getElementById('card-3').style.transition = 'transform 0.3s ease';
+
+    // Reset star selection
+    resetStars();
+  }, 400);
+}
+
+function resetStars() {
+  selectedStar = 0;
+  document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('selected', 'filled'));
+  document.getElementById('score-display').style.display = 'none';
+  document.getElementById('btn-noter').disabled = true;
+}
+
+// Stats
+function updateStats() {
+  const progress = (ratedCount / totalRated) * 100;
+  document.getElementById('progress-fill').style.width = progress + '%';
+  document.getElementById('rated-count').textContent = ratedCount;
+  document.getElementById('pts-earned').textContent = ratedCount * 3;
+  document.getElementById('total-pts-earned').textContent = '+' + (ratedCount * 3) + ' pts';
+
+  if (givenScores.length > 0) {
+    const avg = (givenScores.reduce((a, b) => a + b, 0) / givenScores.length).toFixed(1);
+    const max = Math.max(...givenScores);
+    const min = Math.min(...givenScores);
+    document.getElementById('avg-given').textContent = avg + '/10';
+    document.getElementById('max-given').textContent = max + '/10';
+    document.getElementById('min-given').textContent = min + '/10';
+  }
+}
+
+// History
+function addToHistory(profile, score) {
+  historyItems.unshift({ profile, score });
+  if (historyItems.length > 5) historyItems.pop();
+
+  const list = document.getElementById('history-list');
+  list.innerHTML = historyItems.map(item => `
+    <div class="history-row">
+      <div class="history-av">${item.profile.av}</div>
+      <div class="history-info">${item.profile.name.split(',')[0]}</div>
+      <div class="history-score">${item.score}/10</div>
+    </div>
+  `).join('');
+}
+
+// Pts
+function updatePts() {
+  document.getElementById('pts-display').textContent = pts;
+  document.getElementById('sidebar-pts').textContent = pts;
+}
+
+// Empty state
+function showEmptyState() {
+  document.getElementById('card-stack').style.display = 'none';
+  document.getElementById('rating-section').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'flex';
+}
+
+// Reset
+function resetSession() {
+  currentIndex = 0;
+  ratedCount = 0;
+  passedCount = 0;
+  givenScores = [];
+  historyItems = [];
+
+  document.getElementById('card-stack').style.display = 'block';
+  document.getElementById('rating-section').style.display = 'block';
+  document.getElementById('empty-state').style.display = 'none';
+
+  loadProfile('card-1', 0);
+  loadProfile('card-2', 1);
+  loadProfile('card-3', 2);
+
+  updateStats();
+  resetStars();
+
+  document.getElementById('history-list').innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:16px 0;">Vos notes apparaîtront ici</div>';
+}
+
+// Watch ad
+function watchAd() {
+  showToast('📺 Pub en cours... +5 pts dans 3s', '');
+  setTimeout(() => {
+    pts += 5;
+    updatePts();
+    showToast('⚡ +5 points crédités !', 'gold');
+  }, 3000);
+}
+
+// Swipe drag
+let startX = 0, startY = 0, isDragging = false;
+const card1 = document.getElementById('card-1');
+
+card1.addEventListener('mousedown', e => {
+  startX = e.clientX;
+  startY = e.clientY;
+  isDragging = true;
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - startX;
+  const rotate = dx * 0.08;
+  card1.style.transition = 'none';
+  card1.style.transform = `translateX(${dx}px) rotate(${rotate}deg)`;
+
+  const like = document.getElementById('swipe-like');
+  const pass = document.getElementById('swipe-pass');
+
+  if (dx > 40) {
+    like.style.opacity = Math.min(dx / 120, 1);
+    pass.style.opacity = 0;
+  } else if (dx < -40) {
+    pass.style.opacity = Math.min(Math.abs(dx) / 120, 1);
+    like.style.opacity = 0;
+  } else {
+    like.style.opacity = 0;
+    pass.style.opacity = 0;
+  }
+});
+
+document.addEventListener('mouseup', e => {
+  if (!isDragging) return;
+  isDragging = false;
+  const dx = e.clientX - startX;
+
+  document.getElementById('swipe-like').style.opacity = 0;
+  document.getElementById('swipe-pass').style.opacity = 0;
+
+  if (dx > 100 && selectedStar > 0) {
+    doRate();
+  } else if (dx < -100) {
+    doPass();
+  } else {
+    card1.style.transition = 'transform 0.3s ease';
+    card1.style.transform = '';
+  }
+});
+
+// Touch
+card1.addEventListener('touchstart', e => {
+  startX = e.touches[0].clientX;
+  isDragging = true;
+}, { passive: true });
+
+card1.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  const dx = e.touches[0].clientX - startX;
+  const rotate = dx * 0.08;
+  card1.style.transition = 'none';
+  card1.style.transform = `translateX(${dx}px) rotate(${rotate}deg)`;
+
+  const like = document.getElementById('swipe-like');
+  const pass = document.getElementById('swipe-pass');
+  if (dx > 40) { like.style.opacity = Math.min(dx / 120, 1); pass.style.opacity = 0; }
+  else if (dx < -40) { pass.style.opacity = Math.min(Math.abs(dx) / 120, 1); like.style.opacity = 0; }
+  else { like.style.opacity = 0; pass.style.opacity = 0; }
+}, { passive: true });
+
+card1.addEventListener('touchend', e => {
+  if (!isDragging) return;
+  isDragging = false;
+  const dx = e.changedTouches[0].clientX - startX;
+  document.getElementById('swipe-like').style.opacity = 0;
+  document.getElementById('swipe-pass').style.opacity = 0;
+  if (dx > 100 && selectedStar > 0) doRate();
+  else if (dx < -100) doPass();
+  else { card1.style.transition = 'transform 0.3s ease'; card1.style.transform = ''; }
+});
+
+// Toast
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Sidebar mobile
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Init
+loadProfile('card-1', 0);
+loadProfile('card-2', 1);
+loadProfile('card-3', 2);
+</script>
+</body>
+</html>
