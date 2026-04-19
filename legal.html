@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOROVIA — Mentions légales & CGU</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #F5C842; --gold2: #FFE27A; --pink: #FF4D8D;
+  --dark: #07070F; --deep: #0D0D1A; --card: #13131E;
+  --border: rgba(255,255,255,0.07); --text: #F0EEF8;
+  --muted: rgba(240,238,248,0.55);
+}
+
+body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+/* HEADER */
+.header {
+  background: var(--deep); border-bottom: 1px solid var(--border);
+  padding: 18px 40px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.15em;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; text-decoration: none;
+}
+
+.back-btn {
+  font-size: 13px; color: var(--muted); text-decoration: none;
+  display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+}
+.back-btn:hover { color: var(--text); }
+
+/* TABS */
+.tabs-bar {
+  background: var(--deep); border-bottom: 1px solid var(--border);
+  padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+}
+
+.tab {
+  padding: 14px 20px; font-size: 13px; font-weight: 500;
+  color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.2s; white-space: nowrap;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--gold2); border-bottom-color: var(--gold); }
+
+/* CONTENT */
+.page { display: none; max-width: 800px; margin: 0 auto; padding: 48px 40px; }
+.page.active { display: block; }
+
+.page-title {
+  font-family: 'Bebas Neue', sans-serif; font-size: 36px;
+  letter-spacing: 0.08em; margin-bottom: 6px;
+  background: linear-gradient(135deg, var(--gold2), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-date { font-size: 12px; color: var(--muted); margin-bottom: 40px; }
+
+h2 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 20px;
+  letter-spacing: 0.06em; color: var(--gold2);
+  margin: 36px 0 14px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+h3 { font-size: 15px; font-weight: 500; margin: 20px 0 10px; color: var(--text); }
+
+p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; font-weight: 300; }
+
+ul, ol { padding-left: 20px; margin-bottom: 14px; }
+li { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 6px; font-weight: 300; }
+
+strong { color: var(--text); font-weight: 500; }
+
+.highlight {
+  background: rgba(245,200,66,0.06); border: 1px solid rgba(245,200,66,0.15);
+  border-radius: 12px; padding: 16px 20px; margin: 20px 0;
+}
+
+.highlight p { margin-bottom: 0; }
+
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+th { background: rgba(255,255,255,0.04); padding: 10px 14px; text-align: left; color: var(--text); font-weight: 500; border-bottom: 1px solid var(--border); }
+td { padding: 10px 14px; color: var(--muted); border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+
+.contact-box {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px 24px; margin-top: 32px;
+}
+.contact-box h3 { margin-top: 0; }
+.contact-box a { color: var(--gold2); text-decoration: none; }
+.contact-box a:hover { text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .header { padding: 14px 20px; }
+  .tabs-bar { padding: 0 20px; }
+  .page { padding: 32px 20px; }
+  .page-title { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="logo">SCOROVIA</a>
+  <a href="index.html" class="back-btn">← Retour au site</a>
+</div>
+
+<div class="tabs-bar">
+  <div class="tab active" onclick="showPage('mentions', this)">Mentions légales</div>
+  <div class="tab" onclick="showPage('cgu', this)">Conditions d'utilisation</div>
+  <div class="tab" onclick="showPage('confidentialite', this)">Politique de confidentialité</div>
+  <div class="tab" onclick="showPage('cookies', this)">Cookies</div>
+</div>
+
+<!-- MENTIONS LÉGALES -->
+<div class="page active" id="page-mentions">
+  <div class="page-title">Mentions Légales</div>
+  <div class="page-date">Dernière mise à jour : avril 2026</div>
+
+  <h2>1. Éditeur du site</h2>
+  <p>Le site <strong>scorovia.com</strong> est édité par :</p>
+  <ul>
+    <li><strong>Raison sociale :</strong> SCOROVIA (en cours d'immatriculation)</li>
+    <li><strong>Responsable de publication :</strong> Maxime Enou</li>
+    <li><strong>Email de contact :</strong> <a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></li>
+    <li><strong>Siège social :</strong> Rouen, France</li>
+  </ul>
+
+  <h2>2. Hébergement</h2>
+  <p>Le site est hébergé par :</p>
+  <ul>
+    <li><strong>Vercel Inc.</strong></li>
+    <li>440 N Barranca Ave #4133, Covina, CA 91723, États-Unis</li>
+    <li>Site web : vercel.com</li>
+  </ul>
+  <p>La base de données est hébergée par :</p>
+  <ul>
+    <li><strong>Supabase Inc.</strong></li>
+    <li>970 Toa Payoh North, Singapour</li>
+    <li>Serveurs situés en Europe (Irlande, région West EU)</li>
+  </ul>
+
+  <h2>3. Propriété intellectuelle</h2>
+  <p>L'ensemble des contenus présents sur le site SCOROVIA (textes, images, logos, interface, code source) sont protégés par le droit d'auteur et restent la propriété exclusive de SCOROVIA. Toute reproduction, même partielle, est interdite sans autorisation écrite préalable.</p>
+
+  <h2>4. Limitation de responsabilité</h2>
+  <p>SCOROVIA s'efforce d'assurer l'exactitude des informations diffusées sur ce site. Toutefois, SCOROVIA ne peut garantir l'exactitude, la complétude ou l'actualité des informations publiées. SCOROVIA décline toute responsabilité pour les dommages directs ou indirects résultant de l'utilisation du site.</p>
+
+  <h2>5. Droit applicable</h2>
+  <p>Les présentes mentions légales sont soumises au droit français. En cas de litige, les tribunaux français seront seuls compétents.</p>
+
+  <div class="contact-box">
+    <h3>Contact</h3>
+    <p>Pour toute question relative aux mentions légales : <a href="mailto:<a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>"><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></a></p>
+  </div>
+</div>
+
+<!-- CGU -->
+<div class="page" id="page-cgu">
+  <div class="page-title">Conditions Générales d'Utilisation</div>
+  <div class="page-date">Dernière mise à jour : avril 2026</div>
+
+  <div class="highlight">
+    <p>En utilisant SCOROVIA, vous acceptez pleinement et sans réserve les présentes Conditions Générales d'Utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser ce service.</p>
+  </div>
+
+  <h2>1. Description du service</h2>
+  <p>SCOROVIA est une plateforme sociale permettant aux utilisateurs de soumettre des photos et de recevoir des notes de 1 à 10 de la part d'autres membres de la communauté, de manière anonyme.</p>
+
+  <h2>2. Conditions d'accès</h2>
+  <h3>2.1 Âge minimum</h3>
+  <p>L'accès à SCOROVIA est <strong>strictement réservé aux personnes majeures (18 ans et plus)</strong>. En créant un compte, vous confirmez avoir au moins 18 ans. SCOROVIA se réserve le droit de suspendre tout compte dont l'utilisateur serait mineur.</p>
+
+  <h3>2.2 Compte utilisateur</h3>
+  <p>Pour accéder aux fonctionnalités complètes, vous devez créer un compte en fournissant des informations exactes et à jour. Vous êtes responsable de la confidentialité de vos identifiants de connexion.</p>
+
+  <h2>3. Règles de conduite</h2>
+  <p>En utilisant SCOROVIA, vous vous engagez à :</p>
+  <ul>
+    <li>Ne soumettre que des photos vous représentant personnellement</li>
+    <li>Ne pas publier de contenu offensant, haineux, discriminatoire ou illégal</li>
+    <li>Ne pas usurper l'identité d'une autre personne</li>
+    <li>Ne pas utiliser le service à des fins commerciales non autorisées</li>
+    <li>Ne pas tenter de manipuler le système de notation</li>
+    <li>Respecter la dignité et la vie privée des autres utilisateurs</li>
+  </ul>
+
+  <h2>4. Contenu soumis</h2>
+  <h3>4.1 Photos</h3>
+  <p>En soumettant une photo sur SCOROVIA, vous :</p>
+  <ul>
+    <li>Confirmez être l'unique sujet de la photo ou disposer des droits nécessaires</li>
+    <li>Acceptez que la photo soit visible par l'ensemble des membres de la communauté</li>
+    <li>Accordez à SCOROVIA une licence non exclusive d'utilisation de cette photo dans le cadre du service</li>
+  </ul>
+
+  <h3>4.2 Contenu interdit</h3>
+  <p>Sont strictement interdits :</p>
+  <ul>
+    <li>Tout contenu à caractère sexuel ou pornographique</li>
+    <li>Les photos de mineurs</li>
+    <li>Tout contenu incitant à la haine, à la violence ou à la discrimination</li>
+    <li>Les photos portant atteinte aux droits de tiers</li>
+    <li>Tout contenu illégal selon la législation française</li>
+  </ul>
+
+  <h2>5. Système de points</h2>
+  <p>SCOROVIA propose un système de points virtuels permettant d'accéder à certaines fonctionnalités. Ces points :</p>
+  <ul>
+    <li>N'ont aucune valeur monétaire et ne peuvent pas être échangés contre de l'argent</li>
+    <li>Peuvent être achetés via des transactions sécurisées (Stripe)</li>
+    <li>Sont perdus en cas de suppression du compte</li>
+    <li>Ne sont pas remboursables sauf en cas de dysfonctionnement technique avéré</li>
+  </ul>
+
+  <h2>6. Modération</h2>
+  <p>SCOROVIA se réserve le droit de supprimer tout contenu ne respectant pas les présentes CGU, sans préavis et sans obligation de justification. Les comptes contrevenants peuvent être suspendus ou supprimés définitivement.</p>
+
+  <h2>7. Limitation de responsabilité</h2>
+  <p>SCOROVIA n'est pas responsable des contenus publiés par les utilisateurs. Les notes et commentaires exprimés sur la plateforme n'engagent que leurs auteurs. SCOROVIA ne peut être tenu responsable des conséquences psychologiques liées à la réception de notes.</p>
+
+  <h2>8. Modification des CGU</h2>
+  <p>SCOROVIA se réserve le droit de modifier les présentes CGU à tout moment. Les utilisateurs seront informés par email de toute modification substantielle. La continuation de l'utilisation du service vaut acceptation des nouvelles conditions.</p>
+
+  <h2>9. Résiliation</h2>
+  <p>Vous pouvez supprimer votre compte à tout moment depuis la page "Mon profil". SCOROVIA peut également résilier votre accès en cas de violation des présentes CGU.</p>
+
+  <div class="contact-box">
+    <h3>Questions sur les CGU</h3>
+    <p>Pour toute question : <a href="mailto:<a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>"><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></a></p>
+  </div>
+</div>
+
+<!-- POLITIQUE DE CONFIDENTIALITÉ -->
+<div class="page" id="page-confidentialite">
+  <div class="page-title">Politique de Confidentialité</div>
+  <div class="page-date">Dernière mise à jour : avril 2026 — Conforme au RGPD</div>
+
+  <div class="highlight">
+    <p>SCOROVIA s'engage à protéger vos données personnelles conformément au Règlement Général sur la Protection des Données (RGPD - UE 2016/679) et à la loi Informatique et Libertés.</p>
+  </div>
+
+  <h2>1. Responsable du traitement</h2>
+  <p><strong>SCOROVIA</strong>, représenté par Maxime Enou<br>
+  Email : <strong><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></strong><br>
+  Siège : Rouen, France</p>
+
+  <h2>2. Données collectées</h2>
+  <table>
+    <tr>
+      <th>Données</th>
+      <th>Finalité</th>
+      <th>Base légale</th>
+    </tr>
+    <tr>
+      <td>Email, prénom, âge, ville, genre</td>
+      <td>Création et gestion du compte</td>
+      <td>Exécution du contrat</td>
+    </tr>
+    <tr>
+      <td>Photos soumises</td>
+      <td>Fonctionnement du service de notation</td>
+      <td>Consentement</td>
+    </tr>
+    <tr>
+      <td>Notes données et reçues</td>
+      <td>Calcul des scores et classements</td>
+      <td>Exécution du contrat</td>
+    </tr>
+    <tr>
+      <td>Historique des points</td>
+      <td>Gestion des transactions virtuelles</td>
+      <td>Exécution du contrat</td>
+    </tr>
+    <tr>
+      <td>Données de connexion (IP, device)</td>
+      <td>Sécurité et prévention de la fraude</td>
+      <td>Intérêt légitime</td>
+    </tr>
+    <tr>
+      <td>Données de paiement</td>
+      <td>Traitement des achats (via Stripe)</td>
+      <td>Exécution du contrat</td>
+    </tr>
+  </table>
+
+  <h2>3. Partage des données</h2>
+  <p>Vos données personnelles ne sont jamais vendues à des tiers. Elles peuvent être partagées avec :</p>
+  <ul>
+    <li><strong>Supabase</strong> — hébergement de la base de données (serveurs UE)</li>
+    <li><strong>Vercel</strong> — hébergement du site</li>
+    <li><strong>Stripe</strong> — traitement des paiements (certifié PCI DSS)</li>
+    <li><strong>Google</strong> — authentification OAuth (si vous utilisez "Connexion avec Google")</li>
+    <li><strong>Autorités compétentes</strong> — si requis par la loi</li>
+  </ul>
+
+  <h2>4. Durée de conservation</h2>
+  <table>
+    <tr><th>Type de données</th><th>Durée</th></tr>
+    <tr><td>Données de compte</td><td>Jusqu'à la suppression du compte + 1 an</td></tr>
+    <tr><td>Photos</td><td>Jusqu'à suppression par l'utilisateur ou du compte</td></tr>
+    <tr><td>Données de paiement</td><td>10 ans (obligation légale)</td></tr>
+    <tr><td>Logs de connexion</td><td>12 mois</td></tr>
+  </table>
+
+  <h2>5. Vos droits</h2>
+  <p>Conformément au RGPD, vous disposez des droits suivants :</p>
+  <ul>
+    <li><strong>Droit d'accès</strong> — obtenir une copie de vos données</li>
+    <li><strong>Droit de rectification</strong> — corriger vos données inexactes</li>
+    <li><strong>Droit à l'effacement</strong> — demander la suppression de vos données</li>
+    <li><strong>Droit à la portabilité</strong> — recevoir vos données dans un format lisible</li>
+    <li><strong>Droit d'opposition</strong> — vous opposer à certains traitements</li>
+    <li><strong>Droit à la limitation</strong> — limiter le traitement de vos données</li>
+  </ul>
+  <p>Vous pouvez exercer ces droits directement depuis votre page "Mon profil" (export et suppression) ou en écrivant à : <strong><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></strong></p>
+  <p>Vous disposez également du droit de déposer une réclamation auprès de la <strong>CNIL</strong> (cnil.fr).</p>
+
+  <h2>6. Sécurité</h2>
+  <p>SCOROVIA met en œuvre les mesures techniques et organisationnelles appropriées pour protéger vos données :</p>
+  <ul>
+    <li>Chiffrement SSL/TLS de toutes les communications</li>
+    <li>Mots de passe chiffrés (bcrypt via Supabase Auth)</li>
+    <li>Authentification sécurisée via OAuth 2.0</li>
+    <li>Accès aux données restreint aux seules personnes autorisées</li>
+    <li>Sauvegardes régulières des données</li>
+  </ul>
+
+  <h2>7. Transferts internationaux</h2>
+  <p>Certains de nos prestataires (Vercel, Stripe) sont établis aux États-Unis. Ces transferts sont encadrés par des clauses contractuelles types approuvées par la Commission européenne, garantissant un niveau de protection adéquat.</p>
+
+  <h2>8. Mineurs</h2>
+  <p>SCOROVIA est <strong>strictement réservé aux personnes majeures (+18 ans)</strong>. Nous ne collectons pas sciemment de données de mineurs. Si vous pensez qu'un mineur a créé un compte, contactez-nous immédiatement à <a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>.</p>
+
+  <div class="contact-box">
+    <h3>Délégué à la protection des données</h3>
+    <p>Pour toute question relative à vos données personnelles :<br>
+    <a href="mailto:<a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>"><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></a></p>
+  </div>
+</div>
+
+<!-- COOKIES -->
+<div class="page" id="page-cookies">
+  <div class="page-title">Politique de Cookies</div>
+  <div class="page-date">Dernière mise à jour : avril 2026</div>
+
+  <h2>1. Qu'est-ce qu'un cookie ?</h2>
+  <p>Un cookie est un petit fichier texte déposé sur votre appareil lors de votre visite sur un site web. Il permet au site de mémoriser vos préférences et d'assurer certaines fonctionnalités.</p>
+
+  <h2>2. Cookies utilisés par SCOROVIA</h2>
+
+  <h3>2.1 Cookies strictement nécessaires</h3>
+  <p>Ces cookies sont indispensables au fonctionnement du site. Ils ne peuvent pas être désactivés.</p>
+  <table>
+    <tr><th>Cookie</th><th>Finalité</th><th>Durée</th></tr>
+    <tr><td>sb-auth-token</td><td>Session d'authentification Supabase</td><td>Session</td></tr>
+    <tr><td>sb-refresh-token</td><td>Renouvellement de session</td><td>7 jours</td></tr>
+  </table>
+
+  <h3>2.2 Cookies de performance</h3>
+  <p>Ces cookies nous permettent d'analyser l'utilisation du site pour l'améliorer. Ils sont anonymisés.</p>
+  <table>
+    <tr><th>Cookie</th><th>Finalité</th><th>Durée</th></tr>
+    <tr><td>_vercel_analytics</td><td>Statistiques de visite anonymes (Vercel)</td><td>30 jours</td></tr>
+  </table>
+
+  <h3>2.3 Cookies tiers</h3>
+  <table>
+    <tr><th>Tiers</th><th>Finalité</th><th>Politique</th></tr>
+    <tr><td>Google</td><td>Authentification OAuth</td><td>policies.google.com/privacy</td></tr>
+    <tr><td>Stripe</td><td>Paiements sécurisés</td><td>stripe.com/privacy</td></tr>
+  </table>
+
+  <h2>3. Gestion des cookies</h2>
+  <p>Vous pouvez gérer vos préférences de cookies directement depuis les paramètres de votre navigateur :</p>
+  <ul>
+    <li><strong>Chrome</strong> — Paramètres → Confidentialité → Cookies</li>
+    <li><strong>Firefox</strong> — Options → Vie privée → Cookies</li>
+    <li><strong>Safari</strong> — Préférences → Confidentialité</li>
+    <li><strong>Edge</strong> — Paramètres → Confidentialité → Cookies</li>
+  </ul>
+  <p>⚠️ La désactivation des cookies strictement nécessaires empêchera la connexion à votre compte.</p>
+
+  <h2>4. Pas de publicité ciblée</h2>
+  <p>SCOROVIA n'utilise <strong>aucun cookie publicitaire ou de tracking comportemental</strong>. Nous ne partageons pas vos données de navigation avec des régies publicitaires.</p>
+
+  <div class="contact-box">
+    <h3>Questions sur les cookies</h3>
+    <p>Contact : <a href="mailto:<a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>"><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></a></p>
+  </div>
+</div>
+
+<script>
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Handle URL hash
+const hash = window.location.hash.replace('#', '');
+if (hash) {
+  const tab = document.querySelector(`[onclick*="'${hash}'"]`);
+  if (tab) showPage(hash, tab);
+}
+</script>
+</body>
+</html>
