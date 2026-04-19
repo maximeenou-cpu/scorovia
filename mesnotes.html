@@ -189,9 +189,21 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
     <div class="modal-title">Soumettre une photo</div>
     <div class="modal-sub">Choisissez votre meilleure photo pour être noté par la communauté</div>
 
-    <div class="modal-preview" id="modal-preview" onclick="triggerUpload()">
+    <div class="modal-preview" id="modal-preview" onclick="triggerUpload()" style="overflow:hidden;position:relative;">
       📸
       <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />
+    </div>
+
+    <!-- CROP CONTROLS -->
+    <div id="crop-controls" style="display:none;margin-bottom:14px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">🎯 Recadrez votre photo</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <button onclick="setCropMode('cover')" id="btn-cover" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(245,200,66,0.4);background:rgba(245,200,66,0.15);color:var(--gold2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">✂️ Remplir</button>
+        <button onclick="setCropMode('contain')" id="btn-contain" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">🖼️ Tout voir</button>
+        <button onclick="setCropMode('square')" id="btn-square" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">⬜ Carré</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">🔍 Zoom</div>
+      <input type="range" id="zoom-slider" min="100" max="300" value="100" oninput="applyZoom(this.value)" style="width:100%;accent-color:var(--gold);margin-bottom:4px;" />
     </div>
 
     <div class="modal-field">
@@ -453,17 +465,59 @@ function triggerUpload() {
   document.getElementById('file-input').click();
 }
 
+let currentCropMode = 'cover';
+let currentZoom = 100;
+
 function previewFile(input) {
   if (input.files && input.files[0]) {
     selectedFile = input.files[0];
     const reader = new FileReader();
     reader.onload = e => {
-      document.getElementById('modal-preview').innerHTML = `
-        <img src="${e.target.result}" alt="Preview" />
+      const preview = document.getElementById('modal-preview');
+      preview.innerHTML = `
+        <img id="preview-img" src="${e.target.result}" alt="Preview" style="width:100%;height:100%;object-fit:cover;transform:scale(1);transition:transform 0.2s;cursor:move;" />
         <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />`;
+      preview.onclick = null;
+      document.getElementById('crop-controls').style.display = 'block';
+      document.getElementById('zoom-slider').value = 100;
+      currentZoom = 100;
+      currentCropMode = 'cover';
+      updateCropButtons('cover');
     };
     reader.readAsDataURL(input.files[0]);
   }
+}
+
+function setCropMode(mode) {
+  currentCropMode = mode;
+  const img = document.getElementById('preview-img');
+  if (!img) return;
+  if (mode === 'cover') img.style.objectFit = 'cover';
+  else if (mode === 'contain') { img.style.objectFit = 'contain'; document.getElementById('modal-preview').style.background = '#07070F'; }
+  else if (mode === 'square') { img.style.objectFit = 'cover'; img.style.width = '100%'; img.style.height = '100%'; }
+  updateCropButtons(mode);
+}
+
+function updateCropButtons(active) {
+  ['cover','contain','square'].forEach(m => {
+    const btn = document.getElementById('btn-' + m);
+    if (!btn) return;
+    if (m === active) {
+      btn.style.border = '1px solid rgba(245,200,66,0.4)';
+      btn.style.background = 'rgba(245,200,66,0.15)';
+      btn.style.color = 'var(--gold2)';
+    } else {
+      btn.style.border = '1px solid var(--border)';
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--muted)';
+    }
+  });
+}
+
+function applyZoom(val) {
+  currentZoom = val;
+  const img = document.getElementById('preview-img');
+  if (img) img.style.transform = `scale(${val / 100})`;
 }
 
 async function submitPhoto() {
