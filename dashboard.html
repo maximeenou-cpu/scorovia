@@ -502,7 +502,7 @@ body {
         <div class="stat-value" id="stat-note">—</div>
         <div class="stat-sub">sur 10</div>
       </div>
-      <div class="stat-card clickable" onclick="openVotesModal()">
+      <div class="stat-card clickable" onclick="window.location.href='mesnotes.html'">
         <div class="stat-icon">🗳️</div>
         <div class="stat-label">Votes reçus</div>
         <div class="stat-value" id="stat-votes">0</div>
@@ -583,21 +583,6 @@ body {
 
 <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
 
-<!-- MODAL VOTES REÇUS -->
-<div class="modal-overlay" id="votes-modal" onclick="closeVotesModal(event)">
-  <div class="modal-box">
-    <button class="modal-close-btn" onclick="closeVotesModalDirect()">✕</button>
-    <div class="modal-title-row">
-      <h3>🗳️ MES VOTES REÇUS</h3>
-      <p id="votes-modal-sub">Chargement...</p>
-    </div>
-    <div id="votes-modal-list"></div>
-    <div class="modal-cta-premium">
-      <p>Passez Premium pour voir tous vos votants, leur écrire et accéder aux statistiques avancées.</p>
-      <button class="btn-premium-modal" onclick="window.open('https://buy.stripe.com/test_8x2eVc13waSN5msb6m4wM04','_blank')">👑 PASSER PREMIUM — 9,99€/mois</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // SUPABASE
@@ -765,7 +750,7 @@ function markAllRead() {
   document.querySelectorAll('.notif-dot').forEach(el => el.remove());
 }
 
-// VOTERS LIST (résumé dans le dashboard)
+// VOTERS LIST — aperçu simple, tout redirige vers mesnotes
 function renderVotersList() {
   const el = document.getElementById('voters-list');
   if (!userVotes || userVotes.length === 0) {
@@ -776,72 +761,15 @@ function renderVotersList() {
   el.innerHTML = userVotes.slice(0, 3).map((v, i) => {
     const scoreColor = v.note >= 8 ? 'var(--green)' : v.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
     const ago = timeAgo(v.created_at);
-    if (i === 0) {
-      return `<div class="voter-row">
-        <div class="voter-av" style="background:linear-gradient(135deg,var(--gold),var(--pink))">👤</div>
-        <div class="voter-info"><div class="voter-name">Anonyme</div><div class="voter-time">${ago}</div></div>
-        <div class="voter-score" style="color:${scoreColor}">${v.note}/10</div>
-      </div>`;
-    }
-    return `<div class="voter-row" style="position:relative;">
-      <div class="voter-av" style="background:linear-gradient(135deg,#2D1F5E,#1A3A5E);filter:blur(4px)">👤</div>
-      <div class="voter-info" style="filter:blur(4px)"><div class="voter-name">Anonyme</div><div class="voter-time">${ago}</div></div>
+    return `<div class="voter-row" style="cursor:pointer" onclick="window.location.href='mesnotes.html'">
+      <div class="voter-av" style="background:linear-gradient(135deg,#2D1F5E,#1A3A5E);filter:${i > 0 ? 'blur(4px)' : 'none'}">👤</div>
+      <div class="voter-info" style="${i > 0 ? 'filter:blur(4px)' : ''}">
+        <div class="voter-name">Anonyme</div>
+        <div class="voter-time">${ago}</div>
+      </div>
       <div class="voter-score" style="color:${scoreColor}">${v.note}/10</div>
-      <div class="lock-overlay"><div class="lock-pill" onclick="openVotesModal()">🔒 -50 pts</div></div>
     </div>`;
-  }).join('');
-}
-
-// MODAL VOTES
-function openVotesModal() {
-  document.getElementById('votes-modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-
-  const sub = document.getElementById('votes-modal-sub');
-  const list = document.getElementById('votes-modal-list');
-
-  if (!userVotes || userVotes.length === 0) {
-    sub.textContent = 'Aucun vote reçu pour l\'instant.';
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">Soumettez une photo pour commencer !</div>';
-    return;
-  }
-
-  sub.textContent = `${userVotes.length} vote${userVotes.length > 1 ? 's' : ''} reçu${userVotes.length > 1 ? 's' : ''} — cliquez pour révéler l'identité`;
-
-  const fakeNames = ['Marie T.', 'Lucas M.', 'Emma R.', 'Noah B.', 'Chloé D.', 'Pierre L.', 'Sofia K.', 'Thomas V.'];
-
-  list.innerHTML = userVotes.map((v, i) => {
-    const scoreColor = v.note >= 8 ? 'var(--green)' : v.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
-    const ago = timeAgo(v.created_at);
-    const fakeName = fakeNames[i % fakeNames.length];
-    return `<div class="vote-modal-row">
-      <div class="vote-av-blur">👤</div>
-      <div class="vote-info">
-        <div class="vote-name-blur">${fakeName}</div>
-        <div class="vote-detail">${ago}</div>
-      </div>
-      <div class="vote-score-badge" style="color:${scoreColor}">${v.note}/10</div>
-      <div class="vote-unlock-overlay">
-        <button class="btn-unlock" onclick="unlockVoter(${i})">🔓 Voir · -50 pts</button>
-        <button class="btn-unlock-msg" onclick="msgVoter(${i})">💬 Message · -20 pts</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function unlockVoter(i) {
-  showToast('💡 Fonctionnalité disponible avec les points — rendez-vous sur Mes Points !', 'gold');
-}
-function msgVoter(i) {
-  window.location.href = 'messages.html';
-}
-
-function closeVotesModal(e) {
-  if (e.target === document.getElementById('votes-modal')) closeVotesModalDirect();
-}
-function closeVotesModalDirect() {
-  document.getElementById('votes-modal').classList.remove('open');
-  document.body.style.overflow = '';
+  }).join('') + `<div style="text-align:center;padding:10px 0 4px;font-size:12px;color:var(--gold2);cursor:pointer" onclick="window.location.href='mesnotes.html'">Voir tous les votants → Mes Notes</div>`;
 }
 
 // HELPERS
