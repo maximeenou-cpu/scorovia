@@ -308,7 +308,7 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   <a class="nav-item" href="mesnotes.html"><span class="nav-icon">📊</span> Mes notes</a>
   <div class="nav-section">Communauté</div>
   <a class="nav-item" href="classement.html"><span class="nav-icon">🏆</span> Classement</a>
-  <a class="nav-item" href="dashboard.html"><span class="nav-icon">💬</span> Messages</a>
+  <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> Messages</a>
   <div class="nav-section">Compte</div>
   <a class="nav-item" href="points.html"><span class="nav-icon">⚡</span> Mes points</a>
   <a class="nav-item" href="profil.html"><span class="nav-icon">👤</span> Mon profil</a>
@@ -329,7 +329,7 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   <div class="topbar">
     <div class="topbar-title">⭐ Noter</div>
     <div class="topbar-right">
-      <div class="pts-pill" id="pts-pill" style="display:none">⚡ <span id="pts-display">—</span> pts</div>
+      <a href="points.html" class="pts-pill" id="pts-pill" style="display:none;text-decoration:none;">⚡ <span id="pts-display">—</span> pts</a>
       <a href="login.html" id="btn-login-top" style="display:none;background:linear-gradient(135deg,var(--gold),#E8A020);border:none;border-radius:10px;padding:8px 16px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:0.08em;color:#000;cursor:pointer;text-decoration:none;">S'INSCRIRE</a>
     </div>
   </div>
@@ -410,7 +410,7 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
     <!-- RIGHT PANEL -->
     <div class="right-panel">
       <div class="panel-card">
-        <div class="panel-title">📊 Cette session</div>
+        <div class="panel-title">📊 Aujourd'hui</div>
         <div class="session-stat"><span class="session-stat-label">Notes données</span><span class="session-stat-val" id="s-rated">0</span></div>
         <div class="session-stat"><span class="session-stat-label">Passées</span><span class="session-stat-val" id="s-passed">0</span></div>
         <div class="session-stat"><span class="session-stat-label">Note moyenne donnée</span><span class="session-stat-val stat-gold" id="s-avg">—</span></div>
@@ -418,7 +418,7 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
       </div>
 
       <div class="panel-card">
-        <div class="panel-title">🕐 Notes récentes</div>
+        <div class="panel-title">🕐 Notes données aujourd'hui</div>
         <div id="history-list"><div style="font-size:12px;color:var(--muted);text-align:center;padding:12px 0">Vos notes apparaîtront ici</div></div>
       </div>
     </div>
@@ -459,6 +459,9 @@ async function init() {
       document.getElementById('user-pts').textContent = profile.points || 0;
       document.getElementById('pts-display').textContent = profile.points || 0;
       document.getElementById('pts-pill').style.display = 'flex';
+
+      // Charger stats du jour
+      await loadTodayStats();
     }
   } else {
     document.getElementById('user-name').textContent = 'Visiteur';
@@ -592,8 +595,8 @@ async function doRate() {
       photo.nb_votes = newVotes;
       photo.note_moyenne = newAvg;
 
-      // Credit points
-      const newPts = (userProfile?.points || 0) + 3;
+      // Credit points — +1 pt par note
+      const newPts = (userProfile?.points || 0) + 1;
       await sb.from('users').update({ points: newPts }).eq('id', currentUser.id);
       await sb.from('points_history').insert({ user_id: currentUser.id, action: 'Note donnée', points: 1 });
       if (userProfile) userProfile.points = newPts;
@@ -795,6 +798,28 @@ async function sendReport() {
     nextPhoto();
   } catch(e) {
     showToast('❌ Erreur lors du signalement', '');
+  }
+}
+
+// Charger les votes donnés aujourd'hui
+async function loadTodayStats() {
+  if (!currentUser) return;
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const { data: todayVotes } = await sb.from('votes')
+    .select('note, created_at')
+    .eq('voter_id', currentUser.id)
+    .gte('created_at', todayStart.toISOString());
+
+  if (todayVotes && todayVotes.length > 0) {
+    sessionRated = todayVotes.length;
+    sessionPts = todayVotes.length; // 1 pt par note
+    sessionScores = todayVotes.map(v => v.note);
+    const avg = (sessionScores.reduce((a, b) => a + b, 0) / sessionScores.length).toFixed(1);
+    document.getElementById('s-rated').textContent = sessionRated;
+    document.getElementById('s-avg').textContent = avg + '/10';
+    document.getElementById('s-pts').textContent = '+' + sessionPts + ' pt' + (sessionPts > 1 ? 's' : '');
   }
 }
 
