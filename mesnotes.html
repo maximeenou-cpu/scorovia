@@ -565,6 +565,13 @@ function closeModal() {
   preview.innerHTML = '📸<input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFile(this)" />';
   preview.onclick = triggerUpload;
   document.getElementById('crop-controls').style.display = 'none';
+  // Réinitialiser la barre de progression
+  document.getElementById('upload-progress').classList.remove('show');
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('progress-label').textContent = 'Upload en cours...';
+  // Réactiver le bouton
+  const btn = document.getElementById('btn-confirm');
+  if (btn) btn.disabled = false;
 }
 
 document.getElementById('upload-modal').addEventListener('click', e => {
@@ -769,8 +776,10 @@ async function submitPhoto() {
     document.getElementById('pts-display').textContent = userProfile.points;
 
     setTimeout(async () => {
+      document.getElementById('upload-progress').classList.remove('show');
       closeModal();
       await loadPhotos();
+      await loadVoters();
       showToast('✅ Photo soumise avec succès !', 'success');
     }, 800);
 
@@ -778,7 +787,8 @@ async function submitPhoto() {
     console.error(err);
     showToast('❌ Erreur lors de l\'upload : ' + err.message, 'error');
     btn.disabled = false;
-    btn.textContent = 'SOUMETTRE MA PHOTO (-10 pts)';
+    const cost = window._photoCost || 0;
+    btn.textContent = cost === 0 ? 'SOUMETTRE MA PHOTO GRATUITE' : `SOUMETTRE MA PHOTO (-${cost} pts)`;
     document.getElementById('upload-progress').classList.remove('show');
   }
 }
