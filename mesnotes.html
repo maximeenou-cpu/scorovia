@@ -234,6 +234,128 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .empty-photos-title { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
 .empty-photos-sub { font-size: 13px; color: var(--muted); }
 
+/* PANEL VOTANTS PAR PHOTO */
+.voters-panel-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  z-index: 250; align-items: flex-end; justify-content: center;
+}
+.voters-panel-overlay.open { display: flex; }
+
+.voters-panel {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  width: 100%; max-width: 600px;
+  max-height: 80vh; display: flex; flex-direction: column;
+  animation: slideUpPanel 0.3s ease both;
+}
+@keyframes slideUpPanel {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.voters-panel-handle {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.15);
+  margin: 12px auto 0;
+}
+
+.voters-panel-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0;
+}
+
+.voters-panel-photo {
+  width: 52px; height: 52px; border-radius: 10px;
+  object-fit: cover; flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+.voters-panel-title { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+.voters-panel-sub { font-size: 12px; color: var(--muted); }
+
+.voters-panel-close {
+  margin-left: auto; background: rgba(255,255,255,0.06);
+  border: none; color: var(--muted); width: 28px; height: 28px;
+  border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;
+}
+
+.voters-panel-list {
+  overflow-y: auto; padding: 12px 16px;
+  flex: 1;
+}
+.voters-panel-list::-webkit-scrollbar { width: 3px; }
+.voters-panel-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Voter row in panel */
+.voter-panel-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 12px;
+  background: var(--deep); margin-bottom: 8px;
+  position: relative; overflow: hidden;
+}
+.voter-panel-av {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; flex-shrink: 0;
+}
+.voter-panel-av.blurred { filter: blur(5px); user-select: none; }
+.voter-panel-info { flex: 1; }
+.voter-panel-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.voter-panel-name.blurred { filter: blur(5px); user-select: none; }
+.voter-panel-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.voter-panel-score { font-size: 20px; font-weight: 700; flex-shrink: 0; }
+
+.voter-panel-unlock {
+  position: absolute; inset: 0;
+  background: rgba(13,13,26,0.55); backdrop-filter: blur(1px);
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; border-radius: 12px;
+}
+.btn-panel-unlock {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 8px; padding: 7px 16px;
+  font-size: 12px; font-weight: 700; color: #000; cursor: pointer;
+  white-space: nowrap;
+}
+.btn-panel-msg {
+  background: rgba(139,92,246,0.15);
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 8px; padding: 7px 14px;
+  font-size: 12px; font-weight: 600; color: #C4B5FD;
+  cursor: pointer; white-space: nowrap;
+}
+
+.voters-panel-premium {
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(255,77,141,0.06));
+  border-top: 1px solid rgba(245,200,66,0.15);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-shrink: 0;
+}
+.voters-panel-premium p { font-size: 12px; color: var(--muted); }
+.btn-panel-premium {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 10px; padding: 8px 16px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 13px;
+  letter-spacing: 0.06em; color: #000; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Bouton votants sur la photo */
+.btn-see-voters {
+  position: absolute; top: 12px; left: 12px;
+  background: rgba(13,13,26,0.8); backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 5px 10px;
+  font-size: 11px; color: var(--text);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s; z-index: 5;
+}
+.btn-see-voters:hover { background: rgba(245,200,66,0.15); color: var(--gold2); }
+
 /* TOAST */
 .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
 .toast.show { transform: translateX(-50%) translateY(0); }
@@ -253,6 +375,7 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   .topbar { padding: 14px 16px; }
 }
 </style>
+<script src="mobile-nav.js"></script>
 </head>
 <body>
 
@@ -408,6 +531,28 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 
 <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
 
+<!-- PANEL VOTANTS PAR PHOTO -->
+<div class="voters-panel-overlay" id="voters-panel-overlay" onclick="closeVotersPanel(event)">
+  <div class="voters-panel" id="voters-panel">
+    <div class="voters-panel-handle"></div>
+    <div class="voters-panel-header">
+      <img class="voters-panel-photo" id="vp-photo" src="" alt="" />
+      <div>
+        <div class="voters-panel-title" id="vp-title">Votants</div>
+        <div class="voters-panel-sub" id="vp-sub">Chargement...</div>
+      </div>
+      <button class="voters-panel-close" onclick="document.getElementById('voters-panel-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="voters-panel-list" id="vp-list">
+      <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Chargement...</div>
+    </div>
+    <div class="voters-panel-premium">
+      <p>👑 Premium = voir tous vos votants sans dépenser de points</p>
+      <button class="btn-panel-premium" onclick="window.open('https://buy.stripe.com/test_8x2eVc13waSN5msb6m4wM04','_blank')">PREMIUM</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
@@ -435,6 +580,7 @@ async function init() {
   document.getElementById('pts-display').textContent = profile.points;
 
   await loadPhotos();
+  await loadUnlockedVoters();
   await loadVoters();
   document.getElementById('loading').style.display = 'none';
 }
@@ -490,6 +636,7 @@ async function loadPhotos() {
           <div class="photo-score-big">${score !== '—' ? score + '/10' : '—'}</div>
           <div class="photo-votes-count">${votes} votes</div>
         </div>
+        ${votes > 0 ? `<button class="btn-see-voters" onclick="openVotersPanel('${photo.id}', '${photo.url || ''}', ${votes})">👥 ${votes} votant${votes > 1 ? 's' : ''}</button>` : ''}
       </div>
       <div class="photo-info">
         <div class="score-bar-wrap">
@@ -793,7 +940,157 @@ async function submitPhoto() {
   }
 }
 
-// LOAD VOTERS — qui m'a noté (floutés)
+// PANEL VOTANTS PAR PHOTO
+let unlockedVoters = new Set(); // voter_ids déjà déverrouillés (persistant)
+
+async function loadUnlockedVoters() {
+  // Charger les profils déjà déverrouillés depuis Supabase
+  const { data } = await sb.from('unlocked_profiles')
+    .select('voter_id')
+    .eq('user_id', currentUser.id);
+  if (data) data.forEach(r => unlockedVoters.add(r.voter_id));
+}
+
+async function openVotersPanel(photoId, photoUrl, nbVotes) {
+  const overlay = document.getElementById('voters-panel-overlay');
+  const list = document.getElementById('vp-list');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Header
+  const img = document.getElementById('vp-photo');
+  img.src = photoUrl || '';
+  img.style.display = photoUrl ? 'block' : 'none';
+  document.getElementById('vp-title').textContent = `${nbVotes} votant${nbVotes > 1 ? 's' : ''}`;
+  document.getElementById('vp-sub').textContent = 'Chargement...';
+  list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Chargement...</div>';
+
+  // Charger les votes de cette photo
+  const { data: votes } = await sb.from('votes')
+    .select('id, voter_id, note, created_at')
+    .eq('photo_id', photoId)
+    .order('created_at', { ascending: false });
+
+  if (!votes || votes.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Aucun vote pour l\'instant.</div>';
+    return;
+  }
+
+  document.getElementById('vp-sub').textContent = `${votes.length} vote${votes.length > 1 ? 's' : ''} reçu${votes.length > 1 ? 's' : ''} — cliquez pour révéler`;
+
+  // Charger les profils déjà déverrouillés
+  const unlockedData = {};
+  const unlockedIds = votes.map(v => v.voter_id).filter(id => unlockedVoters.has(id));
+  if (unlockedIds.length > 0) {
+    const { data: profiles } = await sb.from('users')
+      .select('id, prenom, ville, age, genre')
+      .in('id', unlockedIds);
+    if (profiles) profiles.forEach(p => { unlockedData[p.id] = p; });
+  }
+
+  const fakeNames = ['Marie T.', 'Lucas M.', 'Emma R.', 'Noah B.', 'Chloé D.', 'Pierre L.', 'Sofia K.', 'Thomas V.', 'Léa F.', 'Hugo C.'];
+  const colors = ['linear-gradient(135deg,#2D1F5E,#1A3A5E)', 'linear-gradient(135deg,#5E2D7A,#2D1F5E)', 'linear-gradient(135deg,#2D5E3A,#1A3A2A)', 'linear-gradient(135deg,#5E3A1A,#2D200D)'];
+
+  list.innerHTML = votes.map((v, i) => {
+    const scoreColor = v.note >= 8 ? 'var(--green)' : v.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
+    const diff = Math.floor((Date.now() - new Date(v.created_at)) / 1000);
+    const ago = diff < 3600 ? `Il y a ${Math.floor(diff/60)} min` : diff < 86400 ? `Il y a ${Math.floor(diff/3600)}h` : `Il y a ${Math.floor(diff/86400)}j`;
+
+    const isUnlocked = unlockedVoters.has(v.voter_id);
+    const profile = unlockedData[v.voter_id];
+    const color = colors[i % colors.length];
+
+    if (isUnlocked && profile) {
+      // Profil déjà déverrouillé — afficher les vraies infos
+      const meta = [profile.ville, profile.age ? profile.age + ' ans' : null].filter(Boolean).join(' · ');
+      return `
+      <div class="voter-panel-row" style="border:1px solid rgba(34,212,160,0.2);">
+        <div class="voter-panel-av" style="background:linear-gradient(135deg,var(--gold),var(--pink))">${(profile.prenom || '?').charAt(0).toUpperCase()}</div>
+        <div class="voter-panel-info">
+          <div class="voter-panel-name">${profile.prenom || 'Membre'}</div>
+          <div class="voter-panel-meta">${meta || 'Membre SCOROVIA'} · ${ago}</div>
+        </div>
+        <div class="voter-panel-score" style="color:${scoreColor}">${v.note}/10</div>
+        <div style="margin-left:8px;">
+          <button class="btn-panel-msg" onclick="window.location.href='messages.html'" style="font-size:11px;padding:5px 10px;">💬</button>
+        </div>
+      </div>`;
+    }
+
+    // Profil verrouillé
+    return `
+    <div class="voter-panel-row" id="vpr-${i}">
+      <div class="voter-panel-av blurred" style="background:${color}">👤</div>
+      <div class="voter-panel-info">
+        <div class="voter-panel-name blurred">${fakeNames[i % fakeNames.length]}</div>
+        <div class="voter-panel-meta">${ago}</div>
+      </div>
+      <div class="voter-panel-score" style="color:${scoreColor}">${v.note}/10</div>
+      <div class="voter-panel-unlock" id="vpu-${i}">
+        <button class="btn-panel-unlock" onclick="unlockVoterPanel('${v.voter_id}', ${i})">🔓 -50 pts</button>
+        <button class="btn-panel-msg" onclick="window.location.href='messages.html'">💬 -20 pts</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function unlockVoterPanel(voterId, rowIndex) {
+  const cost = 50;
+  if (!userProfile || userProfile.points < cost) {
+    showToast(`⚡ Points insuffisants — ${cost} pts requis`, 'error');
+    setTimeout(() => window.location.href = 'points.html', 2000);
+    return;
+  }
+
+  // Vérifier si déjà déverrouillé (double-clic)
+  if (unlockedVoters.has(voterId)) {
+    showToast('✅ Ce profil est déjà déverrouillé !', 'success');
+    return;
+  }
+
+  // Débiter les points
+  const newPts = userProfile.points - cost;
+  await sb.from('users').update({ points: newPts }).eq('id', currentUser.id);
+  await sb.from('points_history').insert({ user_id: currentUser.id, action: 'Profil votant déverrouillé', points: -cost });
+
+  // Persister le déverrouillage
+  await sb.from('unlocked_profiles').insert({ user_id: currentUser.id, voter_id: voterId });
+  unlockedVoters.add(voterId);
+
+  userProfile.points = newPts;
+  document.getElementById('pts-display').textContent = newPts;
+  document.getElementById('user-pts').textContent = newPts;
+
+  // Charger le vrai profil
+  const { data: voter } = await sb.from('users')
+    .select('prenom, ville, age, genre')
+    .eq('id', voterId).single();
+
+  // Mettre à jour la row
+  const row = document.getElementById(`vpr-${rowIndex}`);
+  const overlay = document.getElementById(`vpu-${rowIndex}`);
+  if (row && voter) {
+    const avEl = row.querySelector('.voter-panel-av');
+    const nameEl = row.querySelector('.voter-panel-name');
+    const metaEl = row.querySelector('.voter-panel-meta');
+    if (avEl) { avEl.textContent = (voter.prenom || '?').charAt(0).toUpperCase(); avEl.classList.remove('blurred'); avEl.style.background = 'linear-gradient(135deg,var(--gold),var(--pink))'; }
+    if (nameEl) { nameEl.textContent = voter.prenom || 'Membre'; nameEl.classList.remove('blurred'); }
+    if (metaEl) { const meta = [voter.ville, voter.age ? voter.age + ' ans' : null].filter(Boolean).join(' · '); metaEl.textContent = meta || 'Membre SCOROVIA'; }
+    if (overlay) overlay.innerHTML = `<button class="btn-panel-msg" onclick="window.location.href='messages.html'" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#E8A020);color:#000;border:none;border-radius:8px;">💬 Message</button>`;
+    row.style.border = '1px solid rgba(34,212,160,0.2)';
+  }
+
+  showToast(`✅ Profil révélé ! -${cost} pts`, 'success');
+}
+
+function closeVotersPanel(e) {
+  if (e.target === document.getElementById('voters-panel-overlay')) {
+    document.getElementById('voters-panel-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+// LOAD VOTERS — section globale (gardée pour compatibilité)
 async function loadVoters() {
   // Récupérer mes photos
   const { data: myPhotos } = await sb.from('photos')
