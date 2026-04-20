@@ -821,6 +821,9 @@ async function loadVoters() {
 
   const fakeNames = ['Marie T.', 'Lucas M.', 'Emma R.', 'Noah B.', 'Chloé D.', 'Pierre L.', 'Sofia K.', 'Thomas V.', 'Léa F.', 'Hugo C.'];
 
+  // Stocker les voter IDs pour le défloutage
+  window._voterData = votes.map((v, i) => ({ voterId: v.voter_id, note: v.note, index: i }));
+
   grid.innerHTML = votes.map((v, i) => {
     const scoreColor = v.note >= 8 ? 'var(--green)' : v.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
     const diff = Math.floor((Date.now() - new Date(v.created_at)) / 1000);
@@ -828,34 +831,75 @@ async function loadVoters() {
     const fakeName = fakeNames[i % fakeNames.length];
 
     return `
-    <div class="voter-card">
+    <div class="voter-card" id="voter-card-${i}">
       <div class="voter-card-inner">
-        <div class="voter-av-blur">👤</div>
+        <div class="voter-av-blur" id="voter-av-${i}">👤</div>
         <div class="voter-info-blur">
-          <div class="voter-name-blur">${fakeName}</div>
-          <div class="voter-meta">${ago}</div>
+          <div class="voter-name-blur" id="voter-name-${i}">${fakeName}</div>
+          <div class="voter-meta" id="voter-meta-${i}">${ago}</div>
         </div>
         <div class="voter-score-display" style="color:${scoreColor}">${v.note}/10</div>
       </div>
-      <div class="voter-unlock-bar">
-        <button class="btn-voter-unlock" onclick="unlockVoterFromNotes(${i}, ${v.note})">🔓 Voir · -30 pts</button>
-        <button class="btn-voter-msg" onclick="msgVoterFromNotes()">💬 Message · -20 pts</button>
+      <div class="voter-unlock-bar" id="voter-bar-${i}">
+        <button class="btn-voter-unlock" onclick="unlockVoterFromNotes(${i})">🔓 Voir · -50 pts</button>
+        <button class="btn-voter-msg" onclick="msgVoterFromNotes(${i})">💬 Message · -20 pts</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function unlockVoterFromNotes(i, note) {
-  if (userProfile.points < 30) {
-    showToast('⚡ Points insuffisants — 30 pts requis. Achetez des points !', 'error');
+async function unlockVoterFromNotes(i) {
+  const cost = 50;
+  if (!userProfile || userProfile.points < cost) {
+    showToast(`⚡ Points insuffisants — ${cost} pts requis`, 'error');
     setTimeout(() => window.location.href = 'points.html', 2000);
     return;
   }
-  showToast('💡 Fonctionnalité de défloutage en cours d\'activation — bientôt disponible !', 'gold');
+
+  const voterInfo = window._voterData?.[i];
+  if (!voterInfo) return;
+
+  // Débiter les points
+  const newPts = userProfile.points - cost;
+  await sb.from('users').update({ points: newPts }).eq('id', currentUser.id);
+  await sb.from('points_history').insert({ user_id: currentUser.id, action: 'Identité votant révélée', points: -cost });
+  userProfile.points = newPts;
+  document.getElementById('pts-display').textContent = newPts;
+  document.getElementById('user-pts').textContent = newPts;
+
+  // Charger le vrai profil du votant
+  const { data: voter } = await sb.from('users')
+    .select('prenom, ville, age, genre')
+    .eq('id', voterInfo.voterId).single();
+
+  if (voter) {
+    // Déflouter et afficher les vraies infos
+    const nameEl = document.getElementById(`voter-name-${i}`);
+    const avEl = document.getElementById(`voter-av-${i}`);
+    const metaEl = document.getElementById(`voter-meta-${i}`);
+    const barEl = document.getElementById(`voter-bar-${i}`);
+    const cardEl = document.getElementById(`voter-card-${i}`);
+
+    if (nameEl) { nameEl.textContent = voter.prenom || 'Membre'; nameEl.style.filter = 'none'; }
+    if (avEl) { avEl.textContent = (voter.prenom || '?').charAt(0).toUpperCase(); avEl.style.filter = 'none'; avEl.style.background = 'linear-gradient(135deg,var(--gold),var(--pink))'; }
+    if (metaEl) {
+      const meta = [voter.ville, voter.age ? voter.age + ' ans' : null, voter.genre === 'homme' ? '👨' : voter.genre === 'femme' ? '👩' : null].filter(Boolean).join(' · ');
+      metaEl.textContent = meta || 'Membre SCOROVIA';
+    }
+    // Remplacer les boutons par un lien messages
+    if (barEl) {
+      barEl.innerHTML = `<button class="btn-voter-msg" onclick="msgVoterFromNotes(${i})" style="background:linear-gradient(135deg,var(--gold),#E8A020);color:#000;border:none;">💬 Envoyer un message · -20 pts</button>`;
+    }
+    if (cardEl) cardEl.style.border = '1px solid rgba(34,212,160,0.3)';
+
+    showToast(`✅ Identité révélée ! -${cost} pts`, 'success');
+  } else {
+    showToast('✅ Identité chargée ! -' + cost + ' pts', 'success');
+  }
 }
 
-function msgVoterFromNotes() {
-  if (userProfile.points < 20) {
+function msgVoterFromNotes(i) {
+  if (!userProfile || userProfile.points < 20) {
     showToast('⚡ Points insuffisants — 20 pts requis pour envoyer un message.', 'error');
     setTimeout(() => window.location.href = 'points.html', 2000);
     return;

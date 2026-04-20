@@ -597,32 +597,69 @@ async function openVotesModal() {
   }
 
   const fakeNames = ['Marie T.', 'Lucas M.', 'Emma R.', 'Noah B.', 'Chloé D.', 'Pierre L.', 'Sofia K.', 'Thomas V.'];
+  window._profileVoterData = votes;
+
   document.getElementById('votes-modal-list').innerHTML = votes.map((v, i) => {
     const scoreColor = v.note >= 8 ? 'var(--green)' : v.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
     const ago = timeAgo(v.created_at);
     return `
-    <div class="vote-row-blur">
-      <div class="vote-av-b">👤</div>
+    <div class="vote-row-blur" id="pvote-row-${i}">
+      <div class="vote-av-b" id="pvote-av-${i}">👤</div>
       <div class="vote-info-b">
-        <div class="vote-name-b">${fakeNames[i % fakeNames.length]}</div>
+        <div class="vote-name-b" id="pvote-name-${i}">${fakeNames[i % fakeNames.length]}</div>
         <div class="vote-time-b">${ago}</div>
       </div>
       <div class="vote-score-b" style="color:${scoreColor}">${v.note}/10</div>
-      <div class="vote-overlay">
-        <button class="btn-reveal" onclick="tryReveal()">🔓 Voir · -30 pts</button>
+      <div class="vote-overlay" id="pvote-overlay-${i}">
+        <button class="btn-reveal" onclick="tryReveal(${i})">🔓 Voir · -50 pts</button>
         <button class="btn-msg-vote" onclick="window.location.href='messages.html'">💬 -20 pts</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function tryReveal() {
-  if (!userProfile || userProfile.points < 30) {
-    showToast('⚡ Points insuffisants — 30 pts requis', 'error');
+async function tryReveal(i) {
+  const cost = 50;
+  if (!userProfile || userProfile.points < cost) {
+    showToast(`⚡ Points insuffisants — ${cost} pts requis`, 'error');
     setTimeout(() => window.location.href = 'points.html', 1800);
     return;
   }
-  showToast('💡 Défloutage bientôt disponible — restez connecté !', 'gold');
+
+  const vote = window._profileVoterData?.[i];
+  if (!vote) return;
+
+  // Débiter les points
+  const newPts = userProfile.points - cost;
+  await sb.from('users').update({ points: newPts }).eq('id', currentUser.id);
+  await sb.from('points_history').insert({ user_id: currentUser.id, action: 'Identité votant révélée', points: -cost });
+  userProfile.points = newPts;
+  document.getElementById('pts-display').textContent = newPts;
+  document.getElementById('user-pts').textContent = newPts;
+
+  // Charger le vrai profil
+  const { data: voter } = await sb.from('users')
+    .select('prenom, ville, age, genre')
+    .eq('id', vote.voter_id).single();
+
+  const nameEl = document.getElementById(`pvote-name-${i}`);
+  const avEl = document.getElementById(`pvote-av-${i}`);
+  const overlayEl = document.getElementById(`pvote-overlay-${i}`);
+
+  if (voter && nameEl) {
+    nameEl.textContent = voter.prenom || 'Membre';
+    nameEl.style.filter = 'none';
+  }
+  if (avEl) {
+    avEl.textContent = (voter?.prenom || '?').charAt(0).toUpperCase();
+    avEl.style.filter = 'none';
+    avEl.style.background = 'linear-gradient(135deg,var(--gold),var(--pink))';
+  }
+  if (overlayEl) {
+    overlayEl.innerHTML = `<button class="btn-msg-vote" style="background:linear-gradient(135deg,var(--gold),#E8A020);color:#000;border:none;" onclick="window.location.href='messages.html'">💬 Envoyer un message · -20 pts</button>`;
+  }
+
+  showToast(`✅ Identité révélée ! -${cost} pts`, 'success');
 }
 
 // MODAL HISTORIQUE NOTES DONNÉES
