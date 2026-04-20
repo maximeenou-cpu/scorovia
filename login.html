@@ -51,7 +51,6 @@ body {
   background: radial-gradient(ellipse, rgba(255,77,141,0.05) 0%, transparent 60%);
 }
 
-/* LEFT PANEL */
 .left-panel {
   width: 45%;
   background: var(--deep);
@@ -127,7 +126,6 @@ body {
 
 .panel-footer a { color: rgba(240,238,248,0.3); text-decoration: underline; }
 
-/* RIGHT PANEL */
 .right-panel {
   flex: 1; display: flex; align-items: center;
   justify-content: center; padding: 40px 32px;
@@ -136,7 +134,6 @@ body {
 
 .auth-box { width: 100%; max-width: 400px; }
 
-/* TABS */
 .tabs {
   display: flex; background: var(--card);
   border: 1px solid var(--border); border-radius: 14px;
@@ -161,7 +158,6 @@ body {
 
 .form-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; font-weight: 300; }
 
-/* FIELDS */
 .field { margin-bottom: 14px; }
 
 .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
@@ -184,7 +180,6 @@ body {
 .field-row { display: flex; gap: 10px; }
 .field-row .field { flex: 1; }
 
-/* PASSWORD STRENGTH */
 .pwd-strength { margin-top: 6px; display: flex; gap: 4px; }
 .pwd-bar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
 .pwd-bar.weak { background: var(--red); }
@@ -195,13 +190,11 @@ body {
 .error-msg { font-size: 11px; color: var(--red); margin-top: 4px; display: none; }
 .error-msg.show { display: block; }
 
-/* CHECKBOX */
 .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
 .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold); margin-top: 2px; flex-shrink: 0; }
 .checkbox-row label { font-size: 12px; color: var(--muted); line-height: 1.5; }
 .checkbox-row label a { color: var(--gold2); text-decoration: underline; }
 
-/* AGE WARNING */
 .age-warning {
   background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2);
   border-radius: 10px; padding: 10px 14px; font-size: 12px;
@@ -209,7 +202,6 @@ body {
 }
 .age-warning.show { display: block; }
 
-/* BUTTONS */
 .btn-submit {
   width: 100%; padding: 15px;
   background: linear-gradient(135deg, var(--gold), #E8A020);
@@ -228,7 +220,6 @@ body {
 .switch-text { text-align: center; font-size: 13px; color: var(--muted); }
 .switch-text a { color: var(--gold2); cursor: pointer; font-weight: 500; }
 
-/* ALERT */
 .alert {
   padding: 12px 16px; border-radius: 12px;
   font-size: 13px; margin-bottom: 16px; display: none;
@@ -237,7 +228,6 @@ body {
 .alert.error { background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.25); color: #FF8080; }
 .alert.success { background: rgba(34,212,160,0.1); border: 1px solid rgba(34,212,160,0.25); color: var(--green); }
 
-/* SUCCESS */
 .success-state { display: none; text-align: center; padding: 20px 0; }
 .success-state.show { display: block; }
 .success-emoji { font-size: 56px; margin-bottom: 16px; }
@@ -250,7 +240,6 @@ body {
   letter-spacing: 0.1em; color: #000; cursor: pointer; text-decoration: none;
 }
 
-/* LOADING SPINNER */
 .spinner {
   display: inline-block; width: 16px; height: 16px;
   border: 2px solid rgba(0,0,0,0.3); border-radius: 50%;
@@ -259,7 +248,6 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* TOAST */
 .toast {
   position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(80px);
@@ -271,7 +259,6 @@ body {
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { border-color: rgba(34,212,160,0.3); }
 
-/* GOOGLE BTN */
 .btn-google {
   display: flex; align-items: center; justify-content: center; gap: 12px;
   width: 100%; padding: 13px 20px;
@@ -300,7 +287,6 @@ body {
   .panel-footer { display: none; }
 }
 
-/* ===== MOBILE BOTTOM NAV ===== */
 .mobile-bottom-nav {
   display: none;
   position: fixed;
@@ -312,46 +298,22 @@ body {
   z-index: 9999;
   padding: 6px 0 max(6px, env(safe-area-inset-bottom));
 }
-.mobile-bottom-nav ul {
-  display: flex; align-items: stretch;
-  justify-content: space-around;
-  list-style: none; margin: 0; padding: 0;
-}
+.mobile-bottom-nav ul { display: flex; align-items: stretch; justify-content: space-around; list-style: none; margin: 0; padding: 0; }
 .mobile-bottom-nav li { flex: 1; }
-.mobile-bottom-nav li a {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 3px; text-decoration: none;
-  padding: 6px 4px; border-radius: 10px;
-  transition: background 0.2s;
-  position: relative;
-}
+.mobile-bottom-nav li a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; padding: 6px 4px; border-radius: 10px; transition: background 0.2s; position: relative; }
 .mobile-bottom-nav li a:active { background: rgba(255,255,255,0.08); }
 .mobile-bottom-nav .mnav-icon { font-size: 22px; line-height: 1; }
-.mobile-bottom-nav .mnav-label {
-  font-size: 10px; font-family: 'DM Sans', sans-serif;
-  color: rgba(240,238,248,0.4); letter-spacing: 0.01em;
-}
+.mobile-bottom-nav .mnav-label { font-size: 10px; font-family: 'DM Sans', sans-serif; color: rgba(240,238,248,0.4); letter-spacing: 0.01em; }
 .mobile-bottom-nav li.active .mnav-label { color: #FFE27A; }
-.mobile-bottom-nav li.active .mnav-icon {
-  filter: drop-shadow(0 0 6px rgba(245,200,66,0.5));
-}
-.mobile-bottom-nav .mnav-badge {
-  position: absolute; top: 4px; right: calc(50% - 16px);
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #FF4D8D; border: 2px solid rgba(13,13,26,0.97);
-}
+.mobile-bottom-nav li.active .mnav-icon { filter: drop-shadow(0 0 6px rgba(245,200,66,0.5)); }
+.mobile-bottom-nav .mnav-badge { position: absolute; top: 4px; right: calc(50% - 16px); width: 8px; height: 8px; border-radius: 50%; background: #FF4D8D; border: 2px solid rgba(13,13,26,0.97); }
 @media (max-width: 768px) {
   .mobile-bottom-nav { display: block; }
   .sidebar { display: none !important; }
   .main { margin-left: 0 !important; }
   .menu-btn { display: none !important; }
   body { padding-bottom: 65px; }
-  /* Messages : ajuster le layout */
-  .msg-layout { height: calc(100dvh - 57px - 65px) !important; }
 }
-/* ===== FIN MOBILE BOTTOM NAV ===== */
-
 </style>
 </head>
 <body>
@@ -359,25 +321,20 @@ body {
 <div class="amb"></div>
 <div class="toast" id="toast"></div>
 
-<!-- LEFT PANEL -->
 <div class="left-panel">
   <a href="index.html" class="panel-logo">SCOROVIA</a>
-
   <div class="panel-content">
     <div class="panel-tag">
       <div class="live-dot"></div>
       En ligne · Rejoignez la communauté
     </div>
-
     <h1 class="panel-title">
       QUELLE EST<br>VOTRE NOTE<br><span class="gr">/ 10 ?</span>
     </h1>
-
     <p class="panel-sub">
       De vraies personnes vous notent <strong>anonymement</strong>.<br>
       Découvrez comment le monde vous perçoit vraiment.
     </p>
-
     <div class="stats-mini">
       <div class="stat-mini">
         <div class="stat-mini-val" id="stat-members">...</div>
@@ -389,7 +346,6 @@ body {
       </div>
     </div>
   </div>
-
   <div class="panel-footer">
     © 2026 SCOROVIA ·
     <a href="legal.html#cgu">CGU</a> ·
@@ -399,11 +355,9 @@ body {
   </div>
 </div>
 
-<!-- RIGHT PANEL -->
 <div class="right-panel">
   <div class="auth-box">
 
-    <!-- SUCCESS -->
     <div class="success-state" id="success-state">
       <div class="success-emoji">🎉</div>
       <div class="success-title">Bienvenue !</div>
@@ -411,9 +365,7 @@ body {
       <a href="dashboard.html" class="btn-go">ACCÉDER À MON ESPACE →</a>
     </div>
 
-    <!-- AUTH FORMS -->
     <div id="auth-forms">
-
       <div class="tabs">
         <div class="tab active" id="tab-login" onclick="switchTab('login')">Se connecter</div>
         <div class="tab" id="tab-signup" onclick="switchTab('signup')">S'inscrire</div>
@@ -423,32 +375,24 @@ body {
       <div class="form active" id="form-login">
         <div class="form-title">Bon retour 👋</div>
         <div class="form-sub">Connectez-vous pour voir votre note</div>
-
         <div class="alert" id="login-alert"></div>
-
         <button class="btn-google" onclick="signInWithGoogle()">
           <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
           Continuer avec Google
         </button>
-
         <div class="or-divider">ou par email</div>
-
         <div class="field">
           <label>Adresse email</label>
           <input type="email" id="login-email" placeholder="votre@email.com" />
         </div>
-
         <div class="field">
           <label>Mot de passe</label>
           <input type="password" id="login-pwd" placeholder="••••••••" />
         </div>
-
         <div class="forgot-link">
           <a onclick="switchTab('forgot')">Mot de passe oublié ?</a>
         </div>
-
         <button class="btn-submit" id="btn-login" onclick="doLogin()">SE CONNECTER</button>
-
         <div class="switch-text">
           Pas encore de compte ?
           <a onclick="switchTab('signup')">S'inscrire gratuitement</a>
@@ -459,16 +403,12 @@ body {
       <div class="form" id="form-signup">
         <div class="form-title">Créer un compte 🚀</div>
         <div class="form-sub">Gratuit · Sans carte · En 30 secondes</div>
-
         <div class="alert" id="signup-alert"></div>
-
         <button class="btn-google" onclick="signInWithGoogle()">
           <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
           S'inscrire avec Google
         </button>
-
         <div class="or-divider">ou par email</div>
-
         <div class="field-row">
           <div class="field">
             <label>Prénom</label>
@@ -479,16 +419,13 @@ body {
             <input type="number" id="signup-age" placeholder="25" min="18" max="99" oninput="checkAge(this.value)" />
           </div>
         </div>
-
         <div class="age-warning" id="age-warning">
           ⚠️ SCOROVIA est réservé aux personnes majeures (+18 ans).
         </div>
-
         <div class="field">
           <label>Ville</label>
           <input type="text" id="signup-city" placeholder="Paris" />
         </div>
-
         <div class="field">
           <label>Je suis</label>
           <select id="signup-genre">
@@ -499,12 +436,10 @@ body {
           </select>
           <div class="error-msg" id="signup-genre-err">Veuillez choisir une option</div>
         </div>
-
         <div class="field">
           <label>Adresse email</label>
           <input type="email" id="signup-email" placeholder="votre@email.com" />
         </div>
-
         <div class="field">
           <label>Mot de passe</label>
           <input type="password" id="signup-pwd" placeholder="8 caractères minimum" oninput="checkPwd(this.value)" />
@@ -516,16 +451,13 @@ body {
           </div>
           <div class="pwd-label" id="pwd-label">Entrez un mot de passe</div>
         </div>
-
         <div class="checkbox-row">
           <input type="checkbox" id="terms" />
           <label for="terms">
             J'accepte les <a href="legal.html#cgu">CGU</a> et la <a href="legal.html#confidentialite">Politique de confidentialité</a>. Je confirme avoir au moins 18 ans.
           </label>
         </div>
-
         <button class="btn-submit" id="btn-signup" onclick="doSignup()">CRÉER MON COMPTE GRATUIT</button>
-
         <div class="switch-text">
           Déjà un compte ? <a onclick="switchTab('login')">Se connecter</a>
         </div>
@@ -535,16 +467,12 @@ body {
       <div class="form" id="form-forgot">
         <div class="form-title">Mot de passe oublié</div>
         <div class="form-sub">Recevez un lien de réinitialisation par email</div>
-
         <div class="alert" id="forgot-alert"></div>
-
         <div class="field">
           <label>Adresse email</label>
           <input type="email" id="forgot-email" placeholder="votre@email.com" />
         </div>
-
         <button class="btn-submit" onclick="doForgot()">ENVOYER LE LIEN</button>
-
         <div class="switch-text">
           <a onclick="switchTab('login')">← Retour à la connexion</a>
         </div>
@@ -561,18 +489,22 @@ const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Handle OAuth callback (Google redirect)
+// ─── PARRAINAGE : lecture du ?ref= dans l'URL ───
+const urlParams = new URLSearchParams(window.location.search);
+const refCode = urlParams.get('ref');
+if (refCode) localStorage.setItem('scorovia_ref', refCode);
+// ────────────────────────────────────────────────
+
+// Handle OAuth callback
 async function checkSession() {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
-    // Check if profile exists, create if not (Google signup)
     await ensureProfile(session.user);
     window.location.href = 'dashboard.html';
   }
 }
 checkSession();
 
-// Create profile if first Google login
 async function ensureProfile(user) {
   const { data: existing } = await sb.from('users').select('id').eq('id', user.id).single();
   if (!existing) {
@@ -588,35 +520,28 @@ async function ensureProfile(user) {
       action: 'Bonus inscription',
       points: 20
     });
+    await handleReferral(user.id);
   }
 }
 
-// Google Sign In
 async function signInWithGoogle() {
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: {
-      redirectTo: window.location.origin + '/dashboard.html'
-    }
+    options: { redirectTo: window.location.origin + '/dashboard.html' }
   });
-  if (error) {
-    showToast('❌ Erreur Google : ' + error.message);
-  }
+  if (error) showToast('❌ Erreur Google : ' + error.message);
 }
 
-// Load member count
 async function loadStats() {
   const { count } = await sb.from('users').select('*', { count: 'exact', head: true });
   document.getElementById('stat-members').textContent = count ? count.toLocaleString('fr-FR') : '0';
 }
 loadStats();
 
-// Tab switching
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
   document.querySelectorAll('.alert').forEach(a => { a.classList.remove('show'); });
-
   if (tab === 'login') {
     document.getElementById('tab-login').classList.add('active');
     document.getElementById('form-login').classList.add('active');
@@ -628,19 +553,16 @@ function switchTab(tab) {
   }
 }
 
-// Password strength
 function checkPwd(val) {
   const bars = ['b1','b2','b3','b4'].map(id => document.getElementById(id));
   const label = document.getElementById('pwd-label');
   bars.forEach(b => b.className = 'pwd-bar');
   if (!val) { label.textContent = 'Entrez un mot de passe'; return; }
-
   let score = 0;
   if (val.length >= 8) score++;
   if (/[A-Z]/.test(val)) score++;
   if (/[0-9]/.test(val)) score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
-
   const levels = ['', 'Faible', 'Moyen', 'Bon', 'Fort'];
   const classes = ['', 'weak', 'medium', 'strong', 'strong'];
   for (let i = 0; i < score; i++) bars[i].classList.add(classes[score]);
@@ -648,78 +570,50 @@ function checkPwd(val) {
   label.style.color = score >= 3 ? 'var(--green)' : score >= 2 ? 'var(--gold)' : 'var(--red)';
 }
 
-// Age check
 function checkAge(val) {
   const warning = document.getElementById('age-warning');
   warning.classList.toggle('show', val && parseInt(val) < 18);
 }
 
-// Show alert
 function showAlert(id, msg, type) {
   const el = document.getElementById(id);
   el.textContent = msg;
   el.className = `alert ${type} show`;
 }
 
-// reCAPTCHA v3
 const RECAPTCHA_SITE_KEY = '6Lfe-b8sAAAAAB9-qk0jKy2An9xVvfNUfsIHM3HO';
-const RECAPTCHA_SCORE_MIN = 0.5;
 
 async function getRecaptchaToken(action) {
   return new Promise((resolve) => {
     if (typeof grecaptcha === 'undefined') { resolve(null); return; }
     grecaptcha.ready(() => {
-      grecaptcha.execute(RECAPTCHA_SITE_KEY, { action })
-        .then(resolve)
-        .catch(() => resolve(null));
+      grecaptcha.execute(RECAPTCHA_SITE_KEY, { action }).then(resolve).catch(() => resolve(null));
     });
   });
 }
 
-// LOGIN
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pwd = document.getElementById('login-pwd').value;
-
-  if (!email || !pwd) {
-    showAlert('login-alert', '⚠️ Veuillez remplir tous les champs', 'error');
-    return;
-  }
-
+  if (!email || !pwd) { showAlert('login-alert', '⚠️ Veuillez remplir tous les champs', 'error'); return; }
   const btn = document.getElementById('btn-login');
   btn.innerHTML = '<span class="spinner"></span>Vérification...';
   btn.disabled = true;
-
-  // reCAPTCHA check
   const token = await getRecaptchaToken('login');
   if (!token) {
     showAlert('login-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
-    btn.innerHTML = 'SE CONNECTER';
-    btn.disabled = false;
-    return;
+    btn.innerHTML = 'SE CONNECTER'; btn.disabled = false; return;
   }
-
   btn.innerHTML = '<span class="spinner"></span>Connexion...';
-
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
-
   if (error) {
     showAlert('login-alert', '❌ Email ou mot de passe incorrect', 'error');
-    btn.innerHTML = 'SE CONNECTER';
-    btn.disabled = false;
-    return;
+    btn.innerHTML = 'SE CONNECTER'; btn.disabled = false; return;
   }
-
-  // Save user info in localStorage
-  localStorage.setItem('scorovia_user', JSON.stringify({
-    id: data.user.id,
-    email: data.user.email,
-  }));
-
+  localStorage.setItem('scorovia_user', JSON.stringify({ id: data.user.id, email: data.user.email }));
   showSuccess('Connexion réussie ! Redirection...');
 }
 
-// SIGNUP
 async function doSignup() {
   const prenom = document.getElementById('signup-first').value.trim();
   const age = parseInt(document.getElementById('signup-age').value);
@@ -727,56 +621,32 @@ async function doSignup() {
   const email = document.getElementById('signup-email').value.trim();
   const pwd = document.getElementById('signup-pwd').value;
   const terms = document.getElementById('terms').checked;
-
   const genre = document.getElementById('signup-genre').value;
 
-  if (!prenom || !age || !email || !pwd) {
-    showAlert('signup-alert', '⚠️ Veuillez remplir tous les champs obligatoires', 'error');
-    return;
-  }
-  if (!genre) {
-    showAlert('signup-alert', '⚠️ Veuillez indiquer votre genre', 'error');
-    return;
-  }
-  if (age < 18) {
-    showAlert('signup-alert', '⚠️ Vous devez avoir au moins 18 ans', 'error');
-    return;
-  }
-  if (pwd.length < 8) {
-    showAlert('signup-alert', '⚠️ Le mot de passe doit faire au moins 8 caractères', 'error');
-    return;
-  }
-  if (!terms) {
-    showAlert('signup-alert', '⚠️ Veuillez accepter les conditions d\'utilisation', 'error');
-    return;
-  }
+  if (!prenom || !age || !email || !pwd) { showAlert('signup-alert', '⚠️ Veuillez remplir tous les champs obligatoires', 'error'); return; }
+  if (!genre) { showAlert('signup-alert', '⚠️ Veuillez indiquer votre genre', 'error'); return; }
+  if (age < 18) { showAlert('signup-alert', '⚠️ Vous devez avoir au moins 18 ans', 'error'); return; }
+  if (pwd.length < 8) { showAlert('signup-alert', '⚠️ Le mot de passe doit faire au moins 8 caractères', 'error'); return; }
+  if (!terms) { showAlert('signup-alert', '⚠️ Veuillez accepter les conditions d\'utilisation', 'error'); return; }
 
   const btn = document.getElementById('btn-signup');
   btn.innerHTML = '<span class="spinner"></span>Vérification robot...';
   btn.disabled = true;
 
-  // reCAPTCHA check
   const token = await getRecaptchaToken('signup');
   if (!token) {
     showAlert('signup-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
-    btn.innerHTML = 'CRÉER MON COMPTE GRATUIT';
-    btn.disabled = false;
-    return;
+    btn.innerHTML = 'CRÉER MON COMPTE GRATUIT'; btn.disabled = false; return;
   }
 
   btn.innerHTML = '<span class="spinner"></span>Création du compte...';
 
-  // Create auth user
   const { data, error } = await sb.auth.signUp({ email, password: pwd });
-
   if (error) {
     showAlert('signup-alert', '❌ ' + (error.message === 'User already registered' ? 'Cet email est déjà utilisé' : error.message), 'error');
-    btn.innerHTML = 'CRÉER MON COMPTE GRATUIT';
-    btn.disabled = false;
-    return;
+    btn.innerHTML = 'CRÉER MON COMPTE GRATUIT'; btn.disabled = false; return;
   }
 
-  // Insert user profile
   if (data.user) {
     await sb.from('users').insert({
       id: data.user.id,
@@ -788,53 +658,69 @@ async function doSignup() {
       points: 20
     });
 
-    // Add points history
     await sb.from('points_history').insert({
       user_id: data.user.id,
       action: 'Bonus inscription',
       points: 20
     });
 
+    // ─── Crédite le parrain si parrainage ───
+    await handleReferral(data.user.id);
+    // ────────────────────────────────────────
+
     localStorage.setItem('scorovia_user', JSON.stringify({
-      id: data.user.id,
-      email: email,
-      prenom: prenom,
-      ville: ville,
-      points: 20
+      id: data.user.id, email: email, prenom: prenom, ville: ville, points: 20
     }));
   }
 
   showSuccess(`Bienvenue ${prenom} ! Votre compte est créé avec 20 points de bienvenue 🎉`);
 }
 
-// FORGOT PASSWORD
+// ─── FONCTION PARRAINAGE ─────────────────────────────────
+async function handleReferral(newUserId) {
+  const ref = localStorage.getItem('scorovia_ref');
+  if (!ref) return;
+
+  // Trouve le parrain via les 8 premiers chars de son UUID
+  const { data: parrain } = await sb
+    .from('users')
+    .select('id, points')
+    .ilike('id', ref + '%')
+    .single();
+
+  // Sécurité : pas de self-parrainage
+  if (!parrain || parrain.id === newUserId) {
+    localStorage.removeItem('scorovia_ref');
+    return;
+  }
+
+  // Crédite +50 pts au parrain
+  await sb.from('users')
+    .update({ points: (parrain.points || 0) + 50 })
+    .eq('id', parrain.id);
+
+  await sb.from('points_history').insert({
+    user_id: parrain.id,
+    action: 'Parrainage',
+    points: 50
+  });
+
+  localStorage.removeItem('scorovia_ref');
+}
+// ────────────────────────────────────────────────────────
+
 async function doForgot() {
   const email = document.getElementById('forgot-email').value.trim();
-  if (!email) {
-    showAlert('forgot-alert', '⚠️ Entrez votre adresse email', 'error');
-    return;
-  }
-
-  // reCAPTCHA check
+  if (!email) { showAlert('forgot-alert', '⚠️ Entrez votre adresse email', 'error'); return; }
   const token = await getRecaptchaToken('forgot_password');
-  if (!token) {
-    showAlert('forgot-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
-    return;
-  }
-
+  if (!token) { showAlert('forgot-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error'); return; }
   const { error } = await sb.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + '/login.html'
   });
-
-  if (error) {
-    showAlert('forgot-alert', '❌ Erreur : ' + error.message, 'error');
-    return;
-  }
-
+  if (error) { showAlert('forgot-alert', '❌ Erreur : ' + error.message, 'error'); return; }
   showAlert('forgot-alert', '✅ Lien envoyé ! Vérifiez votre boîte mail.', 'success');
 }
 
-// Show success
 function showSuccess(msg) {
   document.getElementById('auth-forms').style.display = 'none';
   document.getElementById('success-msg').textContent = msg;
@@ -842,16 +728,12 @@ function showSuccess(msg) {
   setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
 }
 
-// Toast
 function showToast(msg, type) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast ' + (type || '');
-  t.classList.add('show');
+  t.textContent = msg; t.className = 'toast ' + (type || ''); t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// Enter key
 document.addEventListener('keypress', e => {
   if (e.key !== 'Enter') return;
   const active = document.querySelector('.form.active');
@@ -860,39 +742,14 @@ document.addEventListener('keypress', e => {
   else if (active?.id === 'form-forgot') doForgot();
 });
 </script>
+
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
   <ul>
-    <li class="">
-      <a href="dashboard.html">
-        <span class="mnav-icon">🏠</span>
-        <span class="mnav-label">Accueil</span>
-        
-      </a>
-    </li>    <li class="">
-      <a href="noter.html">
-        <span class="mnav-icon">⭐</span>
-        <span class="mnav-label">Noter</span>
-        
-      </a>
-    </li>    <li class="">
-      <a href="mesnotes.html">
-        <span class="mnav-icon">📊</span>
-        <span class="mnav-label">Mes notes</span>
-        
-      </a>
-    </li>    <li class="">
-      <a href="messages.html">
-        <span class="mnav-icon">💬</span>
-        <span class="mnav-label">Messages</span>
-        <span class="mnav-badge"></span>
-      </a>
-    </li>    <li class="">
-      <a href="profil.html">
-        <span class="mnav-icon">👤</span>
-        <span class="mnav-label">Profil</span>
-        
-      </a>
-    </li>
+    <li><a href="dashboard.html"><span class="mnav-icon">🏠</span><span class="mnav-label">Accueil</span></a></li>
+    <li><a href="noter.html"><span class="mnav-icon">⭐</span><span class="mnav-label">Noter</span></a></li>
+    <li><a href="mesnotes.html"><span class="mnav-icon">📊</span><span class="mnav-label">Mes notes</span></a></li>
+    <li><a href="messages.html"><span class="mnav-icon">💬</span><span class="mnav-label">Messages</span><span class="mnav-badge"></span></a></li>
+    <li><a href="profil.html"><span class="mnav-icon">👤</span><span class="mnav-label">Profil</span></a></li>
   </ul>
 </nav>
 </body>
