@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOROVIA — Messages</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #F5C842; --gold2: #FFE27A; --pink: #FF4D8D;
+  --dark: #07070F; --deep: #0D0D1A; --card: #13131E; --card2: #18182A;
+  --border: rgba(255,255,255,0.07); --text: #F0EEF8;
+  --muted: rgba(240,238,248,0.42); --green: #22D4A0; --purple: #8B5CF6;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; }
+
+/* LOADING */
+.loading-screen { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 100; }
+.loading-logo { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.18em; background: linear-gradient(135deg, var(--gold), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.loading-spinner { width: 32px; height: 32px; border: 3px solid rgba(245,200,66,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* SIDEBAR */
+.sidebar { width: 220px; flex-shrink: 0; background: var(--deep); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40; transition: transform 0.3s; }
+.sidebar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.15em; background: linear-gradient(135deg, var(--gold), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px; padding-left: 8px; text-decoration: none; display: block; }
+.nav-section { font-size: 10px; color: rgba(240,238,248,0.2); text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 8px 8px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: var(--muted); cursor: pointer; transition: background 0.2s, color 0.2s; margin-bottom: 2px; text-decoration: none; }
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.nav-item.active { background: rgba(245,200,66,0.1); color: var(--gold2); }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-bottom { margin-top: auto; border-top: 1px solid var(--border); padding-top: 16px; }
+.user-mini { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; transition: background 0.2s; text-decoration: none; }
+.user-mini:hover { background: rgba(255,255,255,0.04); }
+.user-av-sm { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--pink)); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; font-weight: 600; }
+.user-name-sm { font-size: 13px; font-weight: 500; color: var(--text); }
+.user-pts-sm { font-size: 11px; color: var(--gold2); }
+
+/* MAIN */
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { background: rgba(7,7,15,0.8); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 30; }
+.topbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.08em; }
+.pts-pill { display: flex; align-items: center; gap: 6px; background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2); padding: 6px 14px; border-radius: 20px; font-size: 13px; color: var(--gold2); font-weight: 500; text-decoration: none; }
+
+/* MESSAGING LAYOUT */
+.msg-layout {
+  display: flex; flex: 1; height: calc(100vh - 57px); overflow: hidden;
+}
+
+/* CONVERSATIONS LIST */
+.conv-panel {
+  width: 320px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  background: var(--deep);
+}
+
+.conv-header {
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.conv-header h2 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+  letter-spacing: 0.08em; margin-bottom: 10px;
+}
+
+.conv-search {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.conv-search input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif;
+  flex: 1;
+}
+.conv-search input::placeholder { color: var(--muted); }
+
+.conv-list { flex: 1; overflow-y: auto; padding: 8px; }
+.conv-list::-webkit-scrollbar { width: 4px; }
+.conv-list::-webkit-scrollbar-track { background: transparent; }
+.conv-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.conv-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 12px; cursor: pointer;
+  transition: background 0.2s; position: relative;
+}
+.conv-item:hover { background: rgba(255,255,255,0.04); }
+.conv-item.active { background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.15); }
+.conv-item.locked { opacity: 0.6; }
+
+.conv-av {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; flex-shrink: 0;
+  position: relative;
+}
+.conv-av.blur-av { filter: blur(5px); user-select: none; }
+.conv-av-online {
+  position: absolute; bottom: 1px; right: 1px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green); border: 2px solid var(--deep);
+}
+
+.conv-info { flex: 1; min-width: 0; }
+.conv-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conv-name.blur-name { filter: blur(5px); user-select: none; }
+.conv-preview { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.conv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.conv-time { font-size: 10px; color: var(--muted); }
+.conv-badge { background: var(--pink); color: #fff; font-size: 9px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.conv-lock-pill { background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2); border-radius: 8px; padding: 3px 8px; font-size: 10px; color: var(--gold2); cursor: pointer; white-space: nowrap; }
+
+.conv-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
+
+/* CHAT AREA */
+.chat-area {
+  flex: 1; display: flex; flex-direction: column;
+  background: var(--dark);
+}
+
+.chat-header {
+  padding: 16px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(7,7,15,0.8); backdrop-filter: blur(12px);
+}
+.chat-av { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; flex-shrink: 0; }
+.chat-name { font-size: 15px; font-weight: 500; }
+.chat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.chat-score-badge { margin-left: auto; background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: var(--gold2); }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 24px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.msg-bubble-wrap { display: flex; gap: 8px; max-width: 75%; }
+.msg-bubble-wrap.me { margin-left: auto; flex-direction: row-reverse; }
+
+.msg-av-small { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: auto; }
+
+.msg-bubble {
+  padding: 10px 14px; border-radius: 16px;
+  font-size: 13px; line-height: 1.55;
+  max-width: 100%;
+}
+.msg-bubble.them { background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.msg-bubble.me { background: linear-gradient(135deg, var(--gold), #E8A020); color: #000; border-bottom-right-radius: 4px; }
+.msg-time { font-size: 10px; color: var(--muted); margin-top: 4px; text-align: right; }
+.msg-bubble-wrap.me .msg-time { text-align: left; }
+
+/* CHAT INPUT */
+.chat-input-area {
+  padding: 16px 24px; border-top: 1px solid var(--border);
+  background: rgba(7,7,15,0.6);
+}
+.chat-input-row {
+  display: flex; gap: 10px; align-items: flex-end;
+}
+.chat-input-box {
+  flex: 1; background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px 16px;
+  color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif;
+  outline: none; resize: none; min-height: 44px; max-height: 120px;
+  transition: border-color 0.3s; line-height: 1.4;
+}
+.chat-input-box:focus { border-color: rgba(245,200,66,0.35); }
+.chat-input-box::placeholder { color: var(--muted); }
+.btn-send {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.btn-send:hover { opacity: 0.9; }
+.btn-send:active { transform: scale(0.94); }
+.btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.chat-input-hint { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; }
+
+/* EMPTY / LOCKED STATES */
+.empty-chat {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 40px;
+  color: var(--muted);
+}
+.empty-chat-icon { font-size: 56px; margin-bottom: 20px; opacity: 0.5; }
+.empty-chat-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.06em; color: var(--text); margin-bottom: 8px; }
+.empty-chat-sub { font-size: 13px; line-height: 1.6; max-width: 320px; }
+
+/* PREMIUM GATE */
+.premium-gate {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 40px;
+}
+.premium-gate-icon { font-size: 64px; margin-bottom: 20px; }
+.premium-gate-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.06em; color: var(--gold2); margin-bottom: 10px; }
+.premium-gate-sub { font-size: 14px; color: var(--muted); line-height: 1.65; max-width: 380px; margin-bottom: 28px; font-weight: 300; }
+.premium-features-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; text-align: left; }
+.pf-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.pf-item::before { content: '✓'; color: var(--green); font-weight: 700; }
+.btn-get-premium {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 14px; padding: 14px 32px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+  letter-spacing: 0.1em; color: #000; cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 8px 30px rgba(245,200,66,0.25);
+}
+.btn-get-premium:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* UNLOCK MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 300; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 400px; padding: 28px; position: relative; margin: 16px; animation: fadeUp 0.25s ease both; text-align: center; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.modal-close-btn { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.06); border: none; color: var(--muted); width: 28px; height: 28px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.modal-box h3 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; color: var(--gold2); margin-bottom: 8px; }
+.modal-box p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+.modal-cost-row { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(245,200,66,0.06); border: 1px solid rgba(245,200,66,0.15); border-radius: 12px; padding: 12px; margin-bottom: 18px; font-size: 14px; }
+.modal-cost-pts { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold2); }
+.btn-modal-confirm { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--gold), #E8A020); border: none; border-radius: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.08em; color: #000; cursor: pointer; margin-bottom: 10px; }
+.btn-modal-cancel { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 400; transition: transform 0.3s ease; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(34,212,160,0.3); }
+.toast.error { border-color: rgba(255,77,77,0.3); }
+.toast.gold { border-color: rgba(245,200,66,0.3); }
+
+.menu-btn { display: none; position: fixed; bottom: 20px; right: 20px; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #E8A020); border: none; font-size: 22px; cursor: pointer; z-index: 60; box-shadow: 0 4px 20px rgba(245,200,66,0.3); align-items: center; justify-content: center; }
+
+@media (max-width: 900px) {
+  .conv-panel { width: 100%; position: absolute; top: 57px; left: 0; bottom: 0; z-index: 20; transform: translateX(0); transition: transform 0.3s; }
+  .conv-panel.hidden { transform: translateX(-100%); }
+  .chat-area { width: 100%; }
+}
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; } .menu-btn { display: flex; }
+  .topbar { padding: 14px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="loading-logo">SCOROVIA</div>
+  <div class="loading-spinner"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL DÉVERROUILLER CONVERSATION -->
+<div class="modal-overlay" id="unlock-modal" onclick="closeUnlockModal(event)">
+  <div class="modal-box">
+    <button class="modal-close-btn" onclick="document.getElementById('unlock-modal').classList.remove('open')">✕</button>
+    <div style="font-size:48px;margin-bottom:14px;">🔓</div>
+    <h3>DÉVERROUILLER CE CONTACT</h3>
+    <p id="unlock-modal-text">Dépensez 20 points pour envoyer votre premier message à cette personne.</p>
+    <div class="modal-cost-row">
+      <span>⚡</span>
+      <div class="modal-cost-pts" id="unlock-cost-display">20</div>
+      <span style="font-size:13px;color:var(--muted)">points</span>
+    </div>
+    <button class="btn-modal-confirm" id="btn-confirm-unlock" onclick="confirmUnlock()">ENVOYER UN MESSAGE</button>
+    <button class="btn-modal-cancel" onclick="document.getElementById('unlock-modal').classList.remove('open')">Annuler</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <a href="index.html" class="sidebar-logo">SCOROVIA</a>
+  <div class="nav-section">Principal</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Tableau de bord</a>
+  <a class="nav-item" href="noter.html"><span class="nav-icon">⭐</span> Noter</a>
+  <a class="nav-item" href="mesnotes.html"><span class="nav-icon">📊</span> Mes notes</a>
+  <div class="nav-section">Communauté</div>
+  <a class="nav-item" href="classement.html"><span class="nav-icon">🏆</span> Classement</a>
+  <a class="nav-item active"><span class="nav-icon">💬</span> Messages</a>
+  <div class="nav-section">Compte</div>
+  <a class="nav-item" href="points.html"><span class="nav-icon">⚡</span> Mes points</a>
+  <a class="nav-item" href="profil.html"><span class="nav-icon">👤</span> Mon profil</a>
+  <a class="nav-item" onclick="doLogout()" style="cursor:pointer"><span class="nav-icon">🚪</span> Déconnexion</a>
+  <div class="sidebar-bottom">
+    <div class="user-mini">
+      <div class="user-av-sm" id="user-avatar">?</div>
+      <div>
+        <div class="user-name-sm" id="user-name">...</div>
+        <div class="user-pts-sm">⚡ <span id="user-pts">—</span> pts</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">💬 Messages</div>
+    <div class="topbar-right">
+      <a href="points.html" class="pts-pill">⚡ <span id="pts-display">—</span> pts</a>
+    </div>
+  </div>
+
+  <div class="msg-layout">
+
+    <!-- LISTE CONVERSATIONS -->
+    <div class="conv-panel" id="conv-panel">
+      <div class="conv-header">
+        <h2>Conversations</h2>
+        <div class="conv-search">
+          <span style="font-size:14px;color:var(--muted)">🔍</span>
+          <input type="text" placeholder="Rechercher..." id="search-input" oninput="filterConvs(this.value)" />
+        </div>
+      </div>
+      <div class="conv-list" id="conv-list">
+        <div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">Chargement...</div>
+      </div>
+    </div>
+
+    <!-- ZONE CHAT -->
+    <div class="chat-area" id="chat-area">
+      <!-- État vide par défaut -->
+      <div class="empty-chat" id="empty-state">
+        <div class="empty-chat-icon">💬</div>
+        <div class="empty-chat-title">Vos messages</div>
+        <div class="empty-chat-sub">Sélectionnez une conversation ou déverrouillez un contact pour commencer à discuter.</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<script>
+const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let userProfile = null;
+let allConvs = [];
+let activeConvId = null;
+let pendingUnlockId = null;
+let isPremium = false;
+
+// Couleurs d'avatar
+const AV_COLORS = [
+  'linear-gradient(135deg,#2D1F5E,#1A3A5E)',
+  'linear-gradient(135deg,#5E2D7A,#2D1F5E)',
+  'linear-gradient(135deg,#1A3A5E,#0D1B2A)',
+  'linear-gradient(135deg,#2D5E3A,#1A3A2A)',
+  'linear-gradient(135deg,#5E3A1A,#2D200D)',
+  'linear-gradient(135deg,#3A2D5E,#1A2D5E)',
+];
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
+  if (!profile) { window.location.href = 'login.html'; return; }
+  userProfile = profile;
+
+  document.getElementById('user-avatar').textContent = profile.prenom?.charAt(0).toUpperCase() || '?';
+  document.getElementById('user-name').textContent = profile.prenom || 'Membre';
+  document.getElementById('user-pts').textContent = profile.points || 0;
+  document.getElementById('pts-display').textContent = profile.points || 0;
+
+  // Vérifier premium (simplifié — à connecter au webhook Stripe quand disponible)
+  isPremium = false; // à changer en true quand le webhook Stripe est actif
+
+  await loadConversations();
+  document.getElementById('loading').style.display = 'none';
+}
+
+async function loadConversations() {
+  // Récupérer les personnes qui ont voté pour mes photos
+  const { data: myPhotos } = await sb.from('photos').select('id').eq('user_id', currentUser.id);
+
+  if (!myPhotos || myPhotos.length === 0) {
+    showEmptyState('noPhotos');
+    return;
+  }
+
+  const photoIds = myPhotos.map(p => p.id);
+
+  // Récupérer les votants uniques
+  const { data: votes } = await sb.from('votes')
+    .select('voter_id, note, created_at')
+    .in('photo_id', photoIds)
+    .order('created_at', { ascending: false });
+
+  if (!votes || votes.length === 0) {
+    showEmptyState('noVotes');
+    return;
+  }
+
+  // Dédupliquer par voter_id, garder la note la plus récente
+  const seen = {};
+  votes.forEach(v => {
+    if (!seen[v.voter_id]) seen[v.voter_id] = v;
+  });
+
+  const uniqueVoters = Object.values(seen);
+
+  // Charger les messages existants (conversations déjà ouvertes)
+  const { data: messages } = await sb.from('messages')
+    .select('*')
+    .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+    .order('created_at', { ascending: false });
+
+  // Construire les conversations
+  allConvs = uniqueVoters.map((v, i) => {
+    const convMessages = messages ? messages.filter(m =>
+      (m.sender_id === currentUser.id && m.receiver_id === v.voter_id) ||
+      (m.sender_id === v.voter_id && m.receiver_id === currentUser.id)
+    ) : [];
+
+    const lastMsg = convMessages[0];
+    const unread = convMessages.filter(m => m.sender_id === v.voter_id && !m.read).length;
+    const isUnlocked = convMessages.length > 0;
+
+    return {
+      id: v.voter_id,
+      voterId: v.voter_id,
+      note: v.note,
+      date: v.created_at,
+      messages: convMessages,
+      lastMsg,
+      unread,
+      isUnlocked,
+      index: i,
+      // Info voter (on ne charge pas pour garder l'anonymat)
+      fakeName: generateFakeName(i),
+      avColor: AV_COLORS[i % AV_COLORS.length],
+    };
+  });
+
+  renderConvList(allConvs);
+}
+
+function generateFakeName(i) {
+  const names = ['Marie T.', 'Lucas M.', 'Emma R.', 'Noah B.', 'Chloé D.', 'Pierre L.', 'Sofia K.', 'Thomas V.', 'Léa F.', 'Hugo C.', 'Inès P.', 'Maxime G.'];
+  return names[i % names.length];
+}
+
+function renderConvList(convs) {
+  const list = document.getElementById('conv-list');
+
+  if (convs.length === 0) {
+    list.innerHTML = '<div class="conv-empty">Aucune conversation trouvée</div>';
+    return;
+  }
+
+  list.innerHTML = convs.map(conv => {
+    const scoreColor = conv.note >= 8 ? 'var(--green)' : conv.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
+    const timeStr = timeAgo(conv.date);
+    const initial = conv.fakeName.charAt(0);
+    const preview = conv.lastMsg ? conv.lastMsg.content.substring(0, 36) + (conv.lastMsg.content.length > 36 ? '…' : '') : `A voté ${conv.note}/10 pour vous`;
+
+    if (conv.isUnlocked || isPremium) {
+      // Conversation déverrouillée
+      return `
+      <div class="conv-item ${activeConvId === conv.id ? 'active' : ''}" onclick="openConv('${conv.id}')">
+        <div class="conv-av" style="background:${conv.avColor}">
+          ${initial}
+          <div class="conv-av-online"></div>
+        </div>
+        <div class="conv-info">
+          <div class="conv-name">${conv.fakeName}</div>
+          <div class="conv-preview">${preview}</div>
+        </div>
+        <div class="conv-meta">
+          <div class="conv-time">${timeStr}</div>
+          ${conv.unread > 0 ? `<div class="conv-badge">${conv.unread}</div>` : `<div style="font-size:11px;color:${scoreColor};font-weight:600">${conv.note}/10</div>`}
+        </div>
+      </div>`;
+    } else {
+      // Conversation verrouillée
+      return `
+      <div class="conv-item locked" onclick="openUnlockModal('${conv.id}', '${conv.note}')">
+        <div class="conv-av blur-av" style="background:${conv.avColor}">${initial}</div>
+        <div class="conv-info">
+          <div class="conv-name blur-name">${conv.fakeName}</div>
+          <div class="conv-preview">A voté <strong style="color:${scoreColor}">${conv.note}/10</strong> pour vous</div>
+        </div>
+        <div class="conv-meta">
+          <div class="conv-time">${timeStr}</div>
+          <div class="conv-lock-pill" onclick="event.stopPropagation();openUnlockModal('${conv.id}','${conv.note}')">🔒 -20 pts</div>
+        </div>
+      </div>`;
+    }
+  }).join('');
+}
+
+function filterConvs(query) {
+  if (!query.trim()) { renderConvList(allConvs); return; }
+  const filtered = allConvs.filter(c =>
+    c.isUnlocked && c.fakeName.toLowerCase().includes(query.toLowerCase())
+  );
+  renderConvList(filtered);
+}
+
+// OUVRIR UNE CONVERSATION
+async function openConv(voterId) {
+  activeConvId = voterId;
+  const conv = allConvs.find(c => c.id === voterId);
+  if (!conv) return;
+
+  // Marquer comme lu
+  if (conv.unread > 0) {
+    await sb.from('messages').update({ read: true })
+      .eq('sender_id', voterId).eq('receiver_id', currentUser.id);
+    conv.unread = 0;
+  }
+
+  // Re-render la liste pour mettre à jour l'état actif
+  renderConvList(allConvs);
+
+  // Charger les vrais messages
+  const { data: messages } = await sb.from('messages')
+    .select('*')
+    .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${voterId}),and(sender_id.eq.${voterId},receiver_id.eq.${currentUser.id})`)
+    .order('created_at', { ascending: true });
+
+  renderChatArea(conv, messages || []);
+}
+
+function renderChatArea(conv, messages) {
+  const area = document.getElementById('chat-area');
+  const scoreColor = conv.note >= 8 ? 'var(--green)' : conv.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
+  const myInitial = userProfile.prenom?.charAt(0).toUpperCase() || '?';
+
+  area.innerHTML = `
+    <div class="chat-header">
+      <div class="chat-av" style="background:${conv.avColor}">${conv.fakeName.charAt(0)}</div>
+      <div>
+        <div class="chat-name">${conv.fakeName}</div>
+        <div class="chat-sub">Membre SCOROVIA · A voté pour vous</div>
+      </div>
+      <div class="chat-score-badge">Vous a donné <strong style="color:${scoreColor}">${conv.note}/10</strong></div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      ${messages.length === 0 ? `
+        <div style="text-align:center;margin:auto;color:var(--muted);font-size:13px;padding:40px 0;">
+          <div style="font-size:32px;margin-bottom:12px;">👋</div>
+          C'est le début de votre conversation !<br>
+          <span style="font-size:12px;">Soyez le premier à envoyer un message.</span>
+        </div>` :
+        messages.map(m => renderMessage(m, myInitial, conv)).join('')
+      }
+    </div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-row">
+        <textarea class="chat-input-box" id="msg-input" placeholder="Écrivez votre message…" rows="1"
+          onkeydown="handleMsgKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="btn-send" id="btn-send" onclick="sendMessage('${conv.voterId}')">➤</button>
+      </div>
+      ${!isPremium ? `<div class="chat-input-hint">⚡ Chaque message envoyé coûte <strong style="color:var(--gold2)">20 points</strong> · <a href="points.html" style="color:var(--gold2)">Premium = illimité</a></div>` : ''}
+    </div>`;
+
+  // Scroll bas
+  setTimeout(() => {
+    const msgs = document.getElementById('chat-messages');
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  }, 50);
+}
+
+function renderMessage(m, myInitial, conv) {
+  const isMe = m.sender_id === currentUser.id;
+  const time = new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return `
+  <div class="msg-bubble-wrap ${isMe ? 'me' : ''}">
+    <div class="msg-av-small" style="background:${isMe ? 'linear-gradient(135deg,var(--gold),var(--pink))' : conv.avColor}">
+      ${isMe ? myInitial : conv.fakeName.charAt(0)}
+    </div>
+    <div>
+      <div class="msg-bubble ${isMe ? 'me' : 'them'}">${escapeHtml(m.content)}</div>
+      <div class="msg-time">${time}</div>
+    </div>
+  </div>`;
+}
+
+// ENVOYER UN MESSAGE
+async function sendMessage(receiverId) {
+  const input = document.getElementById('msg-input');
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) return;
+
+  // Vérifier les points si pas premium
+  if (!isPremium && userProfile.points < 20) {
+    showToast('⚡ Points insuffisants — 20 pts requis par message', 'error');
+    setTimeout(() => window.location.href = 'points.html', 2000);
+    return;
+  }
+
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  try {
+    // Insérer le message
+    const { data: newMsg, error } = await sb.from('messages').insert({
+      sender_id: currentUser.id,
+      receiver_id: receiverId,
+      content,
+      read: false
+    }).select().single();
+
+    if (error) throw error;
+
+    // Débiter les points si pas premium
+    if (!isPremium) {
+      const newPts = userProfile.points - 20;
+      await sb.from('users').update({ points: newPts }).eq('id', currentUser.id);
+      await sb.from('points_history').insert({ user_id: currentUser.id, action: 'Message envoyé', points: -20 });
+      userProfile.points = newPts;
+      document.getElementById('pts-display').textContent = newPts;
+      document.getElementById('user-pts').textContent = newPts;
+    }
+
+    // Ajouter le message dans l'UI
+    const msgs = document.getElementById('chat-messages');
+    const conv = allConvs.find(c => c.id === receiverId);
+    if (msgs && conv) {
+      const myInitial = userProfile.prenom?.charAt(0).toUpperCase() || '?';
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = renderMessage(newMsg, myInitial, conv);
+      // Retirer l'état vide si présent
+      const emptyDiv = msgs.querySelector('div[style*="margin:auto"]');
+      if (emptyDiv) emptyDiv.remove();
+      msgs.appendChild(tempDiv.firstElementChild);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    // Mettre à jour la conv dans la liste
+    if (conv) {
+      conv.lastMsg = newMsg;
+      conv.isUnlocked = true;
+      renderConvList(allConvs);
+    }
+
+    if (!isPremium) showToast(`✅ Message envoyé · -20 pts`, 'success');
+
+  } catch(e) {
+    showToast('❌ Erreur : ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// DÉVERROUILLER CONVERSATION
+function openUnlockModal(voterId, note) {
+  pendingUnlockId = voterId;
+  document.getElementById('unlock-modal-text').textContent = `Cette personne vous a donné ${note}/10. Dépensez 20 points pour lui envoyer votre premier message.`;
+  document.getElementById('unlock-modal').classList.add('open');
+}
+
+async function confirmUnlock() {
+  if (!pendingUnlockId) return;
+
+  if (userProfile.points < 20) {
+    document.getElementById('unlock-modal').classList.remove('open');
+    showToast('⚡ Points insuffisants — achetez des points !', 'error');
+    setTimeout(() => window.location.href = 'points.html', 1800);
+    return;
+  }
+
+  document.getElementById('unlock-modal').classList.remove('open');
+
+  // Marquer la conv comme déverrouillée localement
+  const conv = allConvs.find(c => c.id === pendingUnlockId);
+  if (conv) {
+    conv.isUnlocked = true;
+    renderConvList(allConvs);
+    openConv(pendingUnlockId);
+  }
+
+  pendingUnlockId = null;
+}
+
+function closeUnlockModal(e) {
+  if (e.target === document.getElementById('unlock-modal')) {
+    document.getElementById('unlock-modal').classList.remove('open');
+  }
+}
+
+// ÉTATS VIDES
+function showEmptyState(type) {
+  const area = document.getElementById('chat-area');
+  const msgs = {
+    noPhotos: { icon: '📸', title: 'Pas encore de photos', sub: 'Soumettez une photo pour commencer à recevoir des votes et pouvoir contacter vos votants.' },
+    noVotes: { icon: '🗳️', title: 'Pas encore de votes', sub: 'Vous n\'avez pas encore reçu de votes. Partagez votre profil pour recevoir des notes !' },
+  };
+  const m = msgs[type] || msgs.noPhotos;
+  area.innerHTML = `
+    <div class="empty-chat">
+      <div class="empty-chat-icon">${m.icon}</div>
+      <div class="empty-chat-title">${m.title}</div>
+      <div class="empty-chat-sub">${m.sub}</div>
+    </div>`;
+
+  document.getElementById('conv-list').innerHTML = `<div class="conv-empty">${m.sub}</div>`;
+}
+
+// HELPERS
+function handleMsgKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    const conv = allConvs.find(c => c.id === activeConvId);
+    if (conv) sendMessage(conv.voterId);
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60) return 'À l\'instant';
+  if (diff < 3600) return `${Math.floor(diff/60)}min`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+  return `${Math.floor(diff/86400)}j`;
+}
+
+async function doLogout() { await sb.auth.signOut(); window.location.href = 'login.html'; }
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + (type || ''); t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+init();
+</script>
+</body>
+</html>
