@@ -981,11 +981,9 @@ nav {
       S'inscrire avec Google
           </a>
     <div class="or-divider">ou avec votre email</div>
-    <div class="email-row" id="hero-row">
-      <input type="email" id="hero-email" placeholder="votre@email.com" />
-      <button class="btn-email-go" onclick="heroEmail()">→</button>
-    </div>
-    <div class="success-inline" id="hero-success">✓ Parfait ! On vous prévient dès l'ouverture.</div>
+    <a class="btn-social" href="login.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card);border:1px solid rgba(255,255,255,0.09);color:var(--text);">
+      ✉️ S'inscrire avec votre email
+    </a>
     <p class="legal-note">
       Gratuit · Sans carte · <a href="legal.html#cgu">CGU</a> · <a href="legal.html#confidentialite">Confidentialité</a> · Données protégées RGPD
     </p>
@@ -1081,7 +1079,7 @@ nav {
     <div class="step-card reveal">
       <div class="step-n">01</div>
       <div class="step-t">Uploadez votre photo</div>
-      <div class="step-d">Soumettez votre photo à la communauté. Coût : 10 points.</div>
+      <div class="step-d">Soumettez votre photo à la communauté. La 1ère est gratuite, puis 20 points.</div>
     </div>
     <div class="step-card reveal">
       <div class="step-n">02</div>
@@ -1105,7 +1103,7 @@ nav {
 <section class="points-section">
   <h2 class="pts-title reveal">GAGNEZ DES POINTS</h2>
   <div class="pts-grid">
-    <div class="pts-card reveal"><div class="pts-icon">⭐</div><div class="pts-label">En notant</div><div class="pts-val">+3 pts</div></div>
+    <div class="pts-card reveal"><div class="pts-icon">⭐</div><div class="pts-label">En notant</div><div class="pts-val">+1 pt</div></div>
     <div class="pts-card reveal"><div class="pts-icon">📺</div><div class="pts-label">Pub vidéo</div><div class="pts-val">+5 pts</div></div>
     <div class="pts-card reveal"><div class="pts-icon">👥</div><div class="pts-label">Parrainage</div><div class="pts-val">+50 pts</div></div>
     <div class="pts-card reveal"><div class="pts-icon">💳</div><div class="pts-label">Achat</div><div class="pts-val">dès 0,99€</div></div>
@@ -1196,21 +1194,6 @@ function doEmailSignup() {
   }
   showSuccess();
 }
-
-// Hero email
-function heroEmail() {
-  const v = document.getElementById('hero-email').value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return;
-  document.getElementById('hero-row').style.display = 'none';
-  document.getElementById('hero-success').style.display = 'block';
-  count++;
-  document.getElementById('counter').textContent = count.toLocaleString('fr-FR');
-  document.getElementById('bar-counter').textContent = count.toLocaleString('fr-FR');
-}
-
-document.getElementById('hero-email').addEventListener('keypress', e => {
-  if (e.key === 'Enter') heroEmail();
-});
 
 document.getElementById('modal-email').addEventListener('keypress', e => {
   if (e.key === 'Enter') doEmailSignup();
