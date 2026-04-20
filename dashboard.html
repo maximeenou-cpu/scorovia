@@ -265,6 +265,125 @@ body {
   letter-spacing: 0.08em; color: #000; cursor: pointer; white-space: nowrap; flex-shrink: 0;
 }
 
+/* NOTIF PANEL */
+.notif-btn { position: relative; }
+.notif-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--pink); color: #fff;
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--dark);
+}
+.notif-panel {
+  display: none; position: absolute; top: 56px; right: 0;
+  width: 320px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  z-index: 200; overflow: hidden;
+}
+.notif-panel.open { display: block; animation: fadeDownNotif 0.2s ease both; }
+@keyframes fadeDownNotif {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.notif-header {
+  padding: 14px 16px 10px; font-size: 13px; font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.notif-mark-read { font-size: 11px; color: var(--gold2); cursor: pointer; }
+.notif-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.2s;
+}
+.notif-item:hover { background: rgba(255,255,255,0.03); }
+.notif-item:last-child { border-bottom: none; }
+.notif-item.unread { background: rgba(245,200,66,0.03); }
+.notif-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.notif-body { flex: 1; }
+.notif-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+.notif-text strong { color: var(--gold2); }
+.notif-time { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.notif-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 6px; }
+.notif-empty { padding: 24px 16px; text-align: center; font-size: 12px; color: var(--muted); }
+
+/* MODAL VOTES */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  z-index: 300; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; width: 100%; max-width: 460px;
+  max-height: 85vh; overflow-y: auto;
+  padding: 24px; position: relative; margin: 16px;
+}
+.modal-close-btn {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.06); border: none;
+  color: var(--muted); width: 28px; height: 28px;
+  border-radius: 8px; cursor: pointer; font-size: 14px;
+}
+.modal-title-row { margin-bottom: 20px; }
+.modal-title-row h3 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; margin-bottom: 4px; }
+.modal-title-row p { font-size: 12px; color: var(--muted); }
+.vote-modal-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 12px;
+  background: var(--deep); margin-bottom: 8px;
+  position: relative; overflow: hidden;
+}
+.vote-av-blur {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+  filter: blur(5px); user-select: none;
+}
+.vote-info { flex: 1; }
+.vote-name-blur { font-size: 13px; font-weight: 500; filter: blur(5px); user-select: none; color: var(--text); }
+.vote-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.vote-score-badge { font-size: 18px; font-weight: 700; color: var(--gold2); flex-shrink: 0; }
+.vote-unlock-overlay {
+  position: absolute; inset: 0;
+  background: rgba(13,13,26,0.55); backdrop-filter: blur(1px);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border-radius: 12px;
+}
+.btn-unlock {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 8px; padding: 6px 14px;
+  font-size: 11px; font-weight: 700; color: #000; cursor: pointer;
+  white-space: nowrap;
+}
+.btn-unlock-msg {
+  background: rgba(139,92,246,0.15);
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 8px; padding: 6px 14px;
+  font-size: 11px; font-weight: 600; color: #C4B5FD; cursor: pointer;
+  white-space: nowrap;
+}
+.modal-cta-premium {
+  margin-top: 16px; padding: 16px;
+  background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(255,77,141,0.06));
+  border: 1px solid rgba(245,200,66,0.2); border-radius: 14px; text-align: center;
+}
+.modal-cta-premium p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.btn-premium-modal {
+  background: linear-gradient(135deg, var(--gold), #E8A020);
+  border: none; border-radius: 10px; padding: 10px 24px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 14px;
+  letter-spacing: 0.08em; color: #000; cursor: pointer;
+}
+
+/* Clickable stat cards */
+.stat-card.clickable { cursor: pointer; }
+.stat-card.clickable:hover { border-color: rgba(245,200,66,0.3); transform: translateY(-1px); transition: all 0.2s; }
+
 /* TOAST */
 .toast {
   position: fixed; bottom: 30px; left: 50%;
@@ -319,7 +438,7 @@ body {
   <a class="nav-item" href="mesnotes.html"><span class="nav-icon">📊</span> Mes notes</a>
   <div class="nav-section">Communauté</div>
   <a class="nav-item" href="classement.html"><span class="nav-icon">🏆</span> Classement</a>
-  <a class="nav-item" href="dashboard.html">
+  <a class="nav-item" href="messages.html">
     <span class="nav-icon">💬</span> Messages
     <span style="margin-left:auto;background:var(--pink);color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;">3</span>
   </a>
@@ -342,9 +461,22 @@ body {
 <main class="main">
   <div class="topbar">
     <div class="topbar-title">Tableau de bord</div>
-    <div class="topbar-right">
-      <div class="pts-pill" onclick="window.location.href='points.html'">⚡ <span id="pts-display">—</span> pts</div>
-      <div class="notif-btn">🔔</div>
+    <div class="topbar-right" style="position:relative;">
+      <a href="points.html" class="pts-pill" style="text-decoration:none;">⚡ <span id="pts-display">—</span> pts</a>
+      <div class="notif-btn" id="notif-btn" onclick="toggleNotif()">
+        🔔
+        <div class="notif-badge" id="notif-badge" style="display:none;">0</div>
+      </div>
+      <!-- PANEL NOTIFICATIONS -->
+      <div class="notif-panel" id="notif-panel">
+        <div class="notif-header">
+          🔔 Notifications
+          <span class="notif-mark-read" onclick="markAllRead()">Tout marquer lu</span>
+        </div>
+        <div id="notif-list">
+          <div class="notif-empty">Aucune notification pour l'instant</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -370,23 +502,23 @@ body {
         <div class="stat-value" id="stat-note">—</div>
         <div class="stat-sub">sur 10</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="openVotesModal()">
         <div class="stat-icon">🗳️</div>
         <div class="stat-label">Votes reçus</div>
         <div class="stat-value" id="stat-votes">0</div>
-        <div class="stat-sub">depuis votre inscription</div>
+        <div class="stat-sub" style="color:var(--gold2);font-size:10px;">Voir qui m'a noté →</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="window.location.href='classement.html'">
         <div class="stat-icon">🏆</div>
         <div class="stat-label">Mon rang</div>
         <div class="stat-value" id="stat-rang">—</div>
-        <div class="stat-sub" id="stat-rang-sub">en cours de calcul</div>
+        <div class="stat-sub" id="stat-rang-sub" style="color:var(--gold2);font-size:10px;">Voir le classement →</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="window.location.href='points.html'">
         <div class="stat-icon">⚡</div>
         <div class="stat-label">Mes points</div>
         <div class="stat-value stat-gold" id="stat-pts">—</div>
-        <div class="stat-sub">disponibles</div>
+        <div class="stat-sub" style="color:var(--gold2);font-size:10px;">Gérer mes points →</div>
       </div>
     </div>
 
@@ -425,7 +557,7 @@ body {
             <div class="earn-title">Noter quelqu'un</div>
             <div class="earn-desc">Notez des profils</div>
           </div>
-          <div class="earn-pts">+3 pts</div>
+          <div class="earn-pts">+1 pt</div>
         </a>
         <a class="earn-row" href="points.html">
           <div class="earn-icon-wrap" style="background:rgba(139,92,246,0.1)">📺</div>
@@ -451,6 +583,22 @@ body {
 
 <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
 
+<!-- MODAL VOTES REÇUS -->
+<div class="modal-overlay" id="votes-modal" onclick="closeVotesModal(event)">
+  <div class="modal-box">
+    <button class="modal-close-btn" onclick="closeVotesModalDirect()">✕</button>
+    <div class="modal-title-row">
+      <h3>🗳️ MES VOTES REÇUS</h3>
+      <p id="votes-modal-sub">Chargement...</p>
+    </div>
+    <div id="votes-modal-list"></div>
+    <div class="modal-cta-premium">
+      <p>Passez Premium pour voir tous vos votants, leur écrire et accéder aux statistiques avancées.</p>
+      <button class="btn-premium-modal" onclick="window.open('https://buy.stripe.com/test_8x2eVc13waSN5msb6m4wM04','_blank')">👑 PASSER PREMIUM — 9,99€/mois</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // SUPABASE
 const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
@@ -459,67 +607,76 @@ const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
+let userVotes = [];
 
 // INIT
 async function init() {
-  // Check session
   const { data: { session } } = await sb.auth.getSession();
-
-  if (!session) {
-    window.location.href = 'login.html';
-    return;
-  }
-
+  if (!session) { window.location.href = 'login.html'; return; }
   currentUser = session.user;
 
-  // Load user profile
-  const { data: profile } = await sb.from('users')
-    .select('*')
-    .eq('id', currentUser.id)
-    .single();
+  const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
+  if (!profile) { window.location.href = 'login.html'; return; }
 
-  if (!profile) {
-    window.location.href = 'login.html';
-    return;
-  }
-
-  // Load votes count
   const { data: photos } = await sb.from('photos')
-    .select('nb_votes, note_moyenne')
-    .eq('user_id', currentUser.id)
-    .eq('active', true);
+    .select('id, nb_votes, note_moyenne').eq('user_id', currentUser.id).eq('active', true);
 
   const totalVotes = photos ? photos.reduce((sum, p) => sum + (p.nb_votes || 0), 0) : 0;
   const avgNote = photos && photos.length > 0
     ? (photos.reduce((sum, p) => sum + (p.note_moyenne || 0), 0) / photos.length).toFixed(1)
     : null;
 
-  // Load total members for rank
-  const { count: totalMembers } = await sb.from('users')
-    .select('*', { count: 'exact', head: true });
+  // Rang réel : compter combien d'utilisateurs ont une note moyenne supérieure
+  let rang = null;
+  if (avgNote) {
+    const { data: allPhotos } = await sb.from('photos')
+      .select('user_id, note_moyenne').eq('active', true).gt('nb_votes', 0);
+    if (allPhotos) {
+      const avgByUser = {};
+      allPhotos.forEach(p => {
+        if (!avgByUser[p.user_id]) avgByUser[p.user_id] = [];
+        avgByUser[p.user_id].push(p.note_moyenne);
+      });
+      const myAvg = parseFloat(avgNote);
+      let ahead = 0;
+      Object.values(avgByUser).forEach(notes => {
+        const userAvg = notes.reduce((a,b) => a+b, 0) / notes.length;
+        if (userAvg > myAvg) ahead++;
+      });
+      rang = ahead + 1;
+    }
+  }
+
+  const { count: totalMembers } = await sb.from('users').select('*', { count: 'exact', head: true });
+
+  // Charger votes reçus pour modal
+  if (photos && photos.length > 0) {
+    const photoIds = photos.map(p => p.id);
+    const { data: votes } = await sb.from('votes')
+      .select('id, voter_id, note, created_at, photo_id')
+      .in('photo_id', photoIds)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    userVotes = votes || [];
+  }
 
   // UPDATE UI
   const prenom = profile.prenom || 'Membre';
   const pts = profile.points || 0;
   const initiale = prenom.charAt(0).toUpperCase();
 
-  // Avatar
   document.getElementById('user-avatar').textContent = initiale;
-
-  // Names
-  document.getElementById('user-name').textContent = prenom + ' ' + (profile.ville ? `· ${profile.ville}` : '');
+  document.getElementById('user-name').textContent = prenom + (profile.ville ? ` · ${profile.ville}` : '');
   document.getElementById('user-pts').textContent = pts;
   document.getElementById('pts-display').textContent = pts;
   document.getElementById('welcome-name').textContent = prenom;
 
-  // Welcome sub
   if (totalVotes > 0) {
     document.getElementById('welcome-sub').innerHTML = `Vous avez reçu <strong style="color:var(--gold2)">${totalVotes} votes</strong> au total.`;
   } else {
     document.getElementById('welcome-sub').innerHTML = `Bienvenue sur SCOROVIA ! <strong style="color:var(--gold2)">Soumettez votre première photo</strong> pour commencer.`;
   }
 
-  // Score
   if (avgNote) {
     document.getElementById('welcome-score').textContent = avgNote;
     document.getElementById('stat-note').textContent = avgNote + '/10';
@@ -528,18 +685,172 @@ async function init() {
     document.getElementById('stat-note').textContent = '—';
   }
 
-  // Stats
   document.getElementById('stat-votes').textContent = totalVotes;
   document.getElementById('stat-pts').textContent = pts;
 
-  // Rang
-  if (totalMembers) {
-    document.getElementById('stat-rang').textContent = '#' + totalMembers;
-    document.getElementById('stat-rang-sub').textContent = `sur ${totalMembers} membres`;
+  if (rang) {
+    document.getElementById('stat-rang').textContent = '#' + rang;
+    document.getElementById('stat-rang-sub').innerHTML = `sur ${totalMembers || '?'} membres · <span style="color:var(--gold2);font-size:10px;">Voir le classement →</span>`;
+  } else {
+    document.getElementById('stat-rang').textContent = '—';
   }
 
-  // Hide loading
+  // Notifications
+  loadNotifications(totalVotes, avgNote);
+
+  // Voters list section
+  renderVotersList();
+
   document.getElementById('loading').style.display = 'none';
+}
+
+// NOTIFICATIONS
+function loadNotifications(totalVotes, avgNote) {
+  const notifs = [];
+  if (totalVotes > 0 && avgNote) {
+    notifs.push({ icon: '⭐', text: `Vous avez <strong>${totalVotes} votes</strong> — note moyenne <strong>${avgNote}/10</strong>`, time: 'Aujourd\'hui', unread: true });
+  }
+  if (totalVotes === 0) {
+    notifs.push({ icon: '📸', text: 'Soumettez votre première photo pour commencer à recevoir des notes !', time: 'Maintenant', unread: true });
+  }
+
+  const badge = document.getElementById('notif-badge');
+  const list = document.getElementById('notif-list');
+  const unreadCount = notifs.filter(n => n.unread).length;
+
+  if (unreadCount > 0) {
+    badge.textContent = unreadCount;
+    badge.style.display = 'flex';
+  }
+
+  if (notifs.length === 0) {
+    list.innerHTML = '<div class="notif-empty">Aucune notification pour l\'instant</div>';
+    return;
+  }
+
+  list.innerHTML = notifs.map(n => `
+    <div class="notif-item ${n.unread ? 'unread' : ''}">
+      <div class="notif-icon">${n.icon}</div>
+      <div class="notif-body">
+        <div class="notif-text">${n.text}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+      ${n.unread ? '<div class="notif-dot"></div>' : ''}
+    </div>
+  `).join('');
+}
+
+function toggleNotif() {
+  const panel = document.getElementById('notif-panel');
+  panel.classList.toggle('open');
+  // Fermer si clic ailleurs
+  if (panel.classList.contains('open')) {
+    setTimeout(() => {
+      document.addEventListener('click', closeNotifOutside, { once: true });
+    }, 10);
+  }
+}
+
+function closeNotifOutside(e) {
+  const panel = document.getElementById('notif-panel');
+  const btn = document.getElementById('notif-btn');
+  if (!panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+}
+
+function markAllRead() {
+  document.getElementById('notif-badge').style.display = 'none';
+  document.querySelectorAll('.notif-item').forEach(el => el.classList.remove('unread'));
+  document.querySelectorAll('.notif-dot').forEach(el => el.remove());
+}
+
+// VOTERS LIST (résumé dans le dashboard)
+function renderVotersList() {
+  const el = document.getElementById('voters-list');
+  if (!userVotes || userVotes.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">Soumettez une photo pour recevoir des notes !</div>';
+    return;
+  }
+
+  el.innerHTML = userVotes.slice(0, 3).map((v, i) => {
+    const scoreColor = v.note >= 8 ? 'var(--green)' : v.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
+    const ago = timeAgo(v.created_at);
+    if (i === 0) {
+      return `<div class="voter-row">
+        <div class="voter-av" style="background:linear-gradient(135deg,var(--gold),var(--pink))">👤</div>
+        <div class="voter-info"><div class="voter-name">Anonyme</div><div class="voter-time">${ago}</div></div>
+        <div class="voter-score" style="color:${scoreColor}">${v.note}/10</div>
+      </div>`;
+    }
+    return `<div class="voter-row" style="position:relative;">
+      <div class="voter-av" style="background:linear-gradient(135deg,#2D1F5E,#1A3A5E);filter:blur(4px)">👤</div>
+      <div class="voter-info" style="filter:blur(4px)"><div class="voter-name">Anonyme</div><div class="voter-time">${ago}</div></div>
+      <div class="voter-score" style="color:${scoreColor}">${v.note}/10</div>
+      <div class="lock-overlay"><div class="lock-pill" onclick="openVotesModal()">🔒 -30 pts</div></div>
+    </div>`;
+  }).join('');
+}
+
+// MODAL VOTES
+function openVotesModal() {
+  document.getElementById('votes-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const sub = document.getElementById('votes-modal-sub');
+  const list = document.getElementById('votes-modal-list');
+
+  if (!userVotes || userVotes.length === 0) {
+    sub.textContent = 'Aucun vote reçu pour l\'instant.';
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">Soumettez une photo pour commencer !</div>';
+    return;
+  }
+
+  sub.textContent = `${userVotes.length} vote${userVotes.length > 1 ? 's' : ''} reçu${userVotes.length > 1 ? 's' : ''} — cliquez pour révéler l'identité`;
+
+  const fakeNames = ['Marie T.', 'Lucas M.', 'Emma R.', 'Noah B.', 'Chloé D.', 'Pierre L.', 'Sofia K.', 'Thomas V.'];
+
+  list.innerHTML = userVotes.map((v, i) => {
+    const scoreColor = v.note >= 8 ? 'var(--green)' : v.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
+    const ago = timeAgo(v.created_at);
+    const fakeName = fakeNames[i % fakeNames.length];
+    return `<div class="vote-modal-row">
+      <div class="vote-av-blur">👤</div>
+      <div class="vote-info">
+        <div class="vote-name-blur">${fakeName}</div>
+        <div class="vote-detail">${ago}</div>
+      </div>
+      <div class="vote-score-badge" style="color:${scoreColor}">${v.note}/10</div>
+      <div class="vote-unlock-overlay">
+        <button class="btn-unlock" onclick="unlockVoter(${i})">🔓 Voir · -30 pts</button>
+        <button class="btn-unlock-msg" onclick="msgVoter(${i})">💬 Message · -20 pts</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function unlockVoter(i) {
+  showToast('💡 Fonctionnalité disponible avec les points — rendez-vous sur Mes Points !', 'gold');
+}
+function msgVoter(i) {
+  window.location.href = 'messages.html';
+}
+
+function closeVotesModal(e) {
+  if (e.target === document.getElementById('votes-modal')) closeVotesModalDirect();
+}
+function closeVotesModalDirect() {
+  document.getElementById('votes-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// HELPERS
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60) return 'Il y a quelques secondes';
+  if (diff < 3600) return `Il y a ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `Il y a ${Math.floor(diff/3600)}h`;
+  return `Il y a ${Math.floor(diff/86400)} jour${Math.floor(diff/86400) > 1 ? 's' : ''}`;
 }
 
 // LOGOUT
@@ -551,7 +862,7 @@ async function doLogout() {
 
 // COPY INVITE
 function copyInvite() {
-  const link = `scorovia.com/login.html?ref=${currentUser?.id?.slice(0,8) || 'user'}`;
+  const link = `https://scorovia.com/login.html?ref=${currentUser?.id?.slice(0,8) || 'user'}`;
   navigator.clipboard.writeText(link).then(() => {
     showToast('🔗 Lien de parrainage copié !', 'success');
   }).catch(() => {
