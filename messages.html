@@ -1034,11 +1034,6 @@ async function confirmUnlock() {
   pendingUnlockId = null;
 }
 
-  document.getElementById('unlock-modal').classList.remove('open');
-  showToast(`✅ Profil déverrouillé ! -${cost} pts`, 'success');
-  pendingUnlockId = null;
-}
-
 function closeUnlockModal(e) {
   if (e.target === document.getElementById('unlock-modal')) {
     document.getElementById('unlock-modal').classList.remove('open');
