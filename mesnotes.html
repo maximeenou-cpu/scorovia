@@ -645,14 +645,8 @@ async function deletePhoto(photoId, photoUrl) {
     // Delete record
     await sb.from('photos').delete().eq('id', photoId);
 
-    // Refund points
-    await sb.from('users').update({ points: userProfile.points + 10 }).eq('id', currentUser.id);
-    userProfile.points += 10;
-    document.getElementById('user-pts').textContent = userProfile.points;
-    document.getElementById('pts-display').textContent = userProfile.points;
-
     await loadPhotos();
-    showToast('🗑️ Photo supprimée — 10 pts remboursés', 'success');
+    showToast('🗑️ Photo supprimée', 'success');
   } catch (err) {
     showToast('❌ Erreur : ' + err.message, 'error');
   }
