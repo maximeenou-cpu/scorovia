@@ -242,8 +242,60 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   .topbar { padding: 14px 16px; }
   .field-row { flex-direction: column; gap: 0; }
 }
+
+/* ===== MOBILE BOTTOM NAV ===== */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(13,13,26,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 9999;
+  padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+}
+.mobile-bottom-nav ul {
+  display: flex; align-items: stretch;
+  justify-content: space-around;
+  list-style: none; margin: 0; padding: 0;
+}
+.mobile-bottom-nav li { flex: 1; }
+.mobile-bottom-nav li a {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; text-decoration: none;
+  padding: 6px 4px; border-radius: 10px;
+  transition: background 0.2s;
+  position: relative;
+}
+.mobile-bottom-nav li a:active { background: rgba(255,255,255,0.08); }
+.mobile-bottom-nav .mnav-icon { font-size: 22px; line-height: 1; }
+.mobile-bottom-nav .mnav-label {
+  font-size: 10px; font-family: 'DM Sans', sans-serif;
+  color: rgba(240,238,248,0.4); letter-spacing: 0.01em;
+}
+.mobile-bottom-nav li.active .mnav-label { color: #FFE27A; }
+.mobile-bottom-nav li.active .mnav-icon {
+  filter: drop-shadow(0 0 6px rgba(245,200,66,0.5));
+}
+.mobile-bottom-nav .mnav-badge {
+  position: absolute; top: 4px; right: calc(50% - 16px);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #FF4D8D; border: 2px solid rgba(13,13,26,0.97);
+}
+@media (max-width: 768px) {
+  .mobile-bottom-nav { display: block; }
+  .sidebar { display: none !important; }
+  .main { margin-left: 0 !important; }
+  .menu-btn { display: none !important; }
+  body { padding-bottom: 65px; }
+  /* Messages : ajuster le layout */
+  .msg-layout { height: calc(100dvh - 57px - 65px) !important; }
+}
+/* ===== FIN MOBILE BOTTOM NAV ===== */
+
 </style>
-<script src="mobile-nav.js"></script>
 </head>
 <body>
 
@@ -618,5 +670,40 @@ function toggleSidebar() { document.getElementById('sidebar').classList.toggle('
 
 init();
 </script>
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <ul>
+    <li class="">
+      <a href="dashboard.html">
+        <span class="mnav-icon">🏠</span>
+        <span class="mnav-label">Accueil</span>
+        
+      </a>
+    </li>    <li class="">
+      <a href="noter.html">
+        <span class="mnav-icon">⭐</span>
+        <span class="mnav-label">Noter</span>
+        
+      </a>
+    </li>    <li class="">
+      <a href="mesnotes.html">
+        <span class="mnav-icon">📊</span>
+        <span class="mnav-label">Mes notes</span>
+        
+      </a>
+    </li>    <li class="">
+      <a href="messages.html">
+        <span class="mnav-icon">💬</span>
+        <span class="mnav-label">Messages</span>
+        <span class="mnav-badge"></span>
+      </a>
+    </li>    <li class="active">
+      <a href="profil.html">
+        <span class="mnav-icon">👤</span>
+        <span class="mnav-label">Profil</span>
+        
+      </a>
+    </li>
+  </ul>
+</nav>
 </body>
 </html>
