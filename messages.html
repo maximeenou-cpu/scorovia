@@ -542,6 +542,11 @@ async function init() {
 
   await loadConversations();
   document.getElementById('loading').style.display = 'none';
+
+  // Demander permission notifs et démarrer le polling
+  await requestNotifPermission();
+  pollNewMessages();
+  setInterval(pollNewMessages, 30000);
 }
 
 async function loadConversations() {
@@ -580,6 +585,16 @@ async function loadConversations() {
     .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
     .order('created_at', { ascending: false });
 
+  // Charger les profils déjà déverrouillés
+  const { data: unlocked } = await sb.from('unlocked_profiles')
+    .select('voter_id, users!unlocked_profiles_voter_id_fkey(id, prenom, avatar_url)')
+    .eq('user_id', currentUser.id);
+
+  const unlockedMap = {};
+  if (unlocked) unlocked.forEach(u => {
+    if (u.users) unlockedMap[u.voter_id] = u.users;
+  });
+
   // Construire les conversations
   allConvs = uniqueVoters.map((v, i) => {
     const convMessages = messages ? messages.filter(m =>
@@ -589,7 +604,8 @@ async function loadConversations() {
 
     const lastMsg = convMessages[0];
     const unread = convMessages.filter(m => m.sender_id === v.voter_id && !m.read).length;
-    const isUnlocked = convMessages.length > 0;
+    const profile = unlockedMap[v.voter_id];
+    const isUnlocked = !!profile || convMessages.length > 0;
 
     return {
       id: v.voter_id,
@@ -601,7 +617,9 @@ async function loadConversations() {
       unread,
       isUnlocked,
       index: i,
-      // Info voter (on ne charge pas pour garder l'anonymat)
+      // Vrai prénom si déverrouillé, sinon nom fictif
+      displayName: profile?.prenom || generateFakeName(i),
+      avatarUrl: profile?.avatar_url || null,
       fakeName: generateFakeName(i),
       avColor: AV_COLORS[i % AV_COLORS.length],
     };
@@ -626,19 +644,25 @@ function renderConvList(convs) {
   list.innerHTML = convs.map(conv => {
     const scoreColor = conv.note >= 8 ? 'var(--green)' : conv.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
     const timeStr = timeAgo(conv.date);
-    const initial = conv.fakeName.charAt(0);
-    const preview = conv.lastMsg ? conv.lastMsg.content.substring(0, 36) + (conv.lastMsg.content.length > 36 ? '…' : '') : `A voté ${conv.note}/10 pour vous`;
+    const preview = conv.lastMsg
+      ? conv.lastMsg.content.substring(0, 36) + (conv.lastMsg.content.length > 36 ? '…' : '')
+      : `A voté ${conv.note}/10 pour vous`;
+
+    const avatarContent = conv.avatarUrl
+      ? `<img src="${conv.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
+      : (conv.isUnlocked ? (conv.displayName || conv.fakeName).charAt(0).toUpperCase() : '👤');
+
+    const displayName = conv.isUnlocked ? (conv.displayName || conv.fakeName) : conv.fakeName;
 
     if (conv.isUnlocked || isPremium) {
-      // Conversation déverrouillée
       return `
       <div class="conv-item ${activeConvId === conv.id ? 'active' : ''}" onclick="openConv('${conv.id}')">
         <div class="conv-av" style="background:${conv.avColor}">
-          ${initial}
+          ${avatarContent}
           <div class="conv-av-online"></div>
         </div>
         <div class="conv-info">
-          <div class="conv-name">${conv.fakeName}</div>
+          <div class="conv-name">${displayName}</div>
           <div class="conv-preview">${preview}</div>
         </div>
         <div class="conv-meta">
@@ -647,10 +671,9 @@ function renderConvList(convs) {
         </div>
       </div>`;
     } else {
-      // Conversation verrouillée
       return `
       <div class="conv-item locked" onclick="openUnlockModal('${conv.id}', '${conv.note}')">
-        <div class="conv-av blur-av" style="background:${conv.avColor}">${initial}</div>
+        <div class="conv-av blur-av" style="background:${conv.avColor}">👤</div>
         <div class="conv-info">
           <div class="conv-name blur-name">${conv.fakeName}</div>
           <div class="conv-preview">A voté <strong style="color:${scoreColor}">${conv.note}/10</strong> pour vous</div>
@@ -751,11 +774,16 @@ function renderChatArea(conv, messages) {
 
   const totalVotes = photos.reduce((s, p) => s + (p.nb_votes || 0), 0);
 
+  const displayName = conv.voterProfile?.prenom || conv.displayName || conv.fakeName;
+  const avatarContent = conv.voterProfile?.avatar_url
+    ? `<img src="${conv.voterProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
+    : displayName.charAt(0).toUpperCase();
+
   area.innerHTML = `
     <div class="chat-header">
-      <div class="chat-av" style="background:${conv.avColor}">${conv.fakeName.charAt(0)}</div>
+      <div class="chat-av" style="background:${conv.avColor}">${avatarContent}</div>
       <div>
-        <div class="chat-name">${vp?.prenom || conv.fakeName}</div>
+        <div class="chat-name">${displayName}</div>
         <div class="chat-sub">${metaParts.join(' · ') || 'Membre SCOROVIA'}</div>
       </div>
       <div class="chat-score-badge">Vous a donné <strong style="color:${scoreColor}">${conv.note}/10</strong></div>
@@ -979,6 +1007,53 @@ function timeAgo(dateStr) {
   if (diff < 3600) return `${Math.floor(diff/60)}min`;
   if (diff < 86400) return `${Math.floor(diff/3600)}h`;
   return `${Math.floor(diff/86400)}j`;
+}
+
+// NOTIFICATIONS PUSH
+async function requestNotifPermission() {
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+function sendNotification(title, body, url) {
+  if (Notification.permission !== 'granted') return;
+  const notif = new Notification(title, {
+    body,
+    icon: '/favicon.ico',
+    badge: '/favicon.ico',
+    tag: 'scorovia-message',
+    renotify: true,
+  });
+  notif.onclick = () => {
+    window.focus();
+    if (url) window.location.href = url;
+    notif.close();
+  };
+}
+
+// Polling messages non lus toutes les 30s
+let lastMessageCount = 0;
+async function pollNewMessages() {
+  if (!currentUser) return;
+  const { count } = await sb.from('messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('receiver_id', currentUser.id)
+    .eq('read', false);
+
+  if (count > lastMessageCount && lastMessageCount > 0) {
+    const diff = count - lastMessageCount;
+    sendNotification(
+      `💬 ${diff} nouveau${diff > 1 ? 'x' : ''} message${diff > 1 ? 's' : ''} — SCOROVIA`,
+      'Cliquez pour lire vos messages',
+      'messages.html'
+    );
+    // Mettre à jour badge bottom nav
+    const badge = document.querySelector('.mobile-bottom-nav .mnav-badge');
+    if (badge) badge.style.display = 'block';
+  }
+  lastMessageCount = count || 0;
 }
 
 async function doLogout() { await sb.auth.signOut(); window.location.href = 'login.html'; }

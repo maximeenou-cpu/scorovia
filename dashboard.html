@@ -549,11 +549,11 @@ body {
 
     <!-- STATS -->
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="window.location.href='mesnotes.html'">
         <div class="stat-icon">⭐</div>
         <div class="stat-label">Ma note</div>
         <div class="stat-value" id="stat-note">—</div>
-        <div class="stat-sub">sur 10</div>
+        <div class="stat-sub" style="color:var(--gold2);font-size:10px;">Voir mes photos →</div>
       </div>
       <div class="stat-card clickable" onclick="window.location.href='mesnotes.html'">
         <div class="stat-icon">🗳️</div>
@@ -710,9 +710,9 @@ async function init() {
   document.getElementById('welcome-name').textContent = prenom;
 
   if (totalVotes > 0) {
-    document.getElementById('welcome-sub').innerHTML = `Vous avez reçu <strong style="color:var(--gold2)">${totalVotes} votes</strong> au total.`;
+    document.getElementById('welcome-sub').innerHTML = `Vous avez reçu <a href="mesnotes.html" style="color:var(--gold2);font-weight:500;text-decoration:none;">${totalVotes} vote${totalVotes > 1 ? 's' : ''} →</a> Cliquez pour voir qui vous a noté.`;
   } else {
-    document.getElementById('welcome-sub').innerHTML = `Bienvenue sur SCOROVIA ! <strong style="color:var(--gold2)">Soumettez votre première photo</strong> pour commencer.`;
+    document.getElementById('welcome-sub').innerHTML = `Bienvenue sur SCOROVIA ! <a href="mesnotes.html" style="color:var(--gold2);font-weight:500;text-decoration:none;">Soumettez votre première photo →</a>`;
   }
 
   if (avgNote) {
@@ -735,6 +735,7 @@ async function init() {
 
   // Notifications
   loadNotifications(totalVotes, avgNote);
+  initNotifications();
 
   // Voters list section
   renderVotersList();
@@ -807,7 +808,10 @@ function markAllRead() {
 function renderVotersList() {
   const el = document.getElementById('voters-list');
   if (!userVotes || userVotes.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">Soumettez une photo pour recevoir des notes !</div>';
+    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">
+      Soumettez une photo pour recevoir des notes !<br>
+      <a href="mesnotes.html" style="color:var(--gold2);font-size:12px;margin-top:8px;display:inline-block;">Aller dans Mes Notes →</a>
+    </div>`;
     return;
   }
 
@@ -815,14 +819,19 @@ function renderVotersList() {
     const scoreColor = v.note >= 8 ? 'var(--green)' : v.note >= 6 ? 'var(--gold2)' : 'var(--pink)';
     const ago = timeAgo(v.created_at);
     return `<div class="voter-row" style="cursor:pointer" onclick="window.location.href='mesnotes.html'">
-      <div class="voter-av" style="background:linear-gradient(135deg,#2D1F5E,#1A3A5E);filter:${i > 0 ? 'blur(4px)' : 'none'}">👤</div>
+      <div class="voter-av" style="background:linear-gradient(135deg,#2D1F5E,#1A3A5E);${i > 0 ? 'filter:blur(4px)' : ''}">👤</div>
       <div class="voter-info" style="${i > 0 ? 'filter:blur(4px)' : ''}">
         <div class="voter-name">Anonyme</div>
         <div class="voter-time">${ago}</div>
       </div>
       <div class="voter-score" style="color:${scoreColor}">${v.note}/10</div>
     </div>`;
-  }).join('') + `<div style="text-align:center;padding:10px 0 4px;font-size:12px;color:var(--gold2);cursor:pointer" onclick="window.location.href='mesnotes.html'">Voir tous les votants → Mes Notes</div>`;
+  }).join('') +
+  `<div style="text-align:center;padding:8px 0 2px;">
+    <a href="mesnotes.html" style="font-size:12px;color:var(--gold2);text-decoration:none;">
+      Voir tous les votants dans Mes Notes →
+    </a>
+  </div>`;
 }
 
 // HELPERS
@@ -863,6 +872,35 @@ function showToast(msg, type) {
 // SIDEBAR
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
+}
+
+// NOTIFICATIONS — polling messages non lus
+async function initNotifications() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') await Notification.requestPermission();
+
+  async function checkMessages() {
+    if (!currentUser) return;
+    const { count } = await sb.from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', currentUser.id).eq('read', false);
+
+    if (count > 0) {
+      // Badge sur la bottom nav
+      const badge = document.querySelector('.mobile-bottom-nav li:nth-child(4) .mnav-badge');
+      if (badge) badge.style.display = 'block';
+
+      if (Notification.permission === 'granted' && document.hidden) {
+        const n = new Notification(`💬 ${count} message${count > 1 ? 's' : ''} non lu${count > 1 ? 's' : ''} — SCOROVIA`, {
+          body: 'Cliquez pour lire vos messages',
+          icon: '/favicon.ico', tag: 'scorovia-msg', renotify: false,
+        });
+        n.onclick = () => { window.focus(); window.location.href = 'messages.html'; n.close(); };
+      }
+    }
+  }
+  checkMessages();
+  setInterval(checkMessages, 30000);
 }
 
 // START

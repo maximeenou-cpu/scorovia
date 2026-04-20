@@ -525,9 +525,9 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
           <div class="score-stat-num" id="avg-score">—</div>
           <div class="score-stat-label">Note moyenne</div>
         </div>
-        <div class="score-stat">
+        <div class="score-stat" style="cursor:pointer" onclick="document.getElementById('voters-section').scrollIntoView({behavior:'smooth'})">
           <div class="score-stat-num" id="total-votes">0</div>
-          <div class="score-stat-label">Votes reçus</div>
+          <div class="score-stat-label" style="color:var(--gold2);">Votes reçus ↓</div>
         </div>
         <div class="score-stat">
           <div class="score-stat-num" id="total-photos">0</div>
