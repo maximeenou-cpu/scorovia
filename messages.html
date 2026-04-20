@@ -860,10 +860,18 @@ function renderChatArea(conv, messages) {
 function renderMessage(m, myInitial, conv) {
   const isMe = m.sender_id === currentUser.id;
   const time = new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const theirName = conv.voterProfile?.prenom || conv.displayName || conv.fakeName;
+  const theirAvatar = conv.voterProfile?.avatar_url
+    ? `<img src="${conv.voterProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
+    : theirName.charAt(0).toUpperCase();
+  const myAvatar = userProfile.avatar_url
+    ? `<img src="${userProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
+    : myInitial;
+
   return `
   <div class="msg-bubble-wrap ${isMe ? 'me' : ''}">
     <div class="msg-av-small" style="background:${isMe ? 'linear-gradient(135deg,var(--gold),var(--pink))' : conv.avColor}">
-      ${isMe ? myInitial : conv.fakeName.charAt(0)}
+      ${isMe ? myAvatar : theirAvatar}
     </div>
     <div>
       <div class="msg-bubble ${isMe ? 'me' : 'them'}">${escapeHtml(m.content)}</div>
