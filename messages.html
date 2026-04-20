@@ -595,6 +595,24 @@ async function loadConversations() {
     if (u.users) unlockedMap[u.voter_id] = u.users;
   });
 
+  // Charger les notes moyennes des votants (visibles avant déverrouillage)
+  const voterIds = uniqueVoters.map(v => v.voter_id);
+  const { data: voterPhotos } = await sb.from('photos')
+    .select('user_id, note_moyenne, nb_votes')
+    .in('user_id', voterIds)
+    .eq('active', true)
+    .gt('nb_votes', 0);
+
+  // Calculer la note moyenne par votant
+  const voterAvgNotes = {};
+  if (voterPhotos) {
+    voterPhotos.forEach(p => {
+      if (!voterAvgNotes[p.user_id]) voterAvgNotes[p.user_id] = { sum: 0, count: 0 };
+      voterAvgNotes[p.user_id].sum += p.note_moyenne;
+      voterAvgNotes[p.user_id].count++;
+    });
+  }
+
   // Construire les conversations
   allConvs = uniqueVoters.map((v, i) => {
     const convMessages = messages ? messages.filter(m =>
@@ -607,6 +625,10 @@ async function loadConversations() {
     const profile = unlockedMap[v.voter_id];
     const isUnlocked = !!profile || convMessages.length > 0;
 
+    // Note moyenne du votant
+    const va = voterAvgNotes[v.voter_id];
+    const voterAvgNote = va && va.count > 0 ? (va.sum / va.count).toFixed(1) : null;
+
     return {
       id: v.voter_id,
       voterId: v.voter_id,
@@ -617,10 +639,10 @@ async function loadConversations() {
       unread,
       isUnlocked,
       index: i,
-      // Vrai prénom si déverrouillé, sinon nom fictif
-      displayName: profile?.prenom || generateFakeName(i),
+      voterAvgNote, // note moyenne de ce votant (visible avant déverrouillage)
+      displayName: profile?.prenom || generateFakeName(v.voter_id),
       avatarUrl: profile?.avatar_url || null,
-      fakeName: generateFakeName(i),
+      fakeName: generateFakeName(v.voter_id),
       avColor: AV_COLORS[i % AV_COLORS.length],
     };
   });
@@ -628,9 +650,13 @@ async function loadConversations() {
   renderConvList(allConvs);
 }
 
-function generateFakeName(i) {
-  const names = ['Marie T.', 'Lucas M.', 'Emma R.', 'Noah B.', 'Chloé D.', 'Pierre L.', 'Sofia K.', 'Thomas V.', 'Léa F.', 'Hugo C.', 'Inès P.', 'Maxime G.'];
-  return names[i % names.length];
+function generateFakeName(voterId) {
+  // Hash stable basé sur l'ID pour que chaque votant ait toujours le même pseudo
+  let hash = 0;
+  for (let c of voterId) hash = (hash * 31 + c.charCodeAt(0)) % 1000;
+  const firstNames = ['Alex', 'Jordan', 'Morgan', 'Taylor', 'Casey', 'Riley', 'Avery', 'Quinn', 'Blake', 'Skyler', 'Drew', 'Jamie'];
+  const lastInits = ['B.', 'C.', 'D.', 'F.', 'G.', 'H.', 'K.', 'L.', 'M.', 'N.', 'P.', 'R.'];
+  return firstNames[hash % firstNames.length] + ' ' + lastInits[Math.floor(hash / 12) % lastInits.length];
 }
 
 function renderConvList(convs) {
@@ -676,7 +702,10 @@ function renderConvList(convs) {
         <div class="conv-av blur-av" style="background:${conv.avColor}">👤</div>
         <div class="conv-info">
           <div class="conv-name blur-name">${conv.fakeName}</div>
-          <div class="conv-preview">A voté <strong style="color:${scoreColor}">${conv.note}/10</strong> pour vous</div>
+          <div class="conv-preview">
+            Vous a donné <strong style="color:${scoreColor}">${conv.note}/10</strong>
+            ${conv.voterAvgNote ? ` · Sa note moyenne : <strong style="color:var(--green)">${conv.voterAvgNote}/10</strong>` : ''}
+          </div>
         </div>
         <div class="conv-meta">
           <div class="conv-time">${timeStr}</div>
@@ -917,8 +946,13 @@ async function sendMessage(receiverId) {
 function openUnlockModal(voterId, note) {
   pendingUnlockId = voterId;
   const pts = userProfile?.points || 0;
-  document.getElementById('unlock-modal-text').textContent =
-    `Cette personne vous a donné ${note}/10. Déverrouillez son profil pour voir ses photos, ses notes, et lui écrire.`;
+  const conv = allConvs.find(c => c.id === voterId);
+  const avgNote = conv?.voterAvgNote;
+
+  document.getElementById('unlock-modal-text').innerHTML =
+    `Cette personne vous a donné <strong style="color:var(--gold2)">${note}/10</strong>.` +
+    (avgNote ? ` Sa note moyenne reçue par la communauté est de <strong style="color:var(--green)">${avgNote}/10</strong>.` : '') +
+    ` Déverrouillez son profil pour voir ses photos et lui écrire.`;
   document.getElementById('modal-pts-balance').textContent = pts;
   document.getElementById('unlock-modal').classList.add('open');
 }
