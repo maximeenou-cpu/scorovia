@@ -587,13 +587,19 @@ async function loadConversations() {
 
   // Charger les profils déjà déverrouillés
   const { data: unlocked } = await sb.from('unlocked_profiles')
-    .select('voter_id, users!unlocked_profiles_voter_id_fkey(id, prenom, avatar_url)')
+    .select('voter_id')
     .eq('user_id', currentUser.id);
 
+  const unlockedIds = unlocked ? unlocked.map(u => u.voter_id) : [];
+
+  // Charger les vrais profils des votants déverrouillés
   const unlockedMap = {};
-  if (unlocked) unlocked.forEach(u => {
-    if (u.users) unlockedMap[u.voter_id] = u.users;
-  });
+  if (unlockedIds.length > 0) {
+    const { data: unlockedProfiles } = await sb.from('users')
+      .select('id, prenom, avatar_url')
+      .in('id', unlockedIds);
+    if (unlockedProfiles) unlockedProfiles.forEach(p => { unlockedMap[p.id] = p; });
+  }
 
   // Charger les notes moyennes des votants (visibles avant déverrouillage)
   const voterIds = uniqueVoters.map(v => v.voter_id);
@@ -979,34 +985,54 @@ function openUnlockModal(voterId, note) {
 
 async function confirmUnlock() {
   if (!pendingUnlockId) return;
-
   const cost = 50;
-  if (!userProfile || userProfile.points < cost) {
-    document.getElementById('unlock-modal').classList.remove('open');
-    showToast(`⚡ Points insuffisants — ${cost} pts requis pour déverrouiller`, 'error');
-    setTimeout(() => window.location.href = 'points.html', 2000);
+
+  // Vérifier d'abord si déjà déverrouillé en base
+  const { data: existing } = await sb.from('unlocked_profiles')
+    .select('voter_id')
+    .eq('user_id', currentUser.id)
+    .eq('voter_id', pendingUnlockId)
+    .single();
+
+  document.getElementById('unlock-modal').classList.remove('open');
+
+  if (existing) {
+    // Déjà payé — ouvrir directement sans débiter
+    const conv = allConvs.find(c => c.id === pendingUnlockId);
+    if (conv) { conv.isUnlocked = true; renderConvList(allConvs); }
+    openConv(pendingUnlockId);
+    pendingUnlockId = null;
     return;
   }
 
-  // Débiter 50 pts immédiatement
+  if (!userProfile || userProfile.points < cost) {
+    showToast(`⚡ Points insuffisants — ${cost} pts requis pour déverrouiller`, 'error');
+    setTimeout(() => window.location.href = 'points.html', 2000);
+    pendingUnlockId = null;
+    return;
+  }
+
+  // Débiter 50 pts
   const newPts = userProfile.points - cost;
   await sb.from('users').update({ points: newPts }).eq('id', currentUser.id);
-  await sb.from('points_history').insert({
-    user_id: currentUser.id,
-    action: 'Profil déverrouillé',
-    points: -cost
-  });
+  await sb.from('points_history').insert({ user_id: currentUser.id, action: 'Profil déverrouillé', points: -cost });
+  // Persister le déverrouillage
+  await sb.from('unlocked_profiles').insert({ user_id: currentUser.id, voter_id: pendingUnlockId });
+
   userProfile.points = newPts;
   document.getElementById('pts-display').textContent = newPts;
   document.getElementById('user-pts').textContent = newPts;
 
-  // Marquer comme déverrouillé localement
   const conv = allConvs.find(c => c.id === pendingUnlockId);
   if (conv) {
     conv.isUnlocked = true;
     renderConvList(allConvs);
     openConv(pendingUnlockId);
   }
+
+  showToast(`✅ Profil déverrouillé ! -${cost} pts`, 'success');
+  pendingUnlockId = null;
+}
 
   document.getElementById('unlock-modal').classList.remove('open');
   showToast(`✅ Profil déverrouillé ! -${cost} pts`, 'success');
