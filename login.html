@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SCOROVIA — Connexion</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=6Lfe-b8sAAAAAB9-qk0jKy2An9xVvfNUfsIHM3HO"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -337,10 +338,10 @@ body {
   </div>
 
   <div class="panel-footer">
-    © 2025 SCOROVIA ·
-    <a href="#">CGU</a> ·
-    <a href="#">Confidentialité</a> ·
-    <a href="#">Mentions légales</a><br>
+    © 2026 SCOROVIA ·
+    <a href="legal.html#cgu">CGU</a> ·
+    <a href="legal.html#confidentialite">Confidentialité</a> ·
+    <a href="legal.html">Mentions légales</a><br>
     Données protégées RGPD · Réservé aux +18 ans
   </div>
 </div>
@@ -466,7 +467,7 @@ body {
         <div class="checkbox-row">
           <input type="checkbox" id="terms" />
           <label for="terms">
-            J'accepte les <a href="#">CGU</a> et la <a href="#">Politique de confidentialité</a>. Je confirme avoir au moins 18 ans.
+            J'accepte les <a href="legal.html#cgu">CGU</a> et la <a href="legal.html#confidentialite">Politique de confidentialité</a>. Je confirme avoir au moins 18 ans.
           </label>
         </div>
 
@@ -607,6 +608,21 @@ function showAlert(id, msg, type) {
   el.className = `alert ${type} show`;
 }
 
+// reCAPTCHA v3
+const RECAPTCHA_SITE_KEY = '6Lfe-b8sAAAAAB9-qk0jKy2An9xVvfNUfsIHM3HO';
+const RECAPTCHA_SCORE_MIN = 0.5;
+
+async function getRecaptchaToken(action) {
+  return new Promise((resolve) => {
+    if (typeof grecaptcha === 'undefined') { resolve(null); return; }
+    grecaptcha.ready(() => {
+      grecaptcha.execute(RECAPTCHA_SITE_KEY, { action })
+        .then(resolve)
+        .catch(() => resolve(null));
+    });
+  });
+}
+
 // LOGIN
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -618,8 +634,19 @@ async function doLogin() {
   }
 
   const btn = document.getElementById('btn-login');
-  btn.innerHTML = '<span class="spinner"></span>Connexion...';
+  btn.innerHTML = '<span class="spinner"></span>Vérification...';
   btn.disabled = true;
+
+  // reCAPTCHA check
+  const token = await getRecaptchaToken('login');
+  if (!token) {
+    showAlert('login-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
+    btn.innerHTML = 'SE CONNECTER';
+    btn.disabled = false;
+    return;
+  }
+
+  btn.innerHTML = '<span class="spinner"></span>Connexion...';
 
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
 
@@ -672,8 +699,19 @@ async function doSignup() {
   }
 
   const btn = document.getElementById('btn-signup');
-  btn.innerHTML = '<span class="spinner"></span>Création du compte...';
+  btn.innerHTML = '<span class="spinner"></span>Vérification robot...';
   btn.disabled = true;
+
+  // reCAPTCHA check
+  const token = await getRecaptchaToken('signup');
+  if (!token) {
+    showAlert('signup-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
+    btn.innerHTML = 'CRÉER MON COMPTE GRATUIT';
+    btn.disabled = false;
+    return;
+  }
+
+  btn.innerHTML = '<span class="spinner"></span>Création du compte...';
 
   // Create auth user
   const { data, error } = await sb.auth.signUp({ email, password: pwd });
@@ -721,6 +759,13 @@ async function doForgot() {
   const email = document.getElementById('forgot-email').value.trim();
   if (!email) {
     showAlert('forgot-alert', '⚠️ Entrez votre adresse email', 'error');
+    return;
+  }
+
+  // reCAPTCHA check
+  const token = await getRecaptchaToken('forgot_password');
+  if (!token) {
+    showAlert('forgot-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
     return;
   }
 
