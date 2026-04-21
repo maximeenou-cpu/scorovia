@@ -655,8 +655,8 @@ async function init() {
   currentUser = session.user;
 
   const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
-  if (!profile) { window.location.href = 'login.html'; return; }
-
+  if (!profile) { window.location.href = 'login.html'; return; } Premium.init(profile);
+  
   const { data: photos } = await sb.from('photos')
     .select('id, nb_votes, note_moyenne').eq('user_id', currentUser.id).eq('active', true);
 
