@@ -101,20 +101,15 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 .notif-time{font-size:10px;color:var(--muted);margin-top:3px}
 .notif-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:6px}
 .notif-empty{padding:24px 16px;text-align:center;font-size:12px;color:var(--muted)}
-
-/* ✅ Toast amélioré — plus visible */
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 24px;font-size:14px;color:var(--text);z-index:500;transition:transform 0.3s ease;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.4);display:flex;align-items:center;gap:10px}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:rgba(34,212,160,0.4);background:linear-gradient(135deg,rgba(34,212,160,0.1),var(--card))}
 .toast.gold{border-color:rgba(245,200,66,0.4);background:linear-gradient(135deg,rgba(245,200,66,0.08),var(--card))}
 .toast.error{border-color:rgba(255,77,77,0.4)}
-
-/* ✅ Bannière copié lien — plus visible */
 .invite-copied-banner{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(120px);background:linear-gradient(135deg,rgba(34,212,160,0.15),rgba(34,212,160,0.05));border:1px solid rgba(34,212,160,0.4);border-radius:14px;padding:16px 24px;font-size:13px;color:var(--text);z-index:500;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.4);text-align:center;min-width:280px}
 .invite-copied-banner.show{transform:translateX(-50%) translateY(0)}
 .invite-copied-banner strong{color:var(--green);display:block;font-size:15px;margin-bottom:4px}
 .invite-copied-banner .link-preview{font-size:11px;color:var(--muted);margin-top:6px;word-break:break-all}
-
 .menu-btn{display:none;position:fixed;bottom:20px;right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8A020);border:none;font-size:22px;cursor:pointer;z-index:60;box-shadow:0 4px 20px rgba(245,200,66,0.3);align-items:center;justify-content:center}
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%)}
@@ -154,7 +149,6 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 
 <div class="toast" id="toast"></div>
 
-<!-- ✅ Bannière copie lien améliorée -->
 <div class="invite-copied-banner" id="invite-banner">
   <strong>🔗 Lien copié !</strong>
   Partagez-le à vos amis pour gagner +50 pts chacun
@@ -174,9 +168,10 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
   <div class="nav-section">Compte</div>
   <a class="nav-item" href="points.html"><span class="nav-icon">⚡</span> Mes points</a>
   <a class="nav-item" href="profil.html"><span class="nav-icon">👤</span> Mon profil</a>
+  <!-- ✅ LIEN CONTACT AJOUTÉ -->
+  <a class="nav-item" href="contact.html"><span class="nav-icon">✉️</span> Contact</a>
   <a class="nav-item" onclick="doLogout()" style="cursor:pointer"><span class="nav-icon">🚪</span> Déconnexion</a>
   <div class="sidebar-bottom">
-    <!-- ✅ Clic sur prénom → profil.html + photo de profil -->
     <a href="profil.html" class="user-mini">
       <div class="user-av-sm" id="user-avatar">😊</div>
       <div>
@@ -240,7 +235,6 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
       </div>
     </div>
 
-    <!-- ✅ Bannière Premium masquée si déjà Premium -->
     <div class="premium-banner premium-cta-hide">
       <div class="premium-icon">👑</div>
       <div class="premium-text">
@@ -301,13 +295,11 @@ async function init(){
   const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
   if(!profile){window.location.href='login.html';return;}
 
-  // ✅ Premium via premium.js
   Premium.init(profile);
 
   const{data:photos}=await sb.from('photos').select('id,nb_votes,note_moyenne').eq('user_id',currentUser.id).eq('active',true);
   const totalVotes=photos?photos.reduce((sum,p)=>sum+(p.nb_votes||0),0):0;
 
-  // ✅ Note moyenne corrigée — seulement les photos avec votes
   const photosWithVotes=photos?photos.filter(p=>p.nb_votes>0):[];
   const avgNote=photosWithVotes.length>0
     ?(photosWithVotes.reduce((sum,p)=>sum+(p.note_moyenne||0),0)/photosWithVotes.length).toFixed(1)
@@ -336,7 +328,6 @@ async function init(){
   const prenom=profile.prenom||'Membre';
   const pts=profile.points||0;
 
-  // ✅ Photo de profil sidebar
   const avEl=document.getElementById('user-avatar');
   if(profile.avatar_url){avEl.innerHTML=`<img src="${profile.avatar_url}" />`;}
   else{avEl.textContent=prenom.charAt(0).toUpperCase();}
@@ -403,7 +394,6 @@ function timeAgo(dateStr){const diff=Math.floor((Date.now()-new Date(dateStr))/1
 
 async function doLogout(){await sb.auth.signOut();localStorage.removeItem('scorovia_user');window.location.href='login.html';}
 
-// ✅ Copie lien avec bannière bien visible
 function copyInvite(){
   const link=`https://scorovia.com/login.html?ref=${currentUser?.id?.slice(0,8)||'user'}`;
   navigator.clipboard.writeText(link).then(()=>{
@@ -440,13 +430,16 @@ async function initNotifications(){
 
 init();
 </script>
+
+<!-- ✅ BOTTOM NAV MOBILE avec Contact ajouté -->
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
   <ul>
     <li class="active"><a href="dashboard.html"><span class="mnav-icon">🏠</span><span class="mnav-label">Accueil</span></a></li>
-    <li class=""><a href="noter.html"><span class="mnav-icon">⭐</span><span class="mnav-label">Noter</span></a></li>
-    <li class=""><a href="mesnotes.html"><span class="mnav-icon">📊</span><span class="mnav-label">Mes notes</span></a></li>
-    <li class=""><a href="messages.html"><span class="mnav-icon">💬</span><span class="mnav-label">Messages</span><span class="mnav-badge"></span></a></li>
-    <li class=""><a href="profil.html"><span class="mnav-icon">👤</span><span class="mnav-label">Profil</span></a></li>
+    <li><a href="noter.html"><span class="mnav-icon">⭐</span><span class="mnav-label">Noter</span></a></li>
+    <li><a href="mesnotes.html"><span class="mnav-icon">📊</span><span class="mnav-label">Mes notes</span></a></li>
+    <li><a href="messages.html"><span class="mnav-icon">💬</span><span class="mnav-label">Messages</span><span class="mnav-badge"></span></a></li>
+    <li><a href="profil.html"><span class="mnav-icon">👤</span><span class="mnav-label">Profil</span></a></li>
+    <li><a href="contact.html"><span class="mnav-icon">✉️</span><span class="mnav-label">Contact</span></a></li>
   </ul>
 </nav>
 </body>
