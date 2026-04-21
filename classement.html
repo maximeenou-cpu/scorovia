@@ -325,8 +325,8 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
       <div class="filter-tab active" onclick="setFilter('global')">🌍 Global</div>
       <div class="filter-tab" onclick="setFilter('homme')">👨 Hommes</div>
       <div class="filter-tab" onclick="setFilter('femme')">👩 Femmes</div>
-      <div class="filter-tab" onclick="unlockFilter('ville')">📍 Par ville <span class="tab-lock">(-5 pts)</span></div>
-      <div class="filter-tab" onclick="unlockFilter('age')">🎂 Par âge <span class="tab-lock">(-5 pts)</span></div>
+      <div class="filter-tab" onclick="unlockFilter('ville')">📍 Par ville <span class="tab-lock filter-tab-cost">(-5 pts)</span></div>
+      <div class="filter-tab" onclick="unlockFilter('age')">🎂 Par âge <span class="tab-lock filter-tab-cost">(-5 pts)</span></div>
     </div>
 
     <!-- FILTRE VILLE (affiché après déverrouillage) -->
@@ -489,6 +489,14 @@ function setFilter(filter) {
 }
 
 function unlockFilter(type) {
+  if (Premium.canFilterFree()) {
+    unlockedFilters[type] = true;
+    document.getElementById(`filter-${type}-row`).classList.add('show');
+    document.getElementById('lb-title').textContent = type === 'ville' ? '📍 Classement par ville' : '🎂 Classement par âge';
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.filter-tab')[type === 'ville' ? 3 : 4].classList.add('active');
+    return;
+  }
   if (unlockedFilters[type]) {
     // Déjà déverrouillé
     document.getElementById(`filter-${type}-row`).classList.add('show');
