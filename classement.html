@@ -394,7 +394,7 @@ async function init() {
     currentUser = session.user;
     const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
     if (profile) {
-      userProfile = profile;
+      userProfile = profile; Premium.init(profile);
       document.getElementById('user-avatar').textContent = profile.prenom?.charAt(0).toUpperCase() || '?';
       document.getElementById('user-name').textContent = profile.prenom || 'Membre';
       document.getElementById('user-pts').textContent = profile.points || 0;
