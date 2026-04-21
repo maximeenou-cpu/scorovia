@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /messages.html
+Disallow: /mesnotes.html
+Disallow: /profil.html
+Disallow: /classement.html
+Disallow: /points.html
+Disallow: /noter.html
+
+Sitemap: https://scorovia.com/sitemap.xml
