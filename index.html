@@ -3,10 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCOROVIA — Quelle est votre note sur 10 ?</title>
+
+<!-- SEO : Title & Description -->
+<title>Scorovia — Fais noter ta photo par de vraies personnes (1 à 10)</title>
+<meta name="description" content="Scorovia : uploade ta photo et reçois une vraie note de 1 à 10 donnée par la communauté. Pas une IA — de vraies personnes. Gratuit, fun, et sans prise de tête.">
+<meta name="keywords" content="noter ma photo, score de beauté, faire noter ma photo, test attractivité, note photo en ligne, avis photo communauté, suis-je beau, suis-je belle, score photo, vote photo, notation photo humaine">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://scorovia.com/">
+
+<!-- Open Graph (partage réseaux sociaux) -->
+<meta property="og:title" content="Scorovia — Note ta photo de 1 à 10 par la communauté">
+<meta property="og:description" content="Pas une IA. De vraies personnes notent ta photo. Rejoins Scorovia, uploade ta photo et découvre ton score !">
+<meta property="og:image" content="https://scorovia.com/og-image.jpg">
+<meta property="og:url" content="https://scorovia.com">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Scorovia">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Scorovia — Note ta photo par la communauté">
+<meta name="twitter:description" content="Des vraies personnes notent ta photo de 1 à 10. Gratuit et fun.">
+<meta name="twitter:image" content="https://scorovia.com/og-image.jpg">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Scorovia",
+  "url": "https://scorovia.com",
+  "description": "Application sociale de notation de photos par la communauté. Reçois une note de 1 à 10 donnée par de vraies personnes, pas une IA.",
+  "applicationCategory": "SocialNetworkingApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "fr",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  }
+}
+</script>
+
 <!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8229912245519123" crossorigin="anonymous"></script>
-  <script src="premium.js"></script>
+<script src="premium.js"></script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -915,6 +957,42 @@ nav {
   .modal-box { padding: 28px 20px 22px; }
   .proof { flex-wrap: wrap; justify-content: center; }
   .ticker-label { display: none; }
+}
+
+/* SEO CONTENT — visible mais discret */
+#seo-content {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+#seo-content h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: 0.05em;
+  color: var(--text);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+#seo-content h2 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--gold2);
+  margin: 28px 0 10px;
+}
+
+#seo-content p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+#seo-content strong {
+  color: var(--text);
+  font-weight: 500;
 }
 </style>
 </head>
