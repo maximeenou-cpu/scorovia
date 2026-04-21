@@ -537,8 +537,9 @@ async function init() {
   document.getElementById('user-pts').textContent = profile.points || 0;
   document.getElementById('pts-display').textContent = profile.points || 0;
 
-  // Vérifier premium (simplifié — à connecter au webhook Stripe quand disponible)
-  isPremium = false; // à changer en true quand le webhook Stripe est actif
+// Vérifier premium depuis Supabase
+isPremium = profile.is_premium === true && 
+  (!profile.premium_until || new Date(profile.premium_until) > new Date());
 
   await loadConversations();
   document.getElementById('loading').style.display = 'none';
