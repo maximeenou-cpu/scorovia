@@ -480,7 +480,7 @@ async function init() {
   currentUser = session.user;
 
   const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
-  if (!profile) { window.location.href = 'login.html'; return; }
+  if (!profile) { window.location.href = 'login.html'; return; } Premium.init(profile);
   userProfile = profile;
 
   // Sidebar
