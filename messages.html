@@ -148,19 +148,18 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;h
   .main{margin-left:0}
   .topbar{padding:12px 16px}
 
-  /* ✅ FIX SAFARI/CHROME : hauteur exacte sans débordement */
+  /* ✅ FIX SAFARI/CHROME : JS calcule la hauteur réelle */
   body{
-    height:100dvh;
+    height: calc(var(--real-vh, 1vh) * 100);
     padding-bottom:0;
     overflow:hidden;
   }
   .main{
-    height:100dvh;
+    height: calc(var(--real-vh, 1vh) * 100);
   }
   .msg-layout{
     position:relative;
-    /* topbar ~57px + bottom nav ~49px + safe-area */
-    height:calc(100dvh - 57px - 49px - env(safe-area-inset-bottom));
+    height: calc(var(--real-vh, 1vh) * 100 - var(--topbar-h, 57px) - var(--nav-h, 49px));
     overflow:hidden;
   }
   .chat-area{display:flex;flex-direction:column;height:100%;overflow:hidden}
@@ -593,6 +592,28 @@ async function pollNewMessages(){
 async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
+
+// ✅ FIX SAFARI IOS : calcule la vraie hauteur visible en excluant
+// la barre du navigateur Safari/Chrome qui n'est pas comptée par 100dvh
+function fixMobileHeight(){
+  if(window.innerWidth > 768) return;
+  // 1vh = 1% de la hauteur visible réelle
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--real-vh', vh + 'px');
+  // Hauteur de la topbar et de la bottom nav mesurées en temps réel
+  const topbar = document.querySelector('.topbar');
+  const nav = document.querySelector('.mobile-bottom-nav');
+  const topbarH = topbar ? topbar.offsetHeight : 57;
+  const navH = nav ? nav.offsetHeight : 49;
+  document.documentElement.style.setProperty('--topbar-h', topbarH + 'px');
+  document.documentElement.style.setProperty('--nav-h', navH + 'px');
+}
+
+// Appel immédiat + à chaque resize (rotation écran, barre Safari qui apparaît/disparaît)
+fixMobileHeight();
+window.addEventListener('resize', fixMobileHeight);
+window.addEventListener('orientationchange', () => setTimeout(fixMobileHeight, 300));
+
 init();
 </script>
 
