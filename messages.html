@@ -142,6 +142,21 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;h
 .menu-btn{display:none;position:fixed;bottom:20px;right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8A020);border:none;font-size:22px;cursor:pointer;z-index:60;box-shadow:0 4px 20px rgba(245,200,66,0.3);align-items:center;justify-content:center}
 .btn-back{display:none;align-items:center;gap:8px;background:none;border:none;color:var(--gold2);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:0;margin-right:8px}
 
+/* ── MODAL AVATAR ───────────────────────────────────────────── */
+.avatar-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:500;align-items:center;justify-content:center;cursor:pointer}
+.avatar-modal-overlay.open{display:flex;animation:fadeIn 0.2s ease both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.avatar-modal-img{width:min(80vw,320px);height:min(80vw,320px);border-radius:50%;object-fit:cover;border:3px solid rgba(245,200,66,0.4);box-shadow:0 0 60px rgba(245,200,66,0.2);animation:zoomIn 0.25s ease both}
+.avatar-modal-initial{width:min(80vw,320px);height:min(80vw,320px);border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:min(20vw,120px);color:#000;animation:zoomIn 0.25s ease both}
+.avatar-modal-name{color:#fff;font-size:18px;font-weight:500;margin-top:16px;text-align:center;animation:zoomIn 0.25s ease 0.05s both}
+.avatar-modal-note{font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px;animation:zoomIn 0.25s ease 0.1s both}
+@keyframes zoomIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+
+/* ── STATUT MESSAGES ────────────────────────────────────────── */
+.msg-status{font-size:10px;color:var(--muted);margin-top:3px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:3px}
+.msg-status.read{color:var(--green)}
+.msg-status-icon{font-size:11px}
+
 /* ── MOBILE ─────────────────────────────────────────────────── */
 @media(max-width:768px){
   .sidebar{display:none !important}
@@ -504,7 +519,7 @@ function renderChatArea(conv,messages){
     </div>`:'';
   area.innerHTML=`
     <div class="chat-header">
-      <div class="chat-av" style="background:${conv.avColor}">${avatarContent}</div>
+      <div class="chat-av" style="background:${conv.avColor};cursor:pointer;" onclick="openAvatarModal(this.dataset.av,this.dataset.name,this.dataset.note)" data-av="${conv.voterProfile?.avatar_url||''}" data-name="${(conv.voterProfile?.prenom||conv.displayName||conv.fakeName)}" data-note="${conv.note}/10">${avatarContent}</div>
       <div><div class="chat-name">${displayName}</div><div class="chat-sub">${conv.isUnlocked&&vp?(metaParts.join(' · ')||'Membre SCOROVIA'):'Profil anonyme'}</div></div>
       <div class="chat-score-badge">Vous a donné <strong style="color:${sc}">${conv.note}/10</strong></div>
     </div>
@@ -526,11 +541,26 @@ function renderMessage(m,myInitial,conv){
   const isMe=m.sender_id===currentUser.id;
   const time=new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   const theirName=conv.voterProfile?.prenom||conv.displayName||conv.fakeName;
-  const theirAvatar=conv.voterProfile?.avatar_url?`<img src="${conv.voterProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:theirName.charAt(0).toUpperCase();
+  const theirAvUrl=conv.voterProfile?.avatar_url||null;
+  const theirAvatar=theirAvUrl?`<img src="${theirAvUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:theirName.charAt(0).toUpperCase();
   const myAvatar=userProfile.avatar_url?`<img src="${userProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:myInitial;
+
+  // Statut message (seulement pour mes messages)
+  let statusHtml='';
+  if(isMe){
+    if(m.read){
+      statusHtml=`<div class="msg-status read"><span class="msg-status-icon">✓✓</span> Lu</div>`;
+    }else{
+      statusHtml=`<div class="msg-status"><span class="msg-status-icon">✓</span> Envoyé</div>`;
+    }
+  }
+
+  // Avatar their = cliquable pour agrandir
+  const theirAvClick=`onclick="openAvatarModal('${theirAvUrl||''}','${theirName.replace(/'/g,"\'")}','${conv.note}/10')"`;
+
   return `<div class="msg-bubble-wrap ${isMe?'me':''}">
-    <div class="msg-av-small" style="background:${isMe?'linear-gradient(135deg,var(--gold),var(--pink))':conv.avColor}">${isMe?myAvatar:theirAvatar}</div>
-    <div><div class="msg-bubble ${isMe?'me':'them'}">${escapeHtml(m.content)}</div><div class="msg-time">${time}</div></div>
+    <div class="msg-av-small" style="background:${isMe?'linear-gradient(135deg,var(--gold),var(--pink))':conv.avColor};${!isMe?'cursor:pointer;':''}" ${!isMe?theirAvClick:''}>${isMe?myAvatar:theirAvatar}</div>
+    <div><div class="msg-bubble ${isMe?'me':'them'}">${escapeHtml(m.content)}</div><div class="msg-time">${time}</div>${statusHtml}</div>
   </div>`;
 }
 
@@ -615,8 +645,34 @@ async function doLogout(){await sb.auth.signOut();window.location.href='login.ht
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 
+// ── MODAL AVATAR ────────────────────────────────────────────
+function openAvatarModal(avatarUrl, name, note){
+  const modal=document.getElementById('avatar-modal');
+  const content=document.getElementById('avatar-modal-content');
+  document.getElementById('avatar-modal-name').textContent=name;
+  document.getElementById('avatar-modal-note').textContent=note?'A donné '+note:'';
+  if(avatarUrl){
+    content.innerHTML=`<img class="avatar-modal-img" src="${avatarUrl}" alt="${name}" />`;
+  }else{
+    content.innerHTML=`<div class="avatar-modal-initial">${name.charAt(0).toUpperCase()}</div>`;
+  }
+  modal.classList.add('open');
+}
+function closeAvatarModal(){
+  document.getElementById('avatar-modal').classList.remove('open');
+}
+
 init();
 </script>
+
+<!-- MODAL AVATAR AGRANDI -->
+<div class="avatar-modal-overlay" id="avatar-modal" onclick="closeAvatarModal()">
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div id="avatar-modal-content"></div>
+    <div class="avatar-modal-name" id="avatar-modal-name"></div>
+    <div class="avatar-modal-note" id="avatar-modal-note"></div>
+  </div>
+</div>
 
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
   <ul>
