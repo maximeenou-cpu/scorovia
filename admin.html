@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Scorovia</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #080808;
+      --bg2: #111111;
+      --bg3: #1a1a1a;
+      --border: #2a2a2a;
+      --gold: #f5c842;
+      --gold2: #e0a800;
+      --text: #f0f0f0;
+      --muted: #666;
+      --green: #3ddc84;
+      --red: #ff4d4d;
+      --blue: #4d9fff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* AUTH SCREEN */
+    #auth-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at center, #1a1200 0%, #080808 70%);
+    }
+
+    .auth-box {
+      text-align: center;
+      padding: 60px 40px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .auth-box .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+    }
+
+    .auth-box .subtitle {
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+
+    .auth-box button {
+      background: var(--gold);
+      color: #000;
+      border: none;
+      padding: 14px 32px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .auth-box button:hover { background: var(--gold2); }
+
+    .auth-error {
+      margin-top: 16px;
+      color: var(--red);
+      font-size: 0.75rem;
+      display: none;
+    }
+
+    /* MAIN LAYOUT */
+    #admin-app { display: none; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--gold);
+      letter-spacing: 3px;
+    }
+
+    .header-badge {
+      background: var(--gold);
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .admin-email {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* NAV TABS */
+    .nav-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      padding: 0 32px;
+      overflow-x: auto;
+    }
+
+    .nav-tab {
+      padding: 16px 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+      background: none;
+      border-left: none;
+      border-right: none;
+      border-top: none;
+    }
+
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* MAIN CONTENT */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.4s ease forwards;
+      opacity: 0;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gold);
+    }
+
+    .stat-card.green::before { background: var(--green); }
+    .stat-card.blue::before { background: var(--blue); }
+    .stat-card.red::before { background: var(--red); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.2s; }
+    .stat-card:nth-child(5) { animation-delay: 0.25s; }
+    .stat-card:nth-child(6) { animation-delay: 0.3s; }
+    .stat-card:nth-child(7) { animation-delay: 0.35s; }
+    .stat-card:nth-child(8) { animation-delay: 0.4s; }
+
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* SECTION TITLES */
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+      margin-top: 40px;
+    }
+
+    .section-title:first-child { margin-top: 0; }
+
+    /* TABLE */
+    .table-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg3);
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg3); }
+
+    /* POINTS CONFIG */
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .config-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .config-label {
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+
+    .config-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .config-input {
+      width: 80px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .config-input:focus { outline: none; border-color: var(--gold); }
+
+    .btn-save-config {
+      background: var(--gold);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-save-config:hover { background: var(--gold2); }
+
+    /* PROMO CODES */
+    .promo-form {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+    }
+
+    .form-group input:focus { outline: none; border-color: var(--gold); }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #000;
+      border: none;
+      padding: 10px 24px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+      height: 40px;
+    }
+
+    .btn-primary:hover { background: var(--gold2); }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .badge-active { background: rgba(61,220,132,0.15); color: var(--green); }
+    .badge-inactive { background: rgba(255,77,77,0.15); color: var(--red); }
+
+    .btn-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: var(--bg2);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 14px 24px;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      z-index: 9999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { border-color: var(--red); color: var(--red); }
+
+    /* LOADER */
+    .loader {
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 40px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    /* RECENT USERS TABLE */
+    .avatar-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      vertical-align: middle;
+      margin-right: 8px;
+      overflow: hidden;
+    }
+
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+    @media (max-width: 768px) {
+      main { padding: 16px; }
+      header { padding: 16px; }
+      .promo-form { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="logo">SCOROVIA</div>
+    <div class="subtitle">Espace Administrateur</div>
+    <button onclick="loginWithGoogle()">Connexion avec Google</button>
+    <div class="auth-error" id="auth-error">Accès refusé — compte non autorisé.</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app">
+  <header>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="header-logo">SCOROVIA</div>
+      <span class="header-badge">Admin</span>
+    </div>
+    <div class="header-right">
+      <span class="admin-email" id="admin-email"></span>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('stats', this)">Statistiques</button>
+    <button class="nav-tab" onclick="showSection('users', this)">Utilisateurs</button>
+    <button class="nav-tab" onclick="showSection('points', this)">Points</button>
+    <button class="nav-tab" onclick="showSection('promos', this)">Codes Promo</button>
+    <button class="nav-tab" onclick="showSection('reports', this)">Reports</button>
+  </nav>
+
+  <main>
+
+    <!-- STATS -->
+    <div class="section active" id="section-stats">
+      <div class="stats-grid" id="stats-grid">
+        <div class="loader">Chargement...</div>
+      </div>
+
+      <div class="section-title">Inscrits récents</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Ville</th>
+              <th>Points</th>
+              <th>Premium</th>
+              <th>Code promo</th>
+              <th>Inscrit le</th>
+            </tr>
+          </thead>
+          <tbody id="recent-users-tbody">
+            <tr><td colspan="6" class="loader">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="section" id="section-users">
+      <div class="section-title">Tous les utilisateurs</div>
+      <div style="margin-bottom:16px;display:flex;gap:12px">
+        <input id="search-user" type="text" placeholder="Rechercher par prénom ou email..."
+          style="flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:'DM Mono',monospace;font-size:0.85rem;"
+          oninput="searchUsers(this.value)">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Email</th>
+              <th>Points</th>
+              <th>Premium</th>
+              <th>Photos</th>
+              <th>Votes donnés</th>
+              <th>Code promo</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="7" class="loader">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POINTS CONFIG -->
+    <div class="section" id="section-points">
+      <div class="section-title">Configuration des points</div>
+      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:24px;">Modifiez les valeurs et cliquez sur Enregistrer pour chaque ligne.</p>
+      <div class="config-grid" id="config-grid">
+        <div class="loader">Chargement...</div>
+      </div>
+    </div>
+
+    <!-- PROMO CODES -->
+    <div class="section" id="section-promos">
+      <div class="section-title">Créer un code promo</div>
+
+      <div class="promo-form">
+        <div class="form-group">
+          <label>Code (ex: LENA50)</label>
+          <input type="text" id="promo-code" placeholder="LENA50" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label>Influenceur</label>
+          <input type="text" id="promo-influencer" placeholder="Léna Martin">
+        </div>
+        <div class="form-group">
+          <label>Points bonus</label>
+          <input type="number" id="promo-points" value="50" min="1">
+        </div>
+        <button class="btn-primary" onclick="createPromoCode()">Créer</button>
+      </div>
+
+      <div class="section-title">Codes actifs</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Influenceur</th>
+              <th>Points bonus</th>
+              <th>Utilisations</th>
+              <th>Statut</th>
+              <th>Créé le</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="promos-tbody">
+            <tr><td colspan="7" class="loader">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="section" id="section-reports">
+      <div class="section-title">Signalements en attente</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Raison</th>
+              <th>Signalé le</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="reports-tbody">
+            <tr><td colspan="4" class="loader">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── CONFIG ───────────────────────────────────────────────
+  const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZGxjcXNtdXZhcWtvaGpxc2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDU4MzYsImV4cCI6MjA5MjE4MTgzNn0._1oxero_MGI2zEq07RUcmjq5Ifmf-uEcg_rVv9AXips';
+  const ADMIN_EMAIL = 'maxime.enou@gmail.com';
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let allUsers = [];
+
+  // ─── AUTH ─────────────────────────────────────────────────
+  async function loginWithGoogle() {
+    await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.href }
+    });
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    location.reload();
+  }
+
+  async function checkAuth() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+
+    const email = session.user.email;
+    if (email !== ADMIN_EMAIL) {
+      document.getElementById('auth-error').style.display = 'block';
+      await sb.auth.signOut();
+      return;
+    }
+
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('admin-app').style.display = 'block';
+    document.getElementById('admin-email').textContent = email;
+    loadStats();
+  }
+
+  // ─── NAVIGATION ───────────────────────────────────────────
+  function showSection(name, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    btn.classList.add('active');
+
+    if (name === 'users') loadUsers();
+    if (name === 'points') loadPointsConfig();
+    if (name === 'promos') loadPromoCodes();
+    if (name === 'reports') loadReports();
+  }
+
+  // ─── STATS ────────────────────────────────────────────────
+  async function loadStats() {
+    const [
+      { count: totalUsers },
+      { count: totalVotes },
+      { count: totalPhotos },
+      { count: totalMessages },
+      { count: totalReports },
+      { count: premiumUsers },
+      { data: pointsData },
+      { data: recentUsers }
+    ] = await Promise.all([
+      sb.from('users').select('*', { count: 'exact', head: true }),
+      sb.from('votes').select('*', { count: 'exact', head: true }),
+      sb.from('photos').select('*', { count: 'exact', head: true }),
+      sb.from('messages').select('*', { count: 'exact', head: true }),
+      sb.from('reports').select('*', { count: 'exact', head: true }),
+      sb.from('users').select('*', { count: 'exact', head: true }).eq('is_premium', true),
+      sb.from('points_history').select('points'),
+      sb.from('users').select('id, prenom, ville, points, is_premium, promo_code, created_at, avatar_url').order('created_at', { ascending: false }).limit(10)
+    ]);
+
+    const totalPoints = pointsData ? pointsData.reduce((s, r) => s + (r.points > 0 ? r.points : 0), 0) : 0;
+
+    const statsGrid = document.getElementById('stats-grid');
+    statsGrid.innerHTML = `
+      ${statCard('Inscrits', totalUsers ?? 0, '', '')}
+      ${statCard('Votes', totalVotes ?? 0, '', 'green')}
+      ${statCard('Photos', totalPhotos ?? 0, '', 'blue')}
+      ${statCard('Messages', totalMessages ?? 0, '', '')}
+      ${statCard('Premium', premiumUsers ?? 0, 'abonnés actifs', 'gold')}
+      ${statCard('Points distribués', totalPoints.toLocaleString('fr'), 'total cumulé', 'green')}
+      ${statCard('Signalements', totalReports ?? 0, 'en attente', 'red')}
+    `;
+
+    // Recent users
+    const tbody = document.getElementById('recent-users-tbody');
+    if (!recentUsers || recentUsers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="loader">Aucun utilisateur</td></tr>';
+      return;
+    }
+    tbody.innerHTML = recentUsers.map(u => `
+      <tr>
+        <td>
+          <span class="avatar-circle">${u.avatar_url ? `<img src="${u.avatar_url}">` : '👤'}</span>
+          ${u.prenom || '—'}
+        </td>
+        <td>${u.ville || '—'}</td>
+        <td>${u.points ?? 0} pts</td>
+        <td>${u.is_premium ? '<span class="badge badge-active">Premium</span>' : '—'}</td>
+        <td>${u.promo_code ? `<code style="color:var(--gold)">${u.promo_code}</code>` : '—'}</td>
+        <td>${formatDate(u.created_at)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function statCard(label, value, sub, color) {
+    return `
+      <div class="stat-card ${color}">
+        <div class="stat-label">${label}</div>
+        <div class="stat-value">${value}</div>
+        ${sub ? `<div class="stat-sub">${sub}</div>` : ''}
+      </div>
+    `;
+  }
+
+  // ─── USERS ────────────────────────────────────────────────
+  async function loadUsers() {
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = '<tr><td colspan="7" class="loader">Chargement...</td></tr>';
+
+    const { data: users } = await sb.from('users')
+      .select('id, prenom, points, is_premium, promo_code, avatar_url')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    allUsers = users || [];
+    renderUsersTable(allUsers);
+  }
+
+  function renderUsersTable(users) {
+    const tbody = document.getElementById('users-tbody');
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun résultat</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>
+          <span class="avatar-circle">${u.avatar_url ? `<img src="${u.avatar_url}">` : '👤'}</span>
+          ${u.prenom || '—'}
+        </td>
+        <td style="color:var(--muted);font-size:0.75rem">—</td>
+        <td>${u.points ?? 0} pts</td>
+        <td>${u.is_premium ? '<span class="badge badge-active">Premium</span>' : '—'}</td>
+        <td>—</td>
+        <td>—</td>
+        <td>${u.promo_code ? `<code style="color:var(--gold)">${u.promo_code}</code>` : '—'}</td>
+      </tr>
+    `).join('');
+  }
+
+  function searchUsers(query) {
+    const q = query.toLowerCase();
+    const filtered = allUsers.filter(u =>
+      (u.prenom || '').toLowerCase().includes(q)
+    );
+    renderUsersTable(filtered);
+  }
+
+  // ─── POINTS CONFIG ────────────────────────────────────────
+  async function loadPointsConfig() {
+    const { data } = await sb.from('points_config').select('*').order('id');
+    const grid = document.getElementById('config-grid');
+    if (!data) { grid.innerHTML = '<div class="loader">Erreur</div>'; return; }
+
+    grid.innerHTML = data.map(cfg => `
+      <div class="config-card">
+        <div class="config-label">${cfg.label}</div>
+        <div class="config-input-wrap">
+          <input class="config-input" type="number" value="${cfg.points}" id="cfg-${cfg.id}">
+          <button class="btn-save-config" onclick="savePointsConfig('${cfg.id}', '${cfg.label}')">OK</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function savePointsConfig(id, label) {
+    const val = parseInt(document.getElementById('cfg-' + id).value);
+    if (isNaN(val)) return showToast('Valeur invalide', true);
+
+    const { error } = await sb.from('points_config').update({ points: val }).eq('id', id);
+    if (error) return showToast('Erreur: ' + error.message, true);
+    showToast(`✓ ${label} → ${val} pts`);
+  }
+
+  // ─── PROMO CODES ──────────────────────────────────────────
+  async function loadPromoCodes() {
+    const { data } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('promos-tbody');
+    if (!data || !data.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun code créé</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(p => `
+      <tr>
+        <td><code style="color:var(--gold);font-size:0.9rem">${p.code}</code></td>
+        <td>${p.influencer_name}</td>
+        <td>+${p.points_bonus} pts</td>
+        <td>${p.uses}</td>
+        <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Actif' : 'Désactivé'}</span></td>
+        <td>${formatDate(p.created_at)}</td>
+        <td><button class="btn-toggle" onclick="togglePromo('${p.id}', ${p.active})">${p.active ? 'Désactiver' : 'Activer'}</button></td>
+      </tr>
+    `).join('');
+  }
+
+  async function createPromoCode() {
+    const code = document.getElementById('promo-code').value.trim().toUpperCase();
+    const influencer = document.getElementById('promo-influencer').value.trim();
+    const points = parseInt(document.getElementById('promo-points').value);
+
+    if (!code || !influencer || isNaN(points)) return showToast('Remplis tous les champs', true);
+
+    const { error } = await sb.from('promo_codes').insert({
+      code, influencer_name: influencer, points_bonus: points
+    });
+
+    if (error) return showToast('Erreur: ' + (error.message.includes('unique') ? 'Code déjà existant' : error.message), true);
+
+    showToast('✓ Code ' + code + ' créé !');
+    document.getElementById('promo-code').value = '';
+    document.getElementById('promo-influencer').value = '';
+    loadPromoCodes();
+  }
+
+  async function togglePromo(id, currentActive) {
+    const { error } = await sb.from('promo_codes').update({ active: !currentActive }).eq('id', id);
+    if (error) return showToast('Erreur', true);
+    showToast(currentActive ? 'Code désactivé' : 'Code activé');
+    loadPromoCodes();
+  }
+
+  // ─── REPORTS ──────────────────────────────────────────────
+  async function loadReports() {
+    const { data } = await sb.from('reports')
+      .select('id, raison, created_at, photo_id, photos(url)')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const tbody = document.getElementById('reports-tbody');
+    if (!data || !data.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="loader">Aucun signalement</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td>
+          ${r.photos?.url ? `<img src="${r.photos.url}" style="width:48px;height:48px;object-fit:cover;border:1px solid var(--border)">` : '—'}
+        </td>
+        <td>${r.raison || '—'}</td>
+        <td>${formatDate(r.created_at)}</td>
+        <td>
+          <button class="btn-toggle" onclick="deletePhoto('${r.photo_id}', '${r.id}')">Supprimer photo</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function deletePhoto(photoId, reportId) {
+    if (!confirm('Supprimer cette photo ?')) return;
+    await sb.from('photos').update({ active: false }).eq('id', photoId);
+    await sb.from('reports').delete().eq('id', reportId);
+    showToast('✓ Photo supprimée');
+    loadReports();
+  }
+
+  // ─── UTILS ────────────────────────────────────────────────
+  function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  }
+
+  let toastTimer;
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────
+  checkAuth();
+</script>
+</body>
+</html>
