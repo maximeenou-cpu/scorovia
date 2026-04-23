@@ -18,6 +18,7 @@
 <title>SCOROVIA — Tableau de bord</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="premium.js"></script>
+<script src="points-config.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -175,7 +176,6 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
   <div class="nav-section">Compte</div>
   <a class="nav-item" href="points.html"><span class="nav-icon">⚡</span> Mes points</a>
   <a class="nav-item" href="profil.html"><span class="nav-icon">👤</span> Mon profil</a>
-  <!-- ✅ LIEN CONTACT AJOUTÉ -->
   <a class="nav-item" href="contact.html"><span class="nav-icon">✉️</span> Contact</a>
   <a class="nav-item" onclick="doLogout()" style="cursor:pointer"><span class="nav-icon">🚪</span> Déconnexion</a>
   <div class="sidebar-bottom">
@@ -268,17 +268,17 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
         <a class="earn-row" href="noter.html">
           <div class="earn-icon-wrap" style="background:rgba(245,200,66,0.1)">⭐</div>
           <div class="earn-info"><div class="earn-title">Noter quelqu'un</div><div class="earn-desc">Notez des profils</div></div>
-          <div class="earn-pts">+1 pt</div>
+          <div class="earn-pts" data-pts-key="vote">+1 pt</div>
         </a>
         <a class="earn-row" href="points.html">
           <div class="earn-icon-wrap" style="background:rgba(139,92,246,0.1)">📺</div>
           <div class="earn-info"><div class="earn-title">Regarder une pub</div><div class="earn-desc">Vidéo de 30 secondes</div></div>
-          <div class="earn-pts">+5 pts</div>
+          <div class="earn-pts" data-pts-key="pub">+5 pts</div>
         </a>
         <div class="earn-row" onclick="copyInvite()">
           <div class="earn-icon-wrap" style="background:rgba(34,212,160,0.1)">👥</div>
           <div class="earn-info"><div class="earn-title">Inviter un ami</div><div class="earn-desc">Copiez votre lien de parrainage</div></div>
-          <div class="earn-pts">+50 pts</div>
+          <div class="earn-pts" data-pts-key="parrainage">+50 pts</div>
         </div>
       </div>
     </div>
@@ -303,6 +303,7 @@ async function init(){
   if(!profile){window.location.href='login.html';return;}
 
   Premium.init(profile);
+  PointsConfig.load().then(() => PointsConfig.updateDOM());
 
   const{data:photos}=await sb.from('photos').select('id,nb_votes,note_moyenne').eq('user_id',currentUser.id).eq('active',true);
   const totalVotes=photos?photos.reduce((sum,p)=>sum+(p.nb_votes||0),0):0;
@@ -438,7 +439,6 @@ async function initNotifications(){
 init();
 </script>
 
-<!-- ✅ BOTTOM NAV MOBILE avec Contact ajouté -->
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
   <ul>
     <li class="active"><a href="dashboard.html"><span class="mnav-icon">🏠</span><span class="mnav-label">Accueil</span></a></li>
