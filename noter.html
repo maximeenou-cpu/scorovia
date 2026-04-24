@@ -33,13 +33,11 @@
 html { scroll-behavior: smooth; }
 body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; }
 
-/* LOADING */
 .loading-screen { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 100; }
 .loading-logo { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.18em; background: linear-gradient(135deg, var(--gold), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .loading-spinner { width: 32px; height: 32px; border: 3px solid rgba(245,200,66,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* SIDEBAR */
 .sidebar { width: 220px; flex-shrink: 0; background: var(--deep); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40; transition: transform 0.3s; }
 .sidebar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.15em; background: linear-gradient(135deg, var(--gold), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px; padding-left: 8px; text-decoration: none; display: block; }
 .nav-section { font-size: 10px; color: rgba(240,238,248,0.2); text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 8px 8px; }
@@ -54,7 +52,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .user-name-sm { font-size: 13px; font-weight: 500; color: var(--text); }
 .user-pts-sm { font-size: 11px; color: var(--gold2); }
 
-/* MAIN */
 .main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
 
 .topbar { background: rgba(7,7,15,0.8); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 30; }
@@ -62,13 +59,10 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .topbar-right { display: flex; align-items: center; gap: 12px; }
 .pts-pill { display: flex; align-items: center; gap: 6px; background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2); padding: 6px 14px; border-radius: 20px; font-size: 13px; color: var(--gold2); font-weight: 500; }
 
-/* CONTENT */
 .content { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 32px; gap: 28px; }
 
-/* CARD AREA */
 .card-area { display: flex; flex-direction: column; align-items: center; gap: 20px; flex-shrink: 0; width: 340px; }
 
-/* PHOTO CARD */
 .photo-card {
   width: 340px;
   background: var(--card);
@@ -104,7 +98,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .card-name { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.06em; }
 .card-city { font-size: 13px; color: var(--muted); }
 
-/* RESULT OVERLAY — shown after voting */
 .result-overlay {
   position: absolute; inset: 0;
   background: rgba(7,7,15,0.88);
@@ -121,10 +114,7 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 
 .result-overlay.show { display: flex; }
 
-.result-your-vote {
-  font-size: 13px; color: var(--muted); margin-bottom: 4px;
-}
-
+.result-your-vote { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 .result-your-num {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 72px; line-height: 1;
@@ -132,28 +122,18 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
 .result-avg-label { font-size: 12px; color: var(--muted); margin-top: 8px; }
-
 .result-avg-row {
   display: flex; align-items: center; gap: 8px;
   background: rgba(255,255,255,0.06);
   border: 1px solid var(--border);
   border-radius: 12px; padding: 10px 18px;
 }
-
-.result-avg-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px; color: var(--gold2);
-}
-
+.result-avg-num { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold2); }
 .result-votes { font-size: 12px; color: var(--muted); }
-
 .result-bar-wrap { width: 100%; background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 4px; }
 .result-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--pink)); border-radius: 4px; transition: width 0.8s ease; }
-
 .result-msg { font-size: 13px; color: var(--muted); margin-top: 4px; font-style: italic; }
-
 .btn-next {
   margin-top: 12px;
   background: linear-gradient(135deg, var(--gold), #E8A020);
@@ -162,7 +142,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   letter-spacing: 0.08em; color: #000; cursor: pointer;
 }
 
-/* RATING SECTION */
 .rating-section {
   background: var(--card); border: 1px solid var(--border);
   border-radius: 20px; padding: 20px; width: 340px;
@@ -191,23 +170,22 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 
 .action-btns { display: flex; gap: 10px; }
 
-.btn-pass { flex: 1; padding: 13px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; color: var(--muted); font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.2s; }
+.btn-pass { flex: 1; padding: 13px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; color: var(--muted); font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.2s, opacity 0.2s; }
 .btn-pass:hover { background: rgba(255,77,141,0.08); color: var(--pink); border-color: rgba(255,77,141,0.2); }
+/* ── FIX : bouton Passer désactivé pendant le timer ── */
+.btn-pass:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 
 .btn-noter { flex: 2; padding: 13px; background: linear-gradient(135deg, var(--gold), #E8A020); border: none; border-radius: 12px; color: #000; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.08em; cursor: pointer; transition: opacity 0.2s; }
 .btn-noter:hover { opacity: 0.9; }
 .btn-noter:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* TIMER BAR */
 .timer-bar-wrap { width: 100%; background: rgba(255,255,255,0.06); border-radius: 4px; height: 3px; margin-bottom: 14px; overflow: hidden; display: none; }
 .timer-bar-wrap.show { display: block; }
 .timer-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--pink)); border-radius: 4px; width: 0%; transition: width 0.1s linear; }
 
-/* REPORT BTN */
 .btn-report { position: absolute; top: 12px; right: 12px; background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.25); border-radius: 8px; padding: 5px 10px; font-size: 11px; color: #FF8080; cursor: pointer; font-family: 'DM Sans', sans-serif; z-index: 10; transition: background 0.2s; }
 .btn-report:hover { background: rgba(255,77,77,0.25); }
 
-/* REPORT MODAL */
 .report-modal-bg { display: none; position: fixed; inset: 0; background: rgba(7,7,15,0.88); backdrop-filter: blur(10px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
 .report-modal-bg.open { display: flex; }
 .report-modal { background: var(--deep); border: 1px solid rgba(255,77,77,0.2); border-radius: 20px; padding: 28px; width: 100%; max-width: 360px; }
@@ -220,19 +198,15 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .btn-send-report:hover { background: rgba(255,77,77,0.22); }
 .btn-cancel-report { width: 100%; padding: 10px; background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: 6px; }
 
-/* RIGHT PANEL */
 .right-panel { display: flex; flex-direction: column; gap: 16px; width: 260px; flex-shrink: 0; }
-
 .panel-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; }
 .panel-title { font-size: 13px; font-weight: 500; margin-bottom: 14px; }
-
 .session-stat { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
 .session-stat:last-child { border-bottom: none; }
 .session-stat-label { color: var(--muted); }
 .session-stat-val { font-weight: 500; }
 .stat-green { color: var(--green); }
 .stat-gold { color: var(--gold2); }
-
 .history-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
 .history-row:last-child { border-bottom: none; }
 .history-av { width: 32px; height: 32px; border-radius: 8px; background: var(--card2); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
@@ -240,14 +214,12 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .history-name { flex: 1; color: var(--muted); }
 .history-score { font-weight: 600; color: var(--gold2); }
 
-/* EMPTY STATE */
 .empty-state { text-align: center; padding: 40px 20px; }
 .empty-emoji { font-size: 56px; margin-bottom: 16px; }
 .empty-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.06em; color: var(--gold2); margin-bottom: 8px; }
 .empty-sub { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
 .btn-reload { background: linear-gradient(135deg, var(--gold), #E8A020); border: none; border-radius: 12px; padding: 12px 24px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.08em; color: #000; cursor: pointer; }
 
-/* SIGNUP POPUP */
 .popup-bg { display: none; position: fixed; inset: 0; background: rgba(7,7,15,0.88); backdrop-filter: blur(10px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
 .popup-bg.show { display: flex; }
 .popup-box { background: var(--deep); border: 1px solid rgba(245,200,66,0.2); border-radius: 24px; padding: 36px 28px; width: 100%; max-width: 380px; text-align: center; }
@@ -258,7 +230,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .btn-continue { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .btn-continue:hover { color: var(--text); }
 
-/* TOAST */
 .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.gold { border-color: rgba(245,200,66,0.3); }
@@ -276,7 +247,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   .stars-grid { gap: 4px; } .star-btn { width: 32px; height: 32px; font-size: 12px; }
 }
 
-/* ===== MOBILE BOTTOM NAV ===== */
 .mobile-bottom-nav {
   display: none;
   position: fixed;
@@ -288,46 +258,23 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   z-index: 9999;
   padding: 6px 0 max(6px, env(safe-area-inset-bottom));
 }
-.mobile-bottom-nav ul {
-  display: flex; align-items: stretch;
-  justify-content: space-around;
-  list-style: none; margin: 0; padding: 0;
-}
+.mobile-bottom-nav ul { display: flex; align-items: stretch; justify-content: space-around; list-style: none; margin: 0; padding: 0; }
 .mobile-bottom-nav li { flex: 1; }
-.mobile-bottom-nav li a {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 3px; text-decoration: none;
-  padding: 6px 4px; border-radius: 10px;
-  transition: background 0.2s;
-  position: relative;
-}
+.mobile-bottom-nav li a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; padding: 6px 4px; border-radius: 10px; transition: background 0.2s; position: relative; }
 .mobile-bottom-nav li a:active { background: rgba(255,255,255,0.08); }
 .mobile-bottom-nav .mnav-icon { font-size: 22px; line-height: 1; }
-.mobile-bottom-nav .mnav-label {
-  font-size: 10px; font-family: 'DM Sans', sans-serif;
-  color: rgba(240,238,248,0.4); letter-spacing: 0.01em;
-}
+.mobile-bottom-nav .mnav-label { font-size: 10px; font-family: 'DM Sans', sans-serif; color: rgba(240,238,248,0.4); letter-spacing: 0.01em; }
 .mobile-bottom-nav li.active .mnav-label { color: #FFE27A; }
-.mobile-bottom-nav li.active .mnav-icon {
-  filter: drop-shadow(0 0 6px rgba(245,200,66,0.5));
-}
-.mobile-bottom-nav .mnav-badge {
-  position: absolute; top: 4px; right: calc(50% - 16px);
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #FF4D8D; border: 2px solid rgba(13,13,26,0.97);
-}
+.mobile-bottom-nav li.active .mnav-icon { filter: drop-shadow(0 0 6px rgba(245,200,66,0.5)); }
+.mobile-bottom-nav .mnav-badge { position: absolute; top: 4px; right: calc(50% - 16px); width: 8px; height: 8px; border-radius: 50%; background: #FF4D8D; border: 2px solid rgba(13,13,26,0.97); }
 @media (max-width: 768px) {
   .mobile-bottom-nav { display: block; }
   .sidebar { display: none !important; }
   .main { margin-left: 0 !important; }
   .menu-btn { display: none !important; }
   body { padding-bottom: 65px; }
-  /* Messages : ajuster le layout */
   .msg-layout { height: calc(100dvh - 57px - 65px) !important; }
 }
-/* ===== FIN MOBILE BOTTOM NAV ===== */
-
 </style>
 </head>
 <body>
@@ -339,7 +286,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 
 <div class="toast" id="toast"></div>
 
-<!-- SIGNUP POPUP -->
 <div class="popup-bg" id="signup-popup">
   <div class="popup-box">
     <div class="popup-emoji">⭐</div>
@@ -350,7 +296,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   </div>
 </div>
 
-<!-- REPORT MODAL -->
 <div class="report-modal-bg" id="report-modal">
   <div class="report-modal">
     <div class="report-title">🚨 Signaler cette photo</div>
@@ -365,7 +310,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   </div>
 </div>
 
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <a href="index.html" class="sidebar-logo">SCOROVIA</a>
   <div class="nav-section">Principal</div>
@@ -390,7 +334,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   </div>
 </aside>
 
-<!-- MAIN -->
 <main class="main">
   <div class="topbar">
     <div class="topbar-title">⭐ Noter</div>
@@ -402,8 +345,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 
   <div class="content">
     <div class="card-area">
-
-      <!-- PHOTO CARD -->
       <div class="photo-card" id="photo-card" style="display:none">
         <div class="card-photo" id="card-photo">
           <div id="card-emoji" style="font-size:80px">👤</div>
@@ -413,8 +354,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
           <div class="card-name" id="card-name">—</div>
           <div class="card-city" id="card-city">—</div>
         </div>
-
-        <!-- RESULT OVERLAY -->
         <div class="result-overlay" id="result-overlay">
           <div class="result-your-vote">Votre note</div>
           <div class="result-your-num" id="result-your-num">—</div>
@@ -431,7 +370,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
         </div>
       </div>
 
-      <!-- EMPTY STATE -->
       <div class="empty-state" id="empty-state" style="display:none">
         <div class="empty-emoji">🎉</div>
         <div class="empty-title">Session terminée !</div>
@@ -439,12 +377,10 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
         <button class="btn-reload" onclick="loadPhotos()">ACTUALISER</button>
       </div>
 
-      <!-- LOADING PHOTOS -->
       <div id="photos-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">
         Chargement des photos...
       </div>
 
-      <!-- RATING -->
       <div class="rating-section" id="rating-section" style="display:none">
         <div class="timer-bar-wrap" id="timer-bar-wrap">
           <div class="timer-bar-fill" id="timer-bar-fill"></div>
@@ -466,14 +402,12 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
           <div class="selected-score-num" id="score-display" style="display:none"></div>
         </div>
         <div class="action-btns">
-          <button class="btn-pass" onclick="doPass()">✗ Passer</button>
+          <button class="btn-pass" id="btn-pass" onclick="doPass()">✗ Passer</button>
           <button class="btn-noter" id="btn-noter" onclick="doRate()" disabled>✓ NOTER</button>
         </div>
       </div>
-
     </div>
 
-    <!-- RIGHT PANEL -->
     <div class="right-panel">
       <div class="panel-card">
         <div class="panel-title">📊 Aujourd'hui</div>
@@ -482,13 +416,11 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
         <div class="session-stat"><span class="session-stat-label">Note moyenne donnée</span><span class="session-stat-val stat-gold" id="s-avg">—</span></div>
         <div class="session-stat"><span class="session-stat-label">Points gagnés</span><span class="session-stat-val stat-green" id="s-pts">+0 pts</span></div>
       </div>
-
       <div class="panel-card">
         <div class="panel-title">🕐 Notes données aujourd'hui</div>
         <div id="history-list"><div style="font-size:12px;color:var(--muted);text-align:center;padding:12px 0">Vos notes apparaîtront ici</div></div>
       </div>
     </div>
-
   </div>
 </main>
 
@@ -512,28 +444,23 @@ let anonymousVotes = 0;
 const POPUP_THRESHOLD = 5;
 
 async function init() {
-  // Check session — optional
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
     currentUser = session.user;
     const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
     userProfile = profile;
-
     if (profile) {
       document.getElementById('user-avatar').textContent = profile.prenom?.charAt(0).toUpperCase() || '?';
       document.getElementById('user-name').textContent = profile.prenom || 'Membre';
       document.getElementById('user-pts').textContent = profile.points || 0;
       document.getElementById('pts-display').textContent = profile.points || 0;
       document.getElementById('pts-pill').style.display = 'flex';
-
-      // Charger stats du jour
       await loadTodayStats();
     }
   } else {
     document.getElementById('user-name').textContent = 'Visiteur';
     document.getElementById('btn-login-top').style.display = 'block';
   }
-
   await loadPhotos();
   document.getElementById('loading').style.display = 'none';
 }
@@ -543,25 +470,16 @@ async function loadPhotos() {
   document.getElementById('photo-card').style.display = 'none';
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('rating-section').style.display = 'none';
-
   try {
     let query = sb.from('photos').select('*, users(prenom, ville)').eq('active', true);
-
-    // Exclude own photos if logged in
-    if (currentUser) {
-      query = query.neq('user_id', currentUser.id);
-    }
-
+    if (currentUser) query = query.neq('user_id', currentUser.id);
     const { data, error } = await query.limit(20);
     if (error) throw error;
-
     if (!data || data.length === 0) {
       document.getElementById('photos-loading').style.display = 'none';
       document.getElementById('empty-state').style.display = 'block';
       return;
     }
-
-    // Filter already voted if logged in
     if (currentUser) {
       const { data: voted } = await sb.from('votes').select('photo_id').eq('voter_id', currentUser.id);
       const votedIds = voted ? voted.map(v => v.photo_id) : [];
@@ -569,13 +487,9 @@ async function loadPhotos() {
     } else {
       photos = data;
     }
-
-    // Shuffle
     photos = photos.sort(() => Math.random() - 0.5);
     currentIndex = 0;
-
     document.getElementById('photos-loading').style.display = 'none';
-
     if (photos.length === 0) {
       document.getElementById('empty-state').style.display = 'block';
     } else {
@@ -584,7 +498,6 @@ async function loadPhotos() {
   } catch(e) {
     document.getElementById('photos-loading').style.display = 'none';
     document.getElementById('empty-state').style.display = 'block';
-    console.error(e);
   }
 }
 
@@ -595,15 +508,11 @@ function showPhoto(index) {
     document.getElementById('empty-state').style.display = 'block';
     return;
   }
-
   const photo = photos[index];
   const prenom = photo.users?.prenom || 'Anonyme';
   const ville = photo.users?.ville || '';
-
   document.getElementById('card-name').textContent = prenom;
   document.getElementById('card-city').textContent = ville ? '📍 ' + ville : '';
-
-  // Photo
   const cardPhoto = document.getElementById('card-photo');
   document.getElementById('card-emoji').style.display = photo.url ? 'none' : 'block';
   const existingImg = cardPhoto.querySelector('img');
@@ -614,10 +523,7 @@ function showPhoto(index) {
     img.alt = prenom;
     cardPhoto.appendChild(img);
   }
-
-  // Hide result overlay
   document.getElementById('result-overlay').classList.remove('show');
-
   document.getElementById('photo-card').style.display = 'block';
   document.getElementById('rating-section').style.display = 'block';
   resetStars();
@@ -634,7 +540,10 @@ function selectStar(n) {
   const d = document.getElementById('score-display');
   d.style.display = 'block';
   d.textContent = n + ' / 10';
-  document.getElementById('btn-noter').disabled = false;
+  // N'active le bouton Noter que si le timer est terminé
+  const btnNoter = document.getElementById('btn-noter');
+  const btnPass = document.getElementById('btn-pass');
+  if (!btnPass.disabled) btnNoter.disabled = false;
 }
 
 function resetStars() {
@@ -648,47 +557,34 @@ async function doRate() {
   if (!selectedStar) return;
   const photo = photos[currentIndex];
   const note = selectedStar;
-
-  // Save vote
   if (currentUser) {
     try {
       await sb.from('votes').insert({ voter_id: currentUser.id, photo_id: photo.id, note });
-
-      // Update photo avg
       const newVotes = (photo.nb_votes || 0) + 1;
       const newAvg = ((photo.note_moyenne || 0) * (photo.nb_votes || 0) + note) / newVotes;
       await sb.from('photos').update({ nb_votes: newVotes, note_moyenne: newAvg }).eq('id', photo.id);
       photo.nb_votes = newVotes;
       photo.note_moyenne = newAvg;
-
-      // Credit points — +1 pt par note
       const newPts = (userProfile?.points || 0) + 1;
       await sb.from('users').update({ points: newPts }).eq('id', currentUser.id);
       await sb.from('points_history').insert({ user_id: currentUser.id, action: 'Note donnée', points: 1 });
       if (userProfile) userProfile.points = newPts;
       document.getElementById('pts-display').textContent = newPts;
       document.getElementById('user-pts').textContent = newPts;
-
       sessionPts += 1;
     } catch(e) { console.error(e); }
   } else {
-    // Anonymous — update locally only
     anonymousVotes++;
     const newVotes = (photo.nb_votes || 0) + 1;
     const newAvg = ((photo.note_moyenne || 0) * (photo.nb_votes || 0) + note) / newVotes;
     photo.nb_votes = newVotes;
     photo.note_moyenne = newAvg;
-
     if (anonymousVotes >= POPUP_THRESHOLD) {
       document.getElementById('popup-count').textContent = anonymousVotes;
       setTimeout(() => document.getElementById('signup-popup').classList.add('show'), 1500);
     }
   }
-
-  // Show result
   showResult(note, photo);
-
-  // Update session stats
   sessionRated++;
   sessionScores.push(note);
   updateSessionStats();
@@ -699,20 +595,16 @@ function showResult(yourNote, photo) {
   const avg = photo.note_moyenne ? parseFloat(photo.note_moyenne).toFixed(1) : yourNote.toFixed(1);
   const votes = photo.nb_votes || 1;
   const pct = (parseFloat(avg) / 10 * 100).toFixed(0);
-
   document.getElementById('result-your-num').textContent = yourNote + '/10';
   document.getElementById('result-avg-num').textContent = avg + '/10';
   document.getElementById('result-votes').textContent = votes + ' vote' + (votes > 1 ? 's' : '');
   document.getElementById('result-bar').style.width = pct + '%';
-
-  // Message
   const diff = yourNote - parseFloat(avg);
   let msg = '';
   if (Math.abs(diff) < 0.5) msg = 'Vous êtes dans la moyenne !';
   else if (diff > 0) msg = 'Vous êtes plus généreux que la moyenne 😊';
   else msg = 'Vous êtes plus sévère que la moyenne 🧐';
   document.getElementById('result-msg').textContent = msg;
-
   document.getElementById('result-overlay').classList.add('show');
 }
 
@@ -728,6 +620,9 @@ function nextPhoto() {
 }
 
 function doPass() {
+  // Sécurité supplémentaire : ne rien faire si le bouton est désactivé
+  const btnPass = document.getElementById('btn-pass');
+  if (btnPass.disabled) return;
   sessionPassed++;
   document.getElementById('s-passed').textContent = sessionPassed;
   currentIndex++;
@@ -758,49 +653,35 @@ function addToHistory(photo, score) {
   const list = document.getElementById('history-list');
   list.innerHTML = historyItems.map(item => `
     <div class="history-row">
-      <div class="history-av">
-        ${item.photo.url ? `<img src="${item.photo.url}" alt="" />` : '👤'}
-      </div>
+      <div class="history-av">${item.photo.url ? `<img src="${item.photo.url}" alt="" />` : '👤'}</div>
       <div class="history-name">${item.photo.users?.prenom || 'Anonyme'}</div>
       <div class="history-score">${item.score}/10</div>
     </div>`).join('');
 }
 
-function closePopup() {
-  document.getElementById('signup-popup').classList.remove('show');
-}
-
-async function doLogout() {
-  await sb.auth.signOut();
-  window.location.href = 'login.html';
-}
-
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast ' + (type || '');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
+function closePopup() { document.getElementById('signup-popup').classList.remove('show'); }
+async function doLogout() { await sb.auth.signOut(); window.location.href = 'login.html'; }
+function showToast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type || ''); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
-// TIMER
+// ── TIMER — bloque Passer ET Noter pendant la durée ─────────
 let timerInterval = null;
-const TIMER_DURATION = 4000; // 4 seconds
+const TIMER_DURATION = 4000;
 
 function startTimer() {
   const fill = document.getElementById('timer-bar-fill');
   const wrap = document.getElementById('timer-bar-wrap');
   const label = document.getElementById('rating-label');
-  const btn = document.getElementById('btn-noter');
+  const btnNoter = document.getElementById('btn-noter');
+  const btnPass = document.getElementById('btn-pass'); // ← AJOUT
 
   if (!fill || !wrap) return;
 
   wrap.classList.add('show');
   fill.style.width = '0%';
   fill.style.transition = 'none';
-  btn.disabled = true;
+  btnNoter.disabled = true;
+  btnPass.disabled = true; // ← BLOQUE le bouton Passer
   label.textContent = '⏳ Regardez la photo avant de noter...';
 
   let elapsed = 0;
@@ -817,13 +698,13 @@ function startTimer() {
       clearInterval(timerInterval);
       wrap.classList.remove('show');
       label.textContent = 'Donnez votre note sur 10';
-      // Only enable if star selected
-      if (selectedStar > 0) btn.disabled = false;
+      if (selectedStar > 0) btnNoter.disabled = false;
+      btnPass.disabled = false; // ← DÉBLOQUE le bouton Passer
     }
   }, interval);
 }
+// ────────────────────────────────────────────────────────────
 
-// REPORT
 let selectedReportRaison = null;
 let reportPhotoId = null;
 
@@ -835,52 +716,30 @@ function openReportModal() {
   document.querySelectorAll('.report-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('report-modal').classList.add('open');
 }
-
-function closeReportModal() {
-  document.getElementById('report-modal').classList.remove('open');
-}
-
+function closeReportModal() { document.getElementById('report-modal').classList.remove('open'); }
 function selectReport(el, raison) {
   document.querySelectorAll('.report-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   selectedReportRaison = raison;
 }
-
 async function sendReport() {
-  if (!selectedReportRaison) {
-    showToast('⚠️ Choisissez une raison', '');
-    return;
-  }
-
+  if (!selectedReportRaison) { showToast('⚠️ Choisissez une raison', ''); return; }
   try {
-    await sb.from('reports').insert({
-      photo_id: reportPhotoId,
-      reporter_id: currentUser?.id || null,
-      raison: selectedReportRaison
-    });
+    await sb.from('reports').insert({ photo_id: reportPhotoId, reporter_id: currentUser?.id || null, raison: selectedReportRaison });
     closeReportModal();
     showToast('✅ Signalement envoyé — merci !', 'success');
-    // Skip to next photo
     nextPhoto();
-  } catch(e) {
-    showToast('❌ Erreur lors du signalement', '');
-  }
+  } catch(e) { showToast('❌ Erreur lors du signalement', ''); }
 }
 
-// Charger les votes donnés aujourd'hui
 async function loadTodayStats() {
   if (!currentUser) return;
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
-
-  const { data: todayVotes } = await sb.from('votes')
-    .select('note, created_at')
-    .eq('voter_id', currentUser.id)
-    .gte('created_at', todayStart.toISOString());
-
+  const { data: todayVotes } = await sb.from('votes').select('note, created_at').eq('voter_id', currentUser.id).gte('created_at', todayStart.toISOString());
   if (todayVotes && todayVotes.length > 0) {
     sessionRated = todayVotes.length;
-    sessionPts = todayVotes.length; // 1 pt par note
+    sessionPts = todayVotes.length;
     sessionScores = todayVotes.map(v => v.note);
     const avg = (sessionScores.reduce((a, b) => a + b, 0) / sessionScores.length).toFixed(1);
     document.getElementById('s-rated').textContent = sessionRated;
@@ -891,39 +750,14 @@ async function loadTodayStats() {
 
 init();
 </script>
+
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
   <ul>
-    <li class="">
-      <a href="dashboard.html">
-        <span class="mnav-icon">🏠</span>
-        <span class="mnav-label">Accueil</span>
-        
-      </a>
-    </li>    <li class="active">
-      <a href="noter.html">
-        <span class="mnav-icon">⭐</span>
-        <span class="mnav-label">Noter</span>
-        
-      </a>
-    </li>    <li class="">
-      <a href="mesnotes.html">
-        <span class="mnav-icon">📊</span>
-        <span class="mnav-label">Mes notes</span>
-        
-      </a>
-    </li>    <li class="">
-      <a href="messages.html">
-        <span class="mnav-icon">💬</span>
-        <span class="mnav-label">Messages</span>
-        <span class="mnav-badge"></span>
-      </a>
-    </li>    <li class="">
-      <a href="profil.html">
-        <span class="mnav-icon">👤</span>
-        <span class="mnav-label">Profil</span>
-        
-      </a>
-    </li>
+    <li><a href="dashboard.html"><span class="mnav-icon">🏠</span><span class="mnav-label">Accueil</span></a></li>
+    <li class="active"><a href="noter.html"><span class="mnav-icon">⭐</span><span class="mnav-label">Noter</span></a></li>
+    <li><a href="mesnotes.html"><span class="mnav-icon">📊</span><span class="mnav-label">Mes notes</span></a></li>
+    <li><a href="messages.html"><span class="mnav-icon">💬</span><span class="mnav-label">Messages</span><span class="mnav-badge"></span></a></li>
+    <li><a href="profil.html"><span class="mnav-icon">👤</span><span class="mnav-label">Profil</span></a></li>
   </ul>
 </nav>
 </body>
