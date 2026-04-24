@@ -541,6 +541,15 @@ const refCode = urlParams.get('ref');
 if (refCode) localStorage.setItem('scorovia_ref', refCode);
 // ────────────────────────────────────────────────
 
+// ─── GESTION DU PARAMÈTRE ?method depuis index.html ───────────
+const methodParam = urlParams.get('method');
+if (methodParam === 'google') {
+  window.addEventListener('load', () => setTimeout(() => signInWithGoogle(), 300));
+} else if (methodParam === 'email') {
+  window.addEventListener('load', () => switchTab('signup'));
+}
+// ────────────────────────────────────────────────────────────
+
 // Handle OAuth callback
 async function checkSession() {
   const { data: { session } } = await sb.auth.getSession();
