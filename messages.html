@@ -314,11 +314,13 @@ let COST_UNLOCK  = 50;   // valeur par défaut
 
 async function loadPointsConfig() {
   try {
-    const { data } = await sb.from('points_config').select('key, value');
+    // La table points_config utilise les colonnes : id (text), points (int), label (text)
+    // Les clés correspondent à celles de points-config.js : 'message' et 'unlock_profile'
+    const { data } = await sb.from('points_config').select('id, points');
     if (!data) return;
     data.forEach(row => {
-      if (row.key === 'message_cost')       COST_MESSAGE = parseInt(row.value) || 20;
-      if (row.key === 'unlock_profile_cost') COST_UNLOCK  = parseInt(row.value) || 50;
+      if (row.id === 'message')        COST_MESSAGE = Math.abs(parseInt(row.points)) || 20;
+      if (row.id === 'unlock_profile') COST_UNLOCK  = Math.abs(parseInt(row.points)) || 50;
     });
   } catch(e) {
     console.warn('points_config non accessible, valeurs par défaut utilisées');
