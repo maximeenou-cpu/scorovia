@@ -215,6 +215,11 @@ body {
 .error-msg { font-size: 11px; color: var(--red); margin-top: 4px; display: none; }
 .error-msg.show { display: block; }
 
+/* ── PROMO feedback ── */
+.promo-feedback { font-size: 11px; margin-top: 5px; display: none; }
+.promo-feedback.valid   { display: block; color: var(--green); }
+.promo-feedback.invalid { display: block; color: var(--red); }
+
 .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
 .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold); margin-top: 2px; flex-shrink: 0; }
 .checkbox-row label { font-size: 12px; color: var(--muted); line-height: 1.5; }
@@ -476,6 +481,22 @@ body {
           </div>
           <div class="pwd-label" id="pwd-label">Entrez un mot de passe</div>
         </div>
+
+        <!-- ── CODE PROMO ── -->
+        <div class="field">
+          <label>Code promo <span style="color:var(--muted);font-weight:300">(optionnel)</span></label>
+          <input
+            type="text"
+            id="signup-promo"
+            placeholder="ex: WELCOME50"
+            style="text-transform:uppercase; letter-spacing:0.06em"
+            oninput="this.value=this.value.toUpperCase(); resetPromoFeedback()"
+            onblur="checkPromoCode(this.value)"
+          />
+          <div class="promo-feedback" id="promo-feedback"></div>
+        </div>
+        <!-- ────────────── -->
+
         <div class="checkbox-row">
           <input type="checkbox" id="terms" />
           <label for="terms">
@@ -600,6 +621,42 @@ function checkAge(val) {
   warning.classList.toggle('show', val && parseInt(val) < 18);
 }
 
+// ─── CODE PROMO : vérification en temps réel (onblur) ───────────────
+function resetPromoFeedback() {
+  const fb = document.getElementById('promo-feedback');
+  fb.className = 'promo-feedback';
+  fb.textContent = '';
+}
+
+async function checkPromoCode(code) {
+  const fb = document.getElementById('promo-feedback');
+  if (!code) { resetPromoFeedback(); return; }
+
+  const { data: promo, error } = await sb
+    .from('promo_codes')
+    .select('points_bonus, uses, active, max_uses')
+    .eq('code', code)
+    .eq('active', true)
+    .single();
+
+  if (error || !promo) {
+    fb.className = 'promo-feedback invalid';
+    fb.textContent = '❌ Code invalide ou expiré';
+    return;
+  }
+
+  const underLimit = !promo.max_uses || (promo.uses || 0) < promo.max_uses;
+  if (!underLimit) {
+    fb.className = 'promo-feedback invalid';
+    fb.textContent = '❌ Ce code a atteint sa limite d\'utilisation';
+    return;
+  }
+
+  fb.className = 'promo-feedback valid';
+  fb.textContent = `✅ Code valide ! +${promo.points_bonus} points offerts à l'inscription`;
+}
+// ────────────────────────────────────────────────────────────────────
+
 function showAlert(id, msg, type) {
   const el = document.getElementById(id);
   el.textContent = msg;
@@ -647,6 +704,7 @@ async function doSignup() {
   const pwd = document.getElementById('signup-pwd').value;
   const terms = document.getElementById('terms').checked;
   const genre = document.getElementById('signup-genre').value;
+  const promoCode = document.getElementById('signup-promo').value.trim().toUpperCase();
 
   if (!prenom || !age || !email || !pwd) { showAlert('signup-alert', '⚠️ Veuillez remplir tous les champs obligatoires', 'error'); return; }
   if (!genre) { showAlert('signup-alert', '⚠️ Veuillez indiquer votre genre', 'error'); return; }
@@ -673,6 +731,34 @@ async function doSignup() {
   }
 
   if (data.user) {
+    // Points de base
+    let totalPoints = 20;
+    let promoBonus = 0;
+    let promoValid = false;
+    let promoData = null;
+
+    // ─── Vérification du code promo ───────────────────────────────────
+    if (promoCode) {
+      const { data: promo, error: promoErr } = await sb
+        .from('promo_codes')
+        .select('id, points_bonus, uses, active, max_uses')
+        .eq('code', promoCode)
+        .eq('active', true)
+        .single();
+
+      if (!promoErr && promo) {
+        const underLimit = !promo.max_uses || (promo.uses || 0) < promo.max_uses;
+        if (underLimit) {
+          promoBonus = promo.points_bonus;
+          totalPoints += promoBonus;
+          promoValid = true;
+          promoData = promo;
+        }
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────
+
+    // Création du profil
     await sb.from('users').insert({
       id: data.user.id,
       email: email,
@@ -680,25 +766,41 @@ async function doSignup() {
       ville: ville || null,
       age: age,
       genre: genre || null,
-      points: 20
+      points: totalPoints
     });
 
+    // Historique points de bienvenue
     await sb.from('points_history').insert({
       user_id: data.user.id,
       action: 'Bonus inscription',
       points: 20
     });
 
-    // ─── Crédite le parrain si parrainage ───
+    // ─── Historique + compteur si code promo valide ───────────────────
+    if (promoValid && promoData) {
+      await sb.from('points_history').insert({
+        user_id: data.user.id,
+        action: `Code promo ${promoCode}`,
+        points: promoBonus
+      });
+
+      await sb.from('promo_codes')
+        .update({ uses: (promoData.uses || 0) + 1 })
+        .eq('id', promoData.id);
+    }
+    // ─────────────────────────────────────────────────────────────────
+
+    // ─── Crédite le parrain si parrainage ───────────────────────────
     await handleReferral(data.user.id);
-    // ────────────────────────────────────────
+    // ────────────────────────────────────────────────────────────────
 
     localStorage.setItem('scorovia_user', JSON.stringify({
-      id: data.user.id, email: email, prenom: prenom, ville: ville, points: 20
+      id: data.user.id, email: email, prenom: prenom, ville: ville, points: totalPoints
     }));
-  }
 
-  showSuccess(`Bienvenue ${prenom} ! Votre compte est créé avec 20 points de bienvenue 🎉`);
+    const bonusMsg = promoValid ? ` + ${promoBonus} pts code promo 🎁` : '';
+    showSuccess(`Bienvenue ${prenom} ! Votre compte est créé avec ${totalPoints} points de bienvenue${bonusMsg} 🎉`);
+  }
 }
 
 // ─── FONCTION PARRAINAGE ─────────────────────────────────
