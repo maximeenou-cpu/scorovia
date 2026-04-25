@@ -1315,7 +1315,7 @@
     tbody.innerHTML = '<tr><td colspan="8" class="loader">Chargement...</td></tr>';
 
     const { data: users, error: usersError } = await sb.from('users')
-      .select('id, email, prenom, points, is_premium, promo_code, avatar_url, created_at, ville, sexe')
+      .select('id, email, prenom, points, is_premium, promo_code, avatar_url, created_at, ville, genre')
       .order('created_at', { ascending: false })
       .limit(500);
 
@@ -1399,7 +1399,7 @@
         </td>
         <td style="color:var(--muted);font-size:0.75rem">${u.email || '—'}</td>
         <td style="color:var(--muted)">${u.ville || '—'}</td>
-        <td style="color:var(--muted)">${u.sexe || '—'}</td>
+        <td style="color:var(--muted)">${u.genre || '—'}</td>
         <td>
           <span style="color:var(--gold)">${u.points ?? 0}</span>
           <span style="color:var(--muted);font-size:0.7rem"> pts</span>
