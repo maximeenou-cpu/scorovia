@@ -29,7 +29,6 @@
 
 body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
-/* HEADER */
 .header {
   background: var(--deep); border-bottom: 1px solid var(--border);
   padding: 18px 40px; display: flex; align-items: center; justify-content: space-between;
@@ -49,7 +48,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 }
 .back-btn:hover { color: var(--text); }
 
-/* TABS */
 .tabs-bar {
   background: var(--deep); border-bottom: 1px solid var(--border);
   padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
@@ -63,7 +61,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .tab:hover { color: var(--text); }
 .tab.active { color: var(--gold2); border-bottom-color: var(--gold); }
 
-/* CONTENT */
 .page { display: none; max-width: 800px; margin: 0 auto; padding: 48px 40px; }
 .page.active { display: block; }
 
@@ -113,6 +110,9 @@ tr:last-child td { border-bottom: none; }
 .contact-box a { color: var(--gold2); text-decoration: none; }
 .contact-box a:hover { text-decoration: underline; }
 
+a { color: var(--gold2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
 @media (max-width: 768px) {
   .header { padding: 14px 20px; }
   .tabs-bar { padding: 0 20px; }
@@ -144,8 +144,8 @@ tr:last-child td { border-bottom: none; }
   <p>Le site <strong>scorovia.com</strong> est édité par :</p>
   <ul>
     <li><strong>Raison sociale :</strong> SCOROVIA (en cours d'immatriculation)</li>
-    <li><strong>Responsable de publication :</strong> Maxime Enou</li>
-    <li><strong>Email de contact :</strong> <a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></li>
+    <li><strong>Responsable de publication :</strong> SCOROVIA</li>
+    <li><strong>Contact :</strong> <a href="contact.html">Formulaire de contact</a></li>
     <li><strong>Siège social :</strong> Rouen, France</li>
   </ul>
 
@@ -174,7 +174,7 @@ tr:last-child td { border-bottom: none; }
 
   <div class="contact-box">
     <h3>Contact</h3>
-    <p>Pour toute question relative aux mentions légales : <a href="mailto:<a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>"><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></a></p>
+    <p>Pour toute question relative aux mentions légales : <a href="contact.html">Formulaire de contact</a></p>
   </div>
 </div>
 
@@ -250,7 +250,7 @@ tr:last-child td { border-bottom: none; }
 
   <div class="contact-box">
     <h3>Questions sur les CGU</h3>
-    <p>Pour toute question : <a href="mailto:<a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>"><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></a></p>
+    <p>Pour toute question : <a href="contact.html">Formulaire de contact</a></p>
   </div>
 </div>
 
@@ -264,8 +264,8 @@ tr:last-child td { border-bottom: none; }
   </div>
 
   <h2>1. Responsable du traitement</h2>
-  <p><strong>SCOROVIA</strong>, représenté par Maxime Enou<br>
-  Email : <strong><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></strong><br>
+  <p><strong>SCOROVIA</strong><br>
+  Contact : <a href="contact.html">Formulaire de contact</a><br>
   Siège : Rouen, France</p>
 
   <h2>2. Données collectées</h2>
@@ -336,7 +336,7 @@ tr:last-child td { border-bottom: none; }
     <li><strong>Droit d'opposition</strong> — vous opposer à certains traitements</li>
     <li><strong>Droit à la limitation</strong> — limiter le traitement de vos données</li>
   </ul>
-  <p>Vous pouvez exercer ces droits directement depuis votre page "Mon profil" (export et suppression) ou en écrivant à : <strong><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></strong></p>
+  <p>Vous pouvez exercer ces droits directement depuis votre page "Mon profil" (export et suppression) ou via : <a href="contact.html">Formulaire de contact</a></p>
   <p>Vous disposez également du droit de déposer une réclamation auprès de la <strong>CNIL</strong> (cnil.fr).</p>
 
   <h2>6. Sécurité</h2>
@@ -353,12 +353,12 @@ tr:last-child td { border-bottom: none; }
   <p>Certains de nos prestataires (Vercel, Stripe) sont établis aux États-Unis. Ces transferts sont encadrés par des clauses contractuelles types approuvées par la Commission européenne, garantissant un niveau de protection adéquat.</p>
 
   <h2>8. Mineurs</h2>
-  <p>SCOROVIA est <strong>strictement réservé aux personnes majeures (+18 ans)</strong>. Nous ne collectons pas sciemment de données de mineurs. Si vous pensez qu'un mineur a créé un compte, contactez-nous immédiatement à <a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>.</p>
+  <p>SCOROVIA est <strong>strictement réservé aux personnes majeures (+18 ans)</strong>. Nous ne collectons pas sciemment de données de mineurs. Si vous pensez qu'un mineur a créé un compte, <a href="contact.html">contactez-nous immédiatement</a>.</p>
 
   <div class="contact-box">
     <h3>Délégué à la protection des données</h3>
     <p>Pour toute question relative à vos données personnelles :<br>
-    <a href="mailto:<a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>"><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></a></p>
+    <a href="contact.html">Formulaire de contact</a></p>
   </div>
 </div>
 
@@ -409,7 +409,7 @@ tr:last-child td { border-bottom: none; }
 
   <div class="contact-box">
     <h3>Questions sur les cookies</h3>
-    <p>Contact : <a href="mailto:<a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a>"><a href="contact.html" style="color:var(--gold2)">Formulaire de contact</a></a></p>
+    <p>Contact : <a href="contact.html">Formulaire de contact</a></p>
   </div>
 </div>
 
@@ -422,7 +422,6 @@ function showPage(id, el) {
   window.scrollTo(0, 0);
 }
 
-// Handle URL hash
 const hash = window.location.hash.replace('#', '');
 if (hash) {
   const tab = document.querySelector(`[onclick*="'${hash}'"]`);
