@@ -47,7 +47,10 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(7,7,15,0.75);border-bottom:1px solid var(--border)}
-.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.18em;background:linear-gradient(135deg,var(--gold) 0%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.18em;background:linear-gradient(135deg,var(--gold) 0%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
+.nav-center{display:flex;align-items:center;gap:24px}
+.nav-link{font-size:13px;color:var(--muted);text-decoration:none;transition:color 0.2s;letter-spacing:0.02em}
+.nav-link:hover{color:var(--gold2)}
 .nav-live{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;border:1px solid rgba(34,212,160,0.22);background:rgba(34,212,160,0.07);font-size:12px;font-weight:500;color:var(--green);letter-spacing:0.04em}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.8s ease infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,212,160,0.5)}50%{box-shadow:0 0 0 5px rgba(34,212,160,0)}}
@@ -164,6 +167,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 .testi-score{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;background:linear-gradient(135deg,var(--gold2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-left:auto}
 .testi-votes{font-size:11px;color:var(--muted);margin-top:-2px;text-align:right}
 
+/* BLOG SECTION */
+.blog-section{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:0 24px 80px}
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px}
+.blog-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;text-decoration:none;transition:border-color 0.2s,transform 0.2s;display:flex;flex-direction:column;gap:8px}
+.blog-card:hover{border-color:rgba(245,200,66,0.25);transform:translateY(-2px)}
+.blog-card-tag{font-size:10px;color:var(--gold2);text-transform:uppercase;letter-spacing:0.1em}
+.blog-card-title{font-size:14px;font-weight:500;color:var(--text);line-height:1.4}
+.blog-card-arrow{font-size:12px;color:var(--muted);margin-top:4px}
+.blog-see-all{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;transition:color 0.2s}
+.blog-see-all:hover{color:var(--gold2)}
+
 /* SEO */
 #seo-content{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:60px 24px 80px;border-top:1px solid var(--border)}
 #seo-content h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,44px);letter-spacing:0.05em;color:var(--text);margin-bottom:16px;text-align:center}
@@ -225,6 +239,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 /* RESPONSIVE */
 @media(max-width:768px){
   nav{padding:14px 18px}
+  .nav-center{display:none}
   .bar-text{display:none}
   .modal-box{padding:28px 20px 22px}
   .proof{flex-wrap:wrap;justify-content:center}
@@ -268,9 +283,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">SCOROVIA</div>
-  <div class="nav-live"><div class="live-dot"></div>En ligne</div>
-  <a href="login.html" style="background:linear-gradient(135deg,#F5C842,#E8A020);border:none;border-radius:10px;padding:9px 20px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.08em;color:#000;text-decoration:none;cursor:pointer;">S'INSCRIRE</a>
+  <a href="/" class="nav-logo">SCOROVIA</a>
+  <div class="nav-center">
+    <a href="classement.html" class="nav-link">Classement</a>
+    <a href="blog/" class="nav-link">Blog</a>
+    <a href="noter.html" class="nav-link">Essayer</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="nav-live"><div class="live-dot"></div>En ligne</div>
+    <a href="login.html" style="background:linear-gradient(135deg,#F5C842,#E8A020);border:none;border-radius:10px;padding:9px 20px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.08em;color:#000;text-decoration:none;cursor:pointer;">S'INSCRIRE</a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -296,7 +318,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
   </div>
   <div class="proof">
     <div class="proof-avatars" id="proof-avatars">
-      <!-- Rempli dynamiquement par JS -->
       <div class="proof-av">👤</div>
       <div class="proof-av">👤</div>
       <div class="proof-av">👤</div>
@@ -309,9 +330,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 
 <!-- TICKER -->
 <div class="ticker-section">
-  <div class="ticker-track" id="ticker-track">
-    <!-- Rempli dynamiquement -->
-  </div>
+  <div class="ticker-track" id="ticker-track"></div>
 </div>
 
 <!-- PHONE SHOWCASE -->
@@ -369,7 +388,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
     <div class="pts-card reveal"><div class="pts-icon">👥</div><div class="pts-label">Parrainage</div><div class="pts-val" data-pts-key="parrainage">+50 pts</div></div>
     <div class="pts-card reveal"><div class="pts-icon">💳</div><div class="pts-label">Achat</div><div class="pts-val">dès 0,99€</div></div>
   </div>
-  <!-- À quoi servent les points -->
   <div class="pts-usage reveal">
     <div class="pts-usage-item">
       <div class="pts-usage-icon">📸</div>
@@ -386,12 +404,33 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
   </div>
 </section>
 
-<!-- TÉMOIGNAGES (membres réels) -->
+<!-- TÉMOIGNAGES -->
 <section class="testi-section">
   <h2 class="section-heading reveal">ILS ONT DÉCOUVERT LEUR NOTE</h2>
-  <div class="testi-grid" id="testi-grid">
-    <!-- Rempli dynamiquement -->
+  <div class="testi-grid" id="testi-grid"></div>
+</section>
+
+<!-- BLOG -->
+<section class="blog-section">
+  <h2 class="section-heading reveal">DU BLOG</h2>
+  <div class="blog-grid">
+    <a href="blog/suis-je-beau.html" class="blog-card reveal">
+      <div class="blog-card-tag">Beauté &amp; Confiance</div>
+      <div class="blog-card-title">Suis-je beau ? La vraie réponse selon des milliers de personnes</div>
+      <div class="blog-card-arrow">→ 5 min de lecture</div>
+    </a>
+    <a href="blog/test-beaute.html" class="blog-card reveal">
+      <div class="blog-card-tag">Guide complet</div>
+      <div class="blog-card-title">Test beauté en ligne : comment ça marche vraiment ?</div>
+      <div class="blog-card-arrow">→ 6 min de lecture</div>
+    </a>
+    <a href="blog/noter-photo.html" class="blog-card reveal">
+      <div class="blog-card-tag">Conseils pratiques</div>
+      <div class="blog-card-title">Faire noter sa photo : tout ce qu'il faut savoir</div>
+      <div class="blog-card-arrow">→ 5 min de lecture</div>
+    </a>
   </div>
+  <a href="blog/" class="blog-see-all reveal">Voir tous les articles →</a>
 </section>
 
 <!-- SEO -->
@@ -440,10 +479,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
       <a href="classement.html">Classement</a>
     </div>
     <div class="footer-col">
-      <h4>Points</h4>
-      <a href="login.html">Gagner des points</a>
-      <a href="points.html">Acheter des points</a>
-      <a href="points.html">Premium</a>
+      <h4>Blog</h4>
+      <a href="blog/">Tous les articles</a>
+      <a href="blog/suis-je-beau.html">Suis-je beau ?</a>
+      <a href="blog/test-beaute.html">Test beauté en ligne</a>
+      <a href="blog/noter-photo.html">Faire noter sa photo</a>
     </div>
     <div class="footer-col">
       <h4>Légal</h4>
@@ -471,7 +511,6 @@ const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Fallbacks illustratifs pour compléter si peu de données réelles
 const FALLBACK_TICKER = [
   { prenom: 'Marie', ville: 'Paris', note: 8.4, avatar: null },
   { prenom: 'Thomas', ville: 'Lyon', note: 7.1, avatar: null },
@@ -483,7 +522,6 @@ const FALLBACK_TICKER = [
   { prenom: 'Chloé', ville: 'Nice', note: 8.1, avatar: null },
 ];
 
-// ── Compteur inscrits ─────────────────────────────────
 function animCount(els, n) {
   const from = Math.max(n - 60, 0), dur = 1400, t0 = performance.now();
   function run(t) {
@@ -502,21 +540,14 @@ async function loadCounter() {
     const { count } = await sb.from('users').select('*', { count: 'exact', head: true });
     userCount = count || 0;
   } catch (e) { userCount = 0; }
-
-  const els = [
-    document.getElementById('counter'),
-    document.getElementById('bar-counter'),
-  ];
+  const els = [document.getElementById('counter'), document.getElementById('bar-counter')];
   els.forEach(el => { if (el) el.textContent = '0'; });
   animCount(els, userCount);
 }
 
-// ── Ticker dynamique ──────────────────────────────────
 async function buildTicker() {
   let items = [];
-
   try {
-    // Récupère les users avec photo, note > 0, avatar
     const { data: photos } = await sb
       .from('photos')
       .select('note_moyenne, nb_votes, users!inner(prenom, ville, avatar_url)')
@@ -525,7 +556,6 @@ async function buildTicker() {
       .gt('note_moyenne', 0)
       .order('nb_votes', { ascending: false })
       .limit(12);
-
     if (photos && photos.length > 0) {
       items = photos.map(p => ({
         prenom: p.users?.prenom || '?',
@@ -535,63 +565,35 @@ async function buildTicker() {
       }));
     }
   } catch (e) {}
-
-  // Complète avec les fallbacks si pas assez de données
   while (items.length < 8) {
     const fb = FALLBACK_TICKER[items.length % FALLBACK_TICKER.length];
     items.push(fb);
   }
-
-  // Génère les items × 2 pour boucle infinie
   const track = document.getElementById('ticker-track');
   const allItems = [...items, ...items];
   track.innerHTML = allItems.map(item => `
     <div class="ticker-item">
-      <div class="t-av">
-        ${item.avatar
-          ? `<img src="${item.avatar}" alt="${item.prenom}" loading="lazy">`
-          : '👤'}
-      </div>
+      <div class="t-av">${item.avatar ? `<img src="${item.avatar}" alt="${item.prenom}" loading="lazy">` : '👤'}</div>
       <span class="t-name">${item.prenom}${item.ville ? ' · ' + item.ville : ''}</span>
       <div class="t-dot"></div>
       <div class="t-score">${item.note.toFixed(1)}/10</div>
     </div>
   `).join('');
-
-  // Lance l'animation après rendu
   requestAnimationFrame(() => track.classList.add('animating'));
 }
 
-// ── Proof social (avatars réels) ──────────────────────
 async function buildProof() {
   try {
-    const { data: users } = await sb
-      .from('users')
-      .select('prenom, avatar_url')
-      .not('avatar_url', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(5);
-
+    const { data: users } = await sb.from('users').select('prenom, avatar_url').not('avatar_url', 'is', null).order('created_at', { ascending: false }).limit(5);
     if (!users || users.length === 0) return;
-
     const container = document.getElementById('proof-avatars');
-    container.innerHTML = users.map(u => `
-      <div class="proof-av">
-        <img src="${u.avatar_url}" alt="${u.prenom || ''}" loading="lazy">
-      </div>
-    `).join('');
+    container.innerHTML = users.map(u => `<div class="proof-av"><img src="${u.avatar_url}" alt="${u.prenom || ''}" loading="lazy"></div>`).join('');
   } catch (e) {}
 }
 
-// ── Mock phone — premier votant réel ─────────────────
 async function buildMockPhone() {
   try {
-    const { data: users } = await sb
-      .from('users')
-      .select('prenom, avatar_url')
-      .not('avatar_url', 'is', null)
-      .limit(1);
-
+    const { data: users } = await sb.from('users').select('prenom, avatar_url').not('avatar_url', 'is', null).limit(1);
     if (users && users[0]) {
       const u = users[0];
       const nameEl = document.getElementById('mock-name1');
@@ -602,10 +604,8 @@ async function buildMockPhone() {
   } catch (e) {}
 }
 
-// ── Témoignages (membres avec le plus de votes) ───────
 async function buildTestimonials() {
   const grid = document.getElementById('testi-grid');
-
   try {
     const { data: photos } = await sb
       .from('photos')
@@ -615,24 +615,17 @@ async function buildTestimonials() {
       .not('users.avatar_url', 'is', null)
       .order('nb_votes', { ascending: false })
       .limit(4);
-
     if (!photos || photos.length === 0) {
-      // Pas assez de données — cache la section
       document.querySelector('.testi-section').style.display = 'none';
       return;
     }
-
     grid.innerHTML = photos.map(p => {
       const u = p.users;
       const note = (Math.round(p.note_moyenne * 10) / 10).toFixed(1);
       return `
         <div class="testi-card reveal">
           <div class="testi-header">
-            <div class="testi-av">
-              ${u.avatar_url
-                ? `<img src="${u.avatar_url}" alt="${u.prenom}" loading="lazy">`
-                : '👤'}
-            </div>
+            <div class="testi-av">${u.avatar_url ? `<img src="${u.avatar_url}" alt="${u.prenom}" loading="lazy">` : '👤'}</div>
             <div>
               <div class="testi-name">${u.prenom || 'Membre'}</div>
               <div class="testi-loc">${u.ville || 'France'}</div>
@@ -645,29 +638,16 @@ async function buildTestimonials() {
         </div>
       `;
     }).join('');
-
-    // Observe les nouveaux éléments pour l'animation reveal
     grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-
   } catch (e) {
     document.querySelector('.testi-section').style.display = 'none';
   }
 }
 
-// ── Modal ─────────────────────────────────────────────
-function openModal() {
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.getElementById('modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal')) closeModal();
-});
+function openModal() { document.getElementById('modal').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal() { document.getElementById('modal').classList.remove('open'); document.body.style.overflow = ''; }
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
 
-// Pop-in 15s ou scroll 70%
 let modalShown = false;
 setTimeout(() => {
   if (!modalShown && !localStorage.getItem('scorovia_user')) { openModal(); modalShown = true; }
@@ -687,31 +667,18 @@ function doEmailSignup() {
   }
   window.location.href = 'login.html';
 }
-document.getElementById('modal-email').addEventListener('keypress', e => {
-  if (e.key === 'Enter') doEmailSignup();
-});
+document.getElementById('modal-email').addEventListener('keypress', e => { if (e.key === 'Enter') doEmailSignup(); });
 
-// ── Reveal scroll ─────────────────────────────────────
 const obs = new IntersectionObserver(entries => {
   entries.forEach((entry, i) => {
-    if (entry.isIntersecting) {
-      setTimeout(() => entry.target.classList.add('vis'), i * 80);
-    }
+    if (entry.isIntersecting) setTimeout(() => entry.target.classList.add('vis'), i * 80);
   });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-// ── Points config ─────────────────────────────────────
 PointsConfig.load().then(() => PointsConfig.updateDOM());
 
-// ── Init ──────────────────────────────────────────────
-Promise.all([
-  loadCounter(),
-  buildTicker(),
-  buildProof(),
-  buildMockPhone(),
-  buildTestimonials(),
-]);
+Promise.all([loadCounter(), buildTicker(), buildProof(), buildMockPhone(), buildTestimonials()]);
 </script>
 </body>
 </html>
