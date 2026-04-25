@@ -980,6 +980,7 @@
               <th>Statut</th>
               <th>Photos</th>
               <th>Votes donnés</th>
+              <th>Votes reçus</th>
               <th>Inscrit le</th>
               <th>Action</th>
             </tr>
@@ -1065,6 +1066,17 @@
             <tr><td colspan="6" class="loader">Chargement...</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="section-title" style="margin-top:48px">Achats de points ponctuels</div>
+      <div class="stripe-info">
+        <span class="stripe-icon">⚡</span>
+        <div>
+          <div class="stripe-text">Les achats ponctuels de points sont gérés via les Payment Links Stripe. Consultez directement Stripe pour voir les transactions :</div>
+          <a class="stripe-link" href="https://dashboard.stripe.com/payment-links" target="_blank">→ Voir les Payment Links</a>
+          &nbsp;&nbsp;
+          <a class="stripe-link" href="https://dashboard.stripe.com/payments" target="_blank">→ Toutes les transactions</a>
+        </div>
       </div>
     </div>
 
@@ -1333,22 +1345,30 @@
     }
 
     // Récupère les counts photos et votes séparément
-    const [{ data: photoCounts }, { data: voteCounts }] = await Promise.all([
+    const [{ data: photoCounts }, { data: votesDonnes }, { data: votesRecus }] = await Promise.all([
       sb.from('photos').select('user_id').eq('active', true),
-      sb.from('votes').select('voter_id')
+      sb.from('votes').select('voter_id'),
+      sb.from('votes').select('photo_id, photos!inner(user_id)')
     ]);
 
     const photoMap = {};
     (photoCounts || []).forEach(p => { photoMap[p.user_id] = (photoMap[p.user_id] || 0) + 1; });
 
     const voteMap = {};
-    (voteCounts || []).forEach(v => { voteMap[v.voter_id] = (voteMap[v.voter_id] || 0) + 1; });
+    (votesDonnes || []).forEach(v => { voteMap[v.voter_id] = (voteMap[v.voter_id] || 0) + 1; });
+
+    const votesRecusMap = {};
+    (votesRecus || []).forEach(v => {
+      const uid = v.photos?.user_id;
+      if (uid) votesRecusMap[uid] = (votesRecusMap[uid] || 0) + 1;
+    });
 
     allUsers = users.map(u => ({
       ...u,
       is_banned: false,
       photo_count: photoMap[u.id] || 0,
-      vote_count: voteMap[u.id] || 0
+      vote_count: voteMap[u.id] || 0,
+      votes_recus: votesRecusMap[u.id] || 0
     }));
 
     filterUsers();
@@ -1407,6 +1427,7 @@
         <td>${u.is_premium ? '<span class="badge badge-premium">Premium</span>' : '<span style="color:var(--muted);font-size:0.75rem">Free</span>'}</td>
         <td style="color:var(--muted)">${u.photo_count}</td>
         <td style="color:var(--muted)">${u.vote_count}</td>
+        <td style="color:var(--muted)">${u.votes_recus}</td>
         <td style="color:var(--muted);font-size:0.75rem">${formatDate(u.created_at)}</td>
         <td>
           <button class="btn-toggle" onclick="openUserModal('${u.id}')">Détails</button>
@@ -1854,26 +1875,26 @@
     const tbody = document.getElementById('premium-tbody');
     if (!premiums || !premiums.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="loader">Aucun abonné</td></tr>';
-      return;
+    } else {
+      tbody.innerHTML = premiums.map(u => `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center">
+              <span class="avatar-circle">${u.avatar_url ? `<img src="${u.avatar_url}">` : '👤'}</span>
+              ${u.prenom || '—'}
+            </div>
+          </td>
+          <td style="color:var(--muted);font-size:0.75rem">${u.email || '—'}</td>
+          <td style="color:var(--muted);font-size:0.75rem">${u.premium_since ? formatDate(u.premium_since) : formatDate(u.created_at)}</td>
+          <td><span style="color:var(--gold)">${u.points ?? 0}</span> pts</td>
+          <td>${u.ville || '—'}</td>
+          <td>
+            <button class="btn-danger" onclick="revokePremium('${u.id}')">Révoquer</button>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    tbody.innerHTML = premiums.map(u => `
-      <tr>
-        <td>
-          <div style="display:flex;align-items:center">
-            <span class="avatar-circle">${u.avatar_url ? `<img src="${u.avatar_url}">` : '👤'}</span>
-            ${u.prenom || '—'}
-          </div>
-        </td>
-        <td style="color:var(--muted);font-size:0.75rem">${u.email || '—'}</td>
-        <td style="color:var(--muted);font-size:0.75rem">${u.premium_since ? formatDate(u.premium_since) : formatDate(u.created_at)}</td>
-        <td><span style="color:var(--gold)">${u.points ?? 0}</span> pts</td>
-        <td>${u.ville || '—'}</td>
-        <td>
-          <button class="btn-danger" onclick="revokePremium('${u.id}')">Révoquer</button>
-        </td>
-      </tr>
-    `).join('');
   }
 
   async function revokePremium(userId) {
