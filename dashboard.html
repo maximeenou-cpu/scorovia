@@ -327,11 +327,11 @@ const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userVotes=[];
 
-async function sendWelcomeEmail(user){
+async function sendWelcomeEmail(user, profile){
   try{
-    const createdAt=new Date(user.created_at);
-    const diffMinutes=(Date.now()-createdAt)/1000/60;
-    if(diffMinutes>5)return; // pas une nouvelle inscription
+    if(profile.welcome_email_sent) return; // déjà envoyé
+    // Marquer immédiatement pour éviter les doublons
+    await sb.from('users').update({welcome_email_sent:true}).eq('id',user.id);
     await fetch('https://rsdlcqsmuvaqkohjqsjs.supabase.co/functions/v1/send-welcome-email',{
       method:'POST',
       headers:{
@@ -356,7 +356,7 @@ async function init(){
   if(!profile){window.location.href='login.html';return;}
 
   // ── Email de bienvenue (première connexion uniquement) ──
-  sendWelcomeEmail(currentUser);
+  sendWelcomeEmail(currentUser, profile);
   // ────────────────────────────────────────────────────────
 
   Premium.init(profile);
