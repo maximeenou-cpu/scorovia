@@ -411,7 +411,7 @@ async function init(){
 
 function loadNotifications(totalVotes,avgNote){
   const notifs=[];
-  if(totalVotes>0&&avgNote)notifs.push({icon:'⭐',text:`Vous avez <strong>${totalVotes} votes</strong> — note moyenne <strong>${avgNote}/10</strong>`,time:'Aujourd'hui',unread:true});
+  if(totalVotes>0&&avgNote)notifs.push({icon:'⭐',text:`Vous avez <strong>${totalVotes} votes</strong> — note moyenne <strong>${avgNote}/10</strong>`,time:"Aujourd'hui",unread:true});
   if(totalVotes===0)notifs.push({icon:'📸',text:'Soumettez votre première photo pour commencer à recevoir des notes !',time:'Maintenant',unread:true});
   const badge=document.getElementById('notif-badge');const list=document.getElementById('notif-list');
   const unreadCount=notifs.filter(n=>n.unread).length;
