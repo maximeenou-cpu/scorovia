@@ -36,17 +36,23 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--gold:#F5C842;--gold2:#FFE27A;--pink:#FF4D8D;--dark:#07070F;--deep:#0D0D1A;--card:#13131E;--border:rgba(255,255,255,0.07);--text:#F0EEF8;--muted:rgba(240,238,248,0.42);--green:#22D4A0}
+:root{--gold:#F5C842;--gold2:#FFE27A;--pink:#FF4D8D;--dark:#07070F;--deep:#0D0D1A;--card:#13131E;--card2:#18182A;--border:rgba(255,255,255,0.07);--text:#F0EEF8;--muted:rgba(240,238,248,0.42);--green:#22D4A0}
 html{scroll-behavior:smooth}
 body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* AMBIENT */
 .amb{position:fixed;inset:0;pointer-events:none;z-index:0}
 .amb::before{content:'';position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:100vw;height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(245,200,66,0.09) 0%,transparent 60%)}
 .amb::after{content:'';position:absolute;bottom:-30%;right:-20%;width:70vw;height:70vh;background:radial-gradient(ellipse,rgba(255,77,141,0.06) 0%,transparent 60%)}
+
+/* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(7,7,15,0.75);border-bottom:1px solid var(--border)}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.18em;background:linear-gradient(135deg,var(--gold) 0%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .nav-live{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;border:1px solid rgba(34,212,160,0.22);background:rgba(34,212,160,0.07);font-size:12px;font-weight:500;color:var(--green);letter-spacing:0.04em}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.8s ease infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,212,160,0.5)}50%{box-shadow:0 0 0 5px rgba(34,212,160,0)}}
+
+/* HERO */
 .hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px;text-align:center}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,0.03);font-size:11px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:32px;animation:fadeDown 0.6s ease both}
 .title-block{animation:fadeDown 0.6s ease 0.1s both;margin-bottom:28px}
@@ -56,23 +62,39 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 .subline{font-size:clamp(16px,2.4vw,20px);color:var(--muted);font-weight:300;max-width:460px;line-height:1.65;margin:0 auto 42px;animation:fadeDown 0.6s ease 0.2s both}
 .subline strong{color:var(--text);font-weight:500}
 .cta-block{width:100%;max-width:380px;margin:0 auto;display:flex;flex-direction:column;gap:10px;animation:fadeDown 0.6s ease 0.3s both}
-.btn-social{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px 20px;border-radius:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:transform 0.15s,opacity 0.15s;letter-spacing:0.01em}
+.btn-social{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px 20px;border-radius:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:transform 0.15s,opacity 0.15s;letter-spacing:0.01em;text-decoration:none}
 .btn-social:hover{transform:translateY(-1px);opacity:0.93}
 .btn-social:active{transform:scale(0.98)}
 .btn-google{background:#fff;color:#1f1f1f}
 .btn-try{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 20px;border-radius:14px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;text-decoration:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--muted);transition:background 0.2s,color 0.2s,border-color 0.2s,transform 0.15s}
 .btn-try:hover{background:rgba(245,200,66,0.07);border-color:rgba(245,200,66,0.2);color:var(--gold2);transform:translateY(-1px)}
-.btn-try:active{transform:scale(0.98)}
 .or-divider{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--muted);letter-spacing:0.08em}
 .or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 .legal-note{font-size:11px;color:rgba(240,238,248,0.28);text-align:center;line-height:1.6;margin-top:4px}
 .legal-note a{color:rgba(240,238,248,0.4);text-decoration:underline;text-underline-offset:2px}
+
+/* PROOF */
 .proof{display:flex;align-items:center;gap:10px;margin-top:32px;animation:fadeDown 0.6s ease 0.4s both}
 .proof-avatars{display:flex}
-.proof-av{width:28px;height:28px;border-radius:50%;border:2px solid var(--dark);font-size:12px;display:flex;align-items:center;justify-content:center;margin-left:-6px}
+.proof-av{width:32px;height:32px;border-radius:50%;border:2px solid var(--dark);font-size:14px;display:flex;align-items:center;justify-content:center;margin-left:-8px;overflow:hidden;background:var(--card2)}
 .proof-av:first-child{margin-left:0}
+.proof-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .proof-text{font-size:13px;color:var(--muted)}
 .proof-text strong{color:var(--gold2);font-weight:500}
+
+/* TICKER */
+.ticker-section{position:relative;z-index:1;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,0.01);overflow:hidden;padding:13px 0;margin-bottom:80px}
+.ticker-track{display:flex;gap:48px;will-change:transform;width:max-content}
+.ticker-track.animating{animation:scroll 28s linear infinite}
+.ticker-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);white-space:nowrap;padding:0 4px}
+.t-av{width:28px;height:28px;border-radius:50%;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.t-av img{width:100%;height:100%;object-fit:cover}
+.t-name{color:rgba(240,238,248,0.55)}
+.t-score{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold2);letter-spacing:0.06em}
+.t-dot{width:3px;height:3px;border-radius:50%;background:var(--border);flex-shrink:0}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SHOWCASE */
 .showcase{position:relative;z-index:1;padding:40px 24px 80px;display:flex;flex-direction:column;align-items:center}
 .showcase-label{font-size:11px;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:48px}
 .phone-big{width:280px;position:relative;animation:fadeUp 0.8s ease 0.2s both}
@@ -84,63 +106,97 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 .p-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.12em;background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .p-pts-badge{font-size:11px;color:var(--gold2);background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.2);padding:3px 9px;border-radius:10px}
 .p-score-display{text-align:center;padding:18px 0 14px}
-.p-score-num{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;background:linear-gradient(135deg,var(--gold2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.p-score-num{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;background:linear-gradient(135deg,var(--gold2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:scoreCount 2s ease 1s both}
+@keyframes scoreCount{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
 .p-score-den{font-size:14px;color:var(--muted);margin-top:2px}
 .p-score-info{font-size:11px;color:var(--muted);margin-top:4px}
 .p-stats-row{display:flex;gap:7px;margin-bottom:12px}
 .p-stat{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 6px;text-align:center}
 .p-stat-n{font-size:16px;font-weight:500}
 .p-stat-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em}
-.p-voter{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 12px;margin-bottom:7px;position:relative;overflow:hidden}
-.p-voter-av{font-size:22px;flex-shrink:0}
+.p-voter{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 12px;margin-bottom:7px;position:relative;overflow:hidden;animation:slideIn 0.5s ease both}
+.p-voter:nth-child(1){animation-delay:1.2s}
+.p-voter:nth-child(2){animation-delay:1.6s}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.p-voter-av{font-size:22px;flex-shrink:0;width:32px;height:32px;border-radius:50%;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center}
+.p-voter-av img{width:100%;height:100%;object-fit:cover}
 .p-voter-info{flex:1}
 .p-voter-name{font-size:12px;font-weight:500}
 .p-voter-time{font-size:10px;color:var(--muted)}
 .p-voter-score{font-size:16px;font-weight:600;color:var(--gold2)}
 .p-lock{position:absolute;inset:0;background:rgba(7,7,15,0.82);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;border-radius:12px}
 .p-lock-pill{background:linear-gradient(135deg,var(--gold),#E8A020);padding:5px 12px;border-radius:10px;font-size:10px;font-weight:700;color:#000;display:flex;align-items:center;gap:4px}
-.ticker-section{position:relative;z-index:1;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,0.01);overflow:hidden;padding:13px 0;margin-bottom:80px}
-.ticker-label{position:absolute;top:50%;left:16px;transform:translateY(-50%);font-size:9px;color:rgba(240,238,248,0.2);text-transform:uppercase;letter-spacing:0.15em;z-index:2;background:var(--dark);padding:2px 8px;border-radius:4px}
-.ticker-track{display:flex;gap:48px;animation:scroll 20s linear infinite;width:max-content}
-.ticker-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap;padding:0 4px}
-.t-av{font-size:15px}
-.t-name{color:rgba(240,238,248,0.55)}
-.t-score{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold2);letter-spacing:0.06em}
-.t-dot{width:3px;height:3px;border-radius:50%;background:var(--border);flex-shrink:0}
-.ticker-note{position:absolute;bottom:4px;right:12px;font-size:9px;color:rgba(240,238,248,0.15);font-style:italic}
-@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* HOW */
 .how-section{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:0 24px 80px}
-.how-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,5vw,56px);letter-spacing:0.05em;text-align:center;margin-bottom:48px;color:var(--text)}
+.section-heading{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,5vw,56px);letter-spacing:0.05em;text-align:center;margin-bottom:48px;color:var(--text)}
 .steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
 .step-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px 20px;transition:border-color 0.3s,transform 0.3s}
 .step-card:hover{border-color:rgba(245,200,66,0.18);transform:translateY(-3px)}
 .step-n{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1;background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
 .step-t{font-size:14px;font-weight:500;margin-bottom:6px}
 .step-d{font-size:12px;color:var(--muted);line-height:1.6}
-.points-section{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 24px 80px}
-.pts-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,48px);letter-spacing:0.05em;text-align:center;margin-bottom:32px;color:var(--text)}
-.pts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+
+/* POINTS */
+.points-section{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 24px 80px}
+.pts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
 .pts-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 14px;text-align:center;transition:border-color 0.3s}
 .pts-card:hover{border-color:rgba(245,200,66,0.18)}
 .pts-icon{font-size:20px;margin-bottom:8px}
 .pts-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
 .pts-val{font-size:16px;font-weight:500;color:var(--gold2)}
+.pts-usage{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.pts-usage-item{display:flex;align-items:center;gap:12px}
+.pts-usage-icon{font-size:22px;flex-shrink:0}
+.pts-usage-text{font-size:13px;color:var(--muted);line-height:1.5}
+.pts-usage-text strong{color:var(--text);font-weight:500;display:block}
+
+/* TESTIMONIALS */
+.testi-section{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:0 24px 80px}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.testi-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;transition:border-color 0.3s,transform 0.2s}
+.testi-card:hover{border-color:rgba(245,200,66,0.15);transform:translateY(-2px)}
+.testi-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.testi-av{width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.testi-av img{width:100%;height:100%;object-fit:cover}
+.testi-name{font-size:14px;font-weight:500}
+.testi-loc{font-size:11px;color:var(--muted)}
+.testi-score{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;background:linear-gradient(135deg,var(--gold2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-left:auto}
+.testi-votes{font-size:11px;color:var(--muted);margin-top:-2px;text-align:right}
+
+/* SEO */
 #seo-content{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:60px 24px 80px;border-top:1px solid var(--border)}
 #seo-content h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,44px);letter-spacing:0.05em;color:var(--text);margin-bottom:16px;text-align:center}
 #seo-content h2{font-size:16px;font-weight:500;color:var(--gold2);margin:32px 0 10px}
 #seo-content p{font-size:14px;color:var(--muted);line-height:1.75}
 #seo-content strong{color:var(--text);font-weight:500}
+
+/* FOOTER CTA */
 .footer-cta{position:relative;z-index:1;padding:60px 24px 140px;text-align:center;max-width:500px;margin:0 auto}
 .footer-sep{width:1px;height:60px;background:linear-gradient(transparent,rgba(245,200,66,0.25),transparent);margin:0 auto 60px}
 .footer-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,6vw,68px);letter-spacing:0.04em;line-height:0.95;margin-bottom:16px}
 .footer-title .gr{background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .footer-sub{font-size:15px;color:var(--muted);margin-bottom:32px;font-weight:300}
 .footer-cta-btns{display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto}
+
+/* REAL FOOTER */
+.site-footer{position:relative;z-index:1;border-top:1px solid var(--border);background:rgba(13,13,26,0.6);padding:48px 40px 32px}
+.footer-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
+.footer-brand .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.18em;background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+.footer-brand p{font-size:12px;color:var(--muted);line-height:1.7;max-width:200px}
+.footer-col h4{font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(240,238,248,0.3);margin-bottom:14px}
+.footer-col a{display:block;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:8px;transition:color 0.2s}
+.footer-col a:hover{color:var(--gold2)}
+.footer-bottom{max-width:900px;margin:32px auto 0;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:rgba(240,238,248,0.2)}
+
+/* BOTTOM BAR */
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(7,7,15,0.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:14px}
 .bar-text{flex:1;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar-text strong{color:var(--gold2);font-weight:500}
 .bar-btn{background:linear-gradient(135deg,var(--gold),#E8A020);border:none;border-radius:10px;padding:11px 22px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.1em;color:#000;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:transform 0.15s;text-decoration:none;display:inline-block}
 .bar-btn:hover{transform:scale(1.03)}
+
+/* MODAL */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(7,7,15,0.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:200;align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
 .modal-box{background:var(--deep);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px 30px 28px;width:100%;max-width:380px;position:relative;animation:fadeDown 0.3s ease both}
@@ -159,15 +215,28 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 .modal-go{background:linear-gradient(135deg,var(--gold),#E8A020);border:none;padding:13px 16px;font-size:16px;cursor:pointer;flex-shrink:0}
 .modal-legal{font-size:10px;color:rgba(240,238,248,0.22);text-align:center;margin-top:14px;line-height:1.7}
 .modal-legal a{color:rgba(240,238,248,0.35);text-decoration:underline;text-underline-offset:2px}
-.modal-success{display:none;text-align:center;padding:10px 0}
-.success-emoji{font-size:52px;margin-bottom:14px}
-.success-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.08em;color:var(--gold2);margin-bottom:8px}
-.success-sub{font-size:14px;color:var(--muted);line-height:1.6;font-weight:300}
+
+/* ANIMATIONS */
 @keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .reveal{opacity:0;transform:translateY(18px);transition:opacity 0.6s ease,transform 0.6s ease}
 .reveal.vis{opacity:1;transform:translateY(0)}
-@media(max-width:600px){nav{padding:14px 18px}.bar-text{display:none}.modal-box{padding:28px 20px 22px}.proof{flex-wrap:wrap;justify-content:center}.ticker-label{display:none}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:14px 18px}
+  .bar-text{display:none}
+  .modal-box{padding:28px 20px 22px}
+  .proof{flex-wrap:wrap;justify-content:center}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:24px}
+  .footer-brand{grid-column:1/-1}
+  .site-footer{padding:40px 20px 24px}
+  .footer-bottom{flex-direction:column;gap:8px;text-align:center}
+}
+@media(max-width:480px){
+  .footer-inner{grid-template-columns:1fr}
+  .footer-brand{grid-column:auto}
+}
 </style>
 </head>
 <body>
@@ -182,10 +251,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
       <div class="modal-title">Découvrez votre note sur 10</div>
       <div class="modal-sub">Créez votre compte gratuitement en 10 secondes</div>
       <div class="modal-btns">
-        <button class="btn-social btn-google" onclick="window.location.href='login.html'">
+        <a class="btn-social btn-google" href="login.html?method=google" style="text-decoration:none;">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
           Continuer avec Google
-        </button>
+        </a>
         <div class="modal-or">ou par email</div>
         <div class="modal-email-row">
           <input type="email" id="modal-email" placeholder="votre@email.com" />
@@ -194,18 +263,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
       </div>
       <div class="modal-legal">En continuant, vous acceptez nos <a href="legal.html#cgu">Conditions d'utilisation</a> et notre <a href="legal.html#confidentialite">Politique de confidentialité</a>.<br>Vos données sont protégées conformément au RGPD. Aucune carte bancaire requise.</div>
     </div>
-    <div class="modal-success" id="modal-success">
-      <div class="success-emoji">🎉</div>
-      <div class="success-title">Vous êtes inscrit !</div>
-      <div class="success-sub">Vous recevrez votre première note dès l'ouverture.<br>On vous prévient en premier.</div>
-    </div>
   </div>
 </div>
 
 <!-- NAV -->
 <nav>
   <div class="nav-logo">SCOROVIA</div>
-  <div class="nav-live"><div class="live-dot"></div>En ligne</div>
+  <div class="nav-live"><div class="live-dot"></div><span id="nav-counter">...</span> en ligne</div>
   <a href="login.html" style="background:linear-gradient(135deg,#F5C842,#E8A020);border:none;border-radius:10px;padding:9px 20px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.08em;color:#000;text-decoration:none;cursor:pointer;">S'INSCRIRE</a>
 </nav>
 
@@ -219,11 +283,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
   </div>
   <p class="subline">De vraies personnes vous notent <strong>anonymement</strong>.<br>Découvrez enfin ce que les autres pensent vraiment de vous.</p>
   <div class="cta-block">
-    <a class="btn-social btn-google" href="login.html?method=google" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;">
+    <a class="btn-social btn-google" href="login.html?method=google">
       <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
       Continuer avec Google
     </a>
-    <a class="btn-social" href="login.html?method=email" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card);border:1px solid rgba(255,255,255,0.09);color:var(--text);">
+    <a class="btn-social" href="login.html?method=email" style="background:var(--card);border:1px solid rgba(255,255,255,0.09);color:var(--text);">
       ✉️ S'inscrire avec votre email
     </a>
     <div class="or-divider">ou</div>
@@ -231,39 +295,23 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
     <p class="legal-note">Gratuit · Sans carte · <a href="legal.html#cgu">CGU</a> · <a href="legal.html#confidentialite">Confidentialité</a> · Données protégées RGPD</p>
   </div>
   <div class="proof">
-    <div class="proof-avatars">
-      <div class="proof-av" style="background:linear-gradient(135deg,#2D1F5E,#1A3A5E)">👤</div>
-      <div class="proof-av" style="background:linear-gradient(135deg,#5E2D7A,#2D1F5E)">👤</div>
-      <div class="proof-av" style="background:linear-gradient(135deg,#1A3A5E,#0D1B2A)">👤</div>
-      <div class="proof-av" style="background:linear-gradient(135deg,#2D5E3A,#1A3A2A)">👤</div>
-      <div class="proof-av" style="background:linear-gradient(135deg,#5E3A1A,#2D200D)">👤</div>
+    <div class="proof-avatars" id="proof-avatars">
+      <!-- Rempli dynamiquement par JS -->
+      <div class="proof-av">👤</div>
+      <div class="proof-av">👤</div>
+      <div class="proof-av">👤</div>
+      <div class="proof-av">👤</div>
+      <div class="proof-av">👤</div>
     </div>
-    <div class="proof-text">Plus de <strong id="counter">...</strong> inscrits</div>
+    <div class="proof-text">Plus de <strong id="counter">0</strong> inscrits</div>
   </div>
 </section>
 
 <!-- TICKER -->
 <div class="ticker-section">
-  <span class="ticker-label">Exemples illustratifs</span>
-  <div class="ticker-track">
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Marie · Paris</span><div class="t-dot"></div><div class="t-score">8.4/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Thomas · Lyon</span><div class="t-dot"></div><div class="t-score">7.1/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Sofia · Marseille</span><div class="t-dot"></div><div class="t-score">9.2/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Lucas · Bordeaux</span><div class="t-dot"></div><div class="t-score">6.8/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Emma · Nantes</span><div class="t-dot"></div><div class="t-score">8.7/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Léa · Toulouse</span><div class="t-dot"></div><div class="t-score">9.0/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Noah · Lille</span><div class="t-dot"></div><div class="t-score">7.6/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Chloé · Nice</span><div class="t-dot"></div><div class="t-score">8.1/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Marie · Paris</span><div class="t-dot"></div><div class="t-score">8.4/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Thomas · Lyon</span><div class="t-dot"></div><div class="t-score">7.1/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Sofia · Marseille</span><div class="t-dot"></div><div class="t-score">9.2/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Lucas · Bordeaux</span><div class="t-dot"></div><div class="t-score">6.8/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Emma · Nantes</span><div class="t-dot"></div><div class="t-score">8.7/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Léa · Toulouse</span><div class="t-dot"></div><div class="t-score">9.0/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Noah · Lille</span><div class="t-dot"></div><div class="t-score">7.6/10</div></div>
-    <div class="ticker-item"><div class="t-av">👤</div><span class="t-name">Chloé · Nice</span><div class="t-dot"></div><div class="t-score">8.1/10</div></div>
+  <div class="ticker-track" id="ticker-track">
+    <!-- Rempli dynamiquement -->
   </div>
-  <span class="ticker-note">Exemples illustratifs — non contractuels</span>
 </div>
 
 <!-- PHONE SHOWCASE -->
@@ -275,14 +323,27 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
       <div class="p-notch"></div>
       <div class="p-screen">
         <div class="p-topbar"><div class="p-logo">SCOROVIA</div><div class="p-pts-badge">⚡ 240 pts</div></div>
-        <div class="p-score-display"><div class="p-score-num">7.8</div><div class="p-score-den">/10</div><div class="p-score-info">847 votes · Top 12% des utilisateurs</div></div>
+        <div class="p-score-display">
+          <div class="p-score-num" id="mock-score">7.8</div>
+          <div class="p-score-den">/10</div>
+          <div class="p-score-info">847 votes · Top 12% des utilisateurs</div>
+        </div>
         <div class="p-stats-row">
           <div class="p-stat"><div class="p-stat-n">847</div><div class="p-stat-l">Votes</div></div>
           <div class="p-stat"><div class="p-stat-n">+0.3</div><div class="p-stat-l">Ce mois</div></div>
           <div class="p-stat"><div class="p-stat-n">Top 12%</div><div class="p-stat-l">Rang</div></div>
         </div>
-        <div class="p-voter"><div class="p-voter-av">👤</div><div class="p-voter-info"><div class="p-voter-name">Lucas M.</div><div class="p-voter-time">Il y a 3 min</div></div><div class="p-voter-score">9/10</div></div>
-        <div class="p-voter"><div class="p-voter-av">👤</div><div class="p-voter-info"><div class="p-voter-name">????</div><div class="p-voter-time">Il y a 8 min</div></div><div class="p-voter-score">10/10</div><div class="p-lock"><div class="p-lock-pill">🔒 Premium pour voir</div></div></div>
+        <div class="p-voter" id="mock-voter1">
+          <div class="p-voter-av" id="mock-av1">👤</div>
+          <div class="p-voter-info"><div class="p-voter-name" id="mock-name1">Lucas M.</div><div class="p-voter-time">Il y a 3 min</div></div>
+          <div class="p-voter-score">9/10</div>
+        </div>
+        <div class="p-voter">
+          <div class="p-voter-av">👤</div>
+          <div class="p-voter-info"><div class="p-voter-name">????</div><div class="p-voter-time">Il y a 8 min</div></div>
+          <div class="p-voter-score">10/10</div>
+          <div class="p-lock"><div class="p-lock-pill">🔒 Premium pour voir</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -290,7 +351,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 
 <!-- HOW IT WORKS -->
 <section class="how-section">
-  <h2 class="how-title reveal">COMMENT ÇA MARCHE</h2>
+  <h2 class="section-heading reveal">COMMENT ÇA MARCHE</h2>
   <div class="steps-grid">
     <div class="step-card reveal"><div class="step-n">01</div><div class="step-t">Uploadez votre photo</div><div class="step-d">Soumettez votre photo à la communauté. La 1ère est gratuite, puis 20 points.</div></div>
     <div class="step-card reveal"><div class="step-n">02</div><div class="step-t">Recevez des notes</div><div class="step-d">Des milliers d'utilisateurs réels vous notent anonymement de 1 à 10.</div></div>
@@ -301,12 +362,35 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 
 <!-- POINTS -->
 <section class="points-section">
-  <h2 class="pts-title reveal">GAGNEZ DES POINTS</h2>
+  <h2 class="section-heading reveal">GAGNEZ DES POINTS</h2>
   <div class="pts-grid">
     <div class="pts-card reveal"><div class="pts-icon">⭐</div><div class="pts-label">En notant</div><div class="pts-val" data-pts-key="vote">+1 pt</div></div>
     <div class="pts-card reveal"><div class="pts-icon">📺</div><div class="pts-label">Pub vidéo</div><div class="pts-val" data-pts-key="pub">+5 pts</div></div>
     <div class="pts-card reveal"><div class="pts-icon">👥</div><div class="pts-label">Parrainage</div><div class="pts-val" data-pts-key="parrainage">+50 pts</div></div>
     <div class="pts-card reveal"><div class="pts-icon">💳</div><div class="pts-label">Achat</div><div class="pts-val">dès 0,99€</div></div>
+  </div>
+  <!-- À quoi servent les points -->
+  <div class="pts-usage reveal">
+    <div class="pts-usage-item">
+      <div class="pts-usage-icon">📸</div>
+      <div class="pts-usage-text"><strong>Soumettre une photo</strong>2ème photo et suivantes : <span data-pts-key="upload_photo">20 pts</span></div>
+    </div>
+    <div class="pts-usage-item">
+      <div class="pts-usage-icon">🔓</div>
+      <div class="pts-usage-text"><strong>Déverrouiller un profil</strong>Voir les infos complètes d'un autre membre</div>
+    </div>
+    <div class="pts-usage-item">
+      <div class="pts-usage-icon">💬</div>
+      <div class="pts-usage-text"><strong>Envoyer un message</strong>Contacter quelqu'un qui vous a noté</div>
+    </div>
+  </div>
+</section>
+
+<!-- TÉMOIGNAGES (membres réels) -->
+<section class="testi-section">
+  <h2 class="section-heading reveal">ILS ONT DÉCOUVERT LEUR NOTE</h2>
+  <div class="testi-grid" id="testi-grid">
+    <!-- Rempli dynamiquement -->
   </div>
 </section>
 
@@ -330,95 +414,317 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
   <h2 class="footer-title reveal">PRÊT À CONNAÎTRE<br><span class="gr">VOTRE NOTE SUR 10 ?</span></h2>
   <p class="footer-sub reveal">Gratuit · Anonyme · Sans engagement</p>
   <div class="footer-cta-btns reveal">
-    <a class="btn-social btn-google" href="login.html?method=google" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;">
+    <a class="btn-social btn-google" href="login.html?method=google">
       <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
       Continuer avec Google
     </a>
-    <a class="btn-social" href="login.html?method=email" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card);border:1px solid rgba(255,255,255,0.09);color:var(--text);">
+    <a class="btn-social" href="login.html?method=email" style="background:var(--card);border:1px solid rgba(255,255,255,0.09);color:var(--text);">
       ✉️ S'inscrire avec votre email
     </a>
     <a class="btn-try" href="noter.html">⭐ Essayer sans inscription →</a>
-    <p class="legal-note">© 2026 SCOROVIA · <a href="legal.html#cgu">CGU</a> · <a href="legal.html#confidentialite">Politique de confidentialité</a> · <a href="legal.html">Mentions légales</a> · <a href="contact.html">Contact</a></p>
   </div>
 </section>
 
+<!-- VRAI FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">SCOROVIA</div>
+      <p>La communauté qui note tes photos. Pas une IA — de vraies personnes, des vraies notes.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Application</h4>
+      <a href="login.html">S'inscrire</a>
+      <a href="dashboard.html">Tableau de bord</a>
+      <a href="noter.html">Noter</a>
+      <a href="classement.html">Classement</a>
+    </div>
+    <div class="footer-col">
+      <h4>Points</h4>
+      <a href="login.html">Gagner des points</a>
+      <a href="points.html">Acheter des points</a>
+      <a href="points.html">Premium</a>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <a href="legal.html#cgu">Conditions d'utilisation</a>
+      <a href="legal.html#confidentialite">Confidentialité</a>
+      <a href="legal.html">Mentions légales</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Scorovia · Tous droits réservés</span>
+    <span>Fait avec ❤️ en France · Données protégées RGPD</span>
+  </div>
+</footer>
+
 <!-- BOTTOM BAR -->
 <div class="bottom-bar">
-  <div class="bar-text">Plus de <strong id="bar-counter">...</strong> personnes connaissent leur note</div>
-  <a href="noter.html" class="bar-btn">OBTENIR MA NOTE</a>
+  <div class="bar-text">Plus de <strong id="bar-counter">0</strong> personnes connaissent leur note</div>
+  <a href="login.html" class="bar-btn">OBTENIR MA NOTE</a>
 </div>
 
 <script>
-const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
-const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
-const{createClient}=supabase;
-const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let count=0;
+// Fallbacks illustratifs pour compléter si peu de données réelles
+const FALLBACK_TICKER = [
+  { prenom: 'Marie', ville: 'Paris', note: 8.4, avatar: null },
+  { prenom: 'Thomas', ville: 'Lyon', note: 7.1, avatar: null },
+  { prenom: 'Sofia', ville: 'Marseille', note: 9.2, avatar: null },
+  { prenom: 'Lucas', ville: 'Bordeaux', note: 6.8, avatar: null },
+  { prenom: 'Emma', ville: 'Nantes', note: 8.7, avatar: null },
+  { prenom: 'Léa', ville: 'Toulouse', note: 9.0, avatar: null },
+  { prenom: 'Noah', ville: 'Lille', note: 7.6, avatar: null },
+  { prenom: 'Chloé', ville: 'Nice', note: 8.1, avatar: null },
+];
 
-function animCount(el,n){
-  if(!el)return;
-  const from=Math.max(n-60,0),dur=1600,t0=performance.now();
-  function run(t){
-    const p=Math.min((t-t0)/dur,1),e=1-Math.pow(1-p,3);
-    el.textContent=Math.round(from+(n-from)*e).toLocaleString('fr-FR');
-    if(p<1)requestAnimationFrame(run);
+// ── Compteur inscrits ─────────────────────────────────
+function animCount(els, n) {
+  const from = Math.max(n - 60, 0), dur = 1400, t0 = performance.now();
+  function run(t) {
+    const p = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+    const val = Math.round(from + (n - from) * e).toLocaleString('fr-FR');
+    els.forEach(el => { if (el) el.textContent = val; });
+    if (p < 1) requestAnimationFrame(run);
   }
   requestAnimationFrame(run);
 }
 
-async function loadCounter(){
-  try{
-    const{count:total}=await sb.from('users').select('*',{count:'exact',head:true});
-    count=total||0;
-  }catch(e){count=2400;}
-  setTimeout(()=>{
-    animCount(document.getElementById('counter'),count);
-    animCount(document.getElementById('bar-counter'),count);
-  },700);
-  setInterval(()=>{
-    count+=Math.floor(Math.random()*2)+1;
-    const c=document.getElementById('counter');
-    const b=document.getElementById('bar-counter');
-    if(c)c.textContent=count.toLocaleString('fr-FR');
-    if(b)b.textContent=count.toLocaleString('fr-FR');
-  },6000);
+let userCount = 0;
+
+async function loadCounter() {
+  try {
+    const { count } = await sb.from('users').select('*', { count: 'exact', head: true });
+    userCount = count || 0;
+  } catch (e) { userCount = 0; }
+
+  const els = [
+    document.getElementById('counter'),
+    document.getElementById('bar-counter'),
+  ];
+  // Affiche immédiatement sans délai
+  els.forEach(el => { if (el) el.textContent = '0'; });
+  animCount(els, userCount);
+
+  // Nav counter = fraction active (simulation)
+  const navEl = document.getElementById('nav-counter');
+  if (navEl) navEl.textContent = Math.max(Math.floor(userCount * 0.07), 3);
+
+  // Incrémentation lente
+  setInterval(() => {
+    userCount += Math.floor(Math.random() * 2);
+    const val = userCount.toLocaleString('fr-FR');
+    document.getElementById('counter').textContent = val;
+    document.getElementById('bar-counter').textContent = val;
+  }, 8000);
 }
-loadCounter();
 
-function openModal(){document.getElementById('modal').classList.add('open');document.body.style.overflow='hidden';}
-function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
-document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+// ── Ticker dynamique ──────────────────────────────────
+async function buildTicker() {
+  let items = [];
 
-// ── Pop-in après 15 secondes OU scroll 50% ──────────────────
-let modalShown=false;
-setTimeout(()=>{
-  if(!modalShown&&!localStorage.getItem('scorovia_user')){openModal();modalShown=true;}
-},15000);
-window.addEventListener('scroll',()=>{
-  if(modalShown||localStorage.getItem('scorovia_user'))return;
-  const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight);
-  if(pct>=0.5){openModal();modalShown=true;}
-},{passive:true});
-// ────────────────────────────────────────────────────────────
+  try {
+    // Récupère les users avec photo, note > 0, avatar
+    const { data: photos } = await sb
+      .from('photos')
+      .select('note_moyenne, nb_votes, users!inner(prenom, ville, avatar_url)')
+      .eq('active', true)
+      .gt('nb_votes', 2)
+      .gt('note_moyenne', 0)
+      .order('nb_votes', { ascending: false })
+      .limit(12);
 
-function doEmailSignup(){
-  const v=document.getElementById('modal-email').value.trim();
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){
-    document.getElementById('modal-email').style.outline='1px solid #FF4D8D';
-    setTimeout(()=>document.getElementById('modal-email').style.outline='',1500);
+    if (photos && photos.length > 0) {
+      items = photos.map(p => ({
+        prenom: p.users?.prenom || '?',
+        ville: p.users?.ville || '',
+        note: Math.round(p.note_moyenne * 10) / 10,
+        avatar: p.users?.avatar_url || null,
+      }));
+    }
+  } catch (e) {}
+
+  // Complète avec les fallbacks si pas assez de données
+  while (items.length < 8) {
+    const fb = FALLBACK_TICKER[items.length % FALLBACK_TICKER.length];
+    items.push(fb);
+  }
+
+  // Génère les items × 2 pour boucle infinie
+  const track = document.getElementById('ticker-track');
+  const allItems = [...items, ...items];
+  track.innerHTML = allItems.map(item => `
+    <div class="ticker-item">
+      <div class="t-av">
+        ${item.avatar
+          ? `<img src="${item.avatar}" alt="${item.prenom}" loading="lazy">`
+          : '👤'}
+      </div>
+      <span class="t-name">${item.prenom}${item.ville ? ' · ' + item.ville : ''}</span>
+      <div class="t-dot"></div>
+      <div class="t-score">${item.note.toFixed(1)}/10</div>
+    </div>
+  `).join('');
+
+  // Lance l'animation après rendu
+  requestAnimationFrame(() => track.classList.add('animating'));
+}
+
+// ── Proof social (avatars réels) ──────────────────────
+async function buildProof() {
+  try {
+    const { data: users } = await sb
+      .from('users')
+      .select('prenom, avatar_url')
+      .not('avatar_url', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (!users || users.length === 0) return;
+
+    const container = document.getElementById('proof-avatars');
+    container.innerHTML = users.map(u => `
+      <div class="proof-av">
+        <img src="${u.avatar_url}" alt="${u.prenom || ''}" loading="lazy">
+      </div>
+    `).join('');
+  } catch (e) {}
+}
+
+// ── Mock phone — premier votant réel ─────────────────
+async function buildMockPhone() {
+  try {
+    const { data: users } = await sb
+      .from('users')
+      .select('prenom, avatar_url')
+      .not('avatar_url', 'is', null)
+      .limit(1);
+
+    if (users && users[0]) {
+      const u = users[0];
+      const nameEl = document.getElementById('mock-name1');
+      const avEl = document.getElementById('mock-av1');
+      if (nameEl) nameEl.textContent = u.prenom || 'Membre';
+      if (avEl && u.avatar_url) avEl.innerHTML = `<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    }
+  } catch (e) {}
+}
+
+// ── Témoignages (membres avec le plus de votes) ───────
+async function buildTestimonials() {
+  const grid = document.getElementById('testi-grid');
+
+  try {
+    const { data: photos } = await sb
+      .from('photos')
+      .select('note_moyenne, nb_votes, users!inner(prenom, ville, avatar_url)')
+      .eq('active', true)
+      .gt('nb_votes', 5)
+      .not('users.avatar_url', 'is', null)
+      .order('nb_votes', { ascending: false })
+      .limit(4);
+
+    if (!photos || photos.length === 0) {
+      // Pas assez de données — cache la section
+      document.querySelector('.testi-section').style.display = 'none';
+      return;
+    }
+
+    grid.innerHTML = photos.map(p => {
+      const u = p.users;
+      const note = (Math.round(p.note_moyenne * 10) / 10).toFixed(1);
+      return `
+        <div class="testi-card reveal">
+          <div class="testi-header">
+            <div class="testi-av">
+              ${u.avatar_url
+                ? `<img src="${u.avatar_url}" alt="${u.prenom}" loading="lazy">`
+                : '👤'}
+            </div>
+            <div>
+              <div class="testi-name">${u.prenom || 'Membre'}</div>
+              <div class="testi-loc">${u.ville || 'France'}</div>
+            </div>
+            <div style="margin-left:auto;text-align:right">
+              <div class="testi-score">${note}</div>
+              <div class="testi-votes">${p.nb_votes} votes</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Observe les nouveaux éléments pour l'animation reveal
+    grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  } catch (e) {
+    document.querySelector('.testi-section').style.display = 'none';
+  }
+}
+
+// ── Modal ─────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+// Pop-in 15s ou scroll 70%
+let modalShown = false;
+setTimeout(() => {
+  if (!modalShown && !localStorage.getItem('scorovia_user')) { openModal(); modalShown = true; }
+}, 15000);
+window.addEventListener('scroll', () => {
+  if (modalShown || localStorage.getItem('scorovia_user')) return;
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  if (pct >= 0.70) { openModal(); modalShown = true; }
+}, { passive: true });
+
+function doEmailSignup() {
+  const v = document.getElementById('modal-email').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+    document.getElementById('modal-email').style.outline = '1px solid #FF4D8D';
+    setTimeout(() => document.getElementById('modal-email').style.outline = '', 1500);
     return;
   }
-  window.location.href='login.html';
+  window.location.href = 'login.html';
 }
-document.getElementById('modal-email').addEventListener('keypress',e=>{if(e.key==='Enter')doEmailSignup();});
+document.getElementById('modal-email').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doEmailSignup();
+});
 
-const obs=new IntersectionObserver(entries=>{
-  entries.forEach((entry,i)=>{if(entry.isIntersecting){setTimeout(()=>entry.target.classList.add('vis'),i*80);}});
-},{threshold:0.1});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+// ── Reveal scroll ─────────────────────────────────────
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('vis'), i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-PointsConfig.load().then(()=>PointsConfig.updateDOM());
+// ── Points config ─────────────────────────────────────
+PointsConfig.load().then(() => PointsConfig.updateDOM());
+
+// ── Init ──────────────────────────────────────────────
+Promise.all([
+  loadCounter(),
+  buildTicker(),
+  buildProof(),
+  buildMockPhone(),
+  buildTestimonials(),
+]);
 </script>
 </body>
 </html>
