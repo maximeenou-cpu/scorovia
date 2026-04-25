@@ -3,20 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classement beauté — Top membres notés par la communauté Scorovia</title>
-<meta name="description" content="Découvrez le classement des membres les mieux notés sur Scorovia. Des vraies personnes notent de 1 à 10. Filtrez par genre, ville ou âge. Rejoignez-les gratuitement.">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://scorovia.com/classement.html">
-<meta property="og:title" content="Classement Scorovia — Les membres les mieux notés">
-<meta property="og:description" content="Top des membres notés par la communauté Scorovia. Notes de 1 à 10 données par de vraies personnes.">
-<meta property="og:image" content="https://scorovia.com/og-image.jpg">
-<meta property="og:url" content="https://scorovia.com/classement.html">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="fr_FR">
-<meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ItemList","name":"Classement Scorovia","description":"Top des membres notés par la communauté Scorovia, de 1 à 10.","url":"https://scorovia.com/classement.html"}
-</script>
+  <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -27,9 +14,10 @@
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js');
   }
-<\/script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
-<script src="premium.js"><\/script>
+</script>
+<title>SCOROVIA — Classement</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="premium.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -160,22 +148,22 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 <aside class="sidebar" id="sidebar">
   <a href="index.html" class="sidebar-logo">SCOROVIA</a>
   <div class="nav-section">Principal</div>
-  <a class="nav-item" href="dashboard.html"><span class="nav-icon">&#127968;</span> Tableau de bord</a>
-  <a class="nav-item" href="noter.html"><span class="nav-icon">&#11088;</span> Noter</a>
-  <a class="nav-item" href="mesnotes.html"><span class="nav-icon">&#128202;</span> Mes notes</a>
-  <div class="nav-section">Communaut&#233;</div>
-  <a class="nav-item active"><span class="nav-icon">&#127942;</span> Classement</a>
-  <a class="nav-item" href="messages.html"><span class="nav-icon">&#128172;</span> Messages</a>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Tableau de bord</a>
+  <a class="nav-item" href="noter.html"><span class="nav-icon">⭐</span> Noter</a>
+  <a class="nav-item" href="mesnotes.html"><span class="nav-icon">📊</span> Mes notes</a>
+  <div class="nav-section">Communauté</div>
+  <a class="nav-item active"><span class="nav-icon">🏆</span> Classement</a>
+  <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> Messages</a>
   <div class="nav-section">Compte</div>
-  <a class="nav-item" href="points.html"><span class="nav-icon">&#9889;</span> Mes points</a>
-  <a class="nav-item" href="profil.html"><span class="nav-icon">&#128100;</span> Mon profil</a>
-  <a class="nav-item" onclick="doLogout()" style="cursor:pointer"><span class="nav-icon">&#128682;</span> D&#233;connexion</a>
+  <a class="nav-item" href="points.html"><span class="nav-icon">⚡</span> Mes points</a>
+  <a class="nav-item" href="profil.html"><span class="nav-icon">👤</span> Mon profil</a>
+  <a class="nav-item" onclick="doLogout()" style="cursor:pointer"><span class="nav-icon">🚪</span> Déconnexion</a>
   <div class="sidebar-bottom">
     <a href="profil.html" class="user-mini">
       <div class="user-av-sm" id="user-avatar">?</div>
       <div>
         <div class="user-name-sm" id="user-name">...</div>
-        <div class="user-pts-sm">&#9889; <span id="user-pts">&mdash;</span> pts <span id="premium-badge-sidebar" class="premium-badge-sidebar" style="display:none;background:linear-gradient(135deg,rgba(245,200,66,0.15),rgba(232,160,32,0.1));border:1px solid rgba(245,200,66,0.3);border-radius:6px;padding:2px 7px;font-size:10px;color:var(--gold2);font-weight:600;letter-spacing:0.05em;margin-left:4px;">&#9733; PREMIUM</span></div>
+        <div class="user-pts-sm">⚡ <span id="user-pts">—</span> pts <span id="premium-badge-sidebar" class="premium-badge-sidebar" style="display:none;background:linear-gradient(135deg,rgba(245,200,66,0.15),rgba(232,160,32,0.1));border:1px solid rgba(245,200,66,0.3);border-radius:6px;padding:2px 7px;font-size:10px;color:var(--gold2);font-weight:600;letter-spacing:0.05em;margin-left:4px;">★ PREMIUM</span></div>
       </div>
     </a>
   </div>
@@ -183,31 +171,31 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 
 <main class="main">
   <div class="topbar">
-    <div class="topbar-title">&#127942; Classement</div>
+    <div class="topbar-title">🏆 Classement</div>
     <div class="topbar-right">
-      <a href="points.html" class="pts-pill">&#9889; <span id="pts-display">&mdash;</span> pts</a>
+      <a href="points.html" class="pts-pill">⚡ <span id="pts-display">—</span> pts</a>
     </div>
   </div>
   <div class="content">
     <div class="my-rank-banner" id="my-rank-banner" style="display:none">
       <div class="my-rank-av" id="my-av">?</div>
       <div class="my-rank-info">
-        <div class="my-rank-name" id="my-name">&mdash;</div>
-        <div class="my-rank-sub" id="my-sub">&mdash;</div>
+        <div class="my-rank-name" id="my-name">—</div>
+        <div class="my-rank-sub" id="my-sub">—</div>
       </div>
       <div class="my-rank-stats">
-        <div class="my-rank-stat"><div class="my-rank-num" id="my-rang">#&mdash;</div><div class="my-rank-label">Rang global</div></div>
-        <div class="my-rank-stat"><div class="my-rank-num gold" id="my-note">&mdash;</div><div class="my-rank-label">Note /10</div></div>
-        <div class="my-rank-stat"><div class="my-rank-num" id="my-votes">0</div><div class="my-rank-label">Votes re&#231;us</div></div>
+        <div class="my-rank-stat"><div class="my-rank-num" id="my-rang">#—</div><div class="my-rank-label">Rang global</div></div>
+        <div class="my-rank-stat"><div class="my-rank-num gold" id="my-note">—</div><div class="my-rank-label">Note /10</div></div>
+        <div class="my-rank-stat"><div class="my-rank-num" id="my-votes">0</div><div class="my-rank-label">Votes reçus</div></div>
       </div>
     </div>
 
     <div class="filter-tabs">
-      <div class="filter-tab active" onclick="setFilter('global', event)">&#127760; Global</div>
-      <div class="filter-tab" onclick="setFilter('homme', event)">&#128104; Hommes</div>
-      <div class="filter-tab" onclick="setFilter('femme', event)">&#128105; Femmes</div>
-      <div class="filter-tab" onclick="unlockFilter('ville')">&#128205; Par ville <span class="tab-lock filter-tab-cost">(-5 pts)</span></div>
-      <div class="filter-tab" onclick="unlockFilter('age')">&#127874; Par &#226;ge <span class="tab-lock filter-tab-cost">(-5 pts)</span></div>
+      <div class="filter-tab active" onclick="setFilter('global', event)">🌍 Global</div>
+      <div class="filter-tab" onclick="setFilter('homme', event)">👨 Hommes</div>
+      <div class="filter-tab" onclick="setFilter('femme', event)">👩 Femmes</div>
+      <div class="filter-tab" onclick="unlockFilter('ville')">📍 Par ville <span class="tab-lock filter-tab-cost">(-5 pts)</span></div>
+      <div class="filter-tab" onclick="unlockFilter('age')">🎂 Par âge <span class="tab-lock filter-tab-cost">(-5 pts)</span></div>
     </div>
 
     <div class="filter-select-row" id="filter-ville-row">
@@ -217,26 +205,26 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
       </select>
     </div>
     <div class="filter-select-row" id="filter-age-row">
-      <span style="font-size:13px;color:var(--muted);">Tranche d'&#226;ge :</span>
+      <span style="font-size:13px;color:var(--muted);">Tranche d'âge :</span>
       <select class="filter-select" id="age-select" onchange="filterByAge(this.value)">
-        <option value="">Tous les &#226;ges</option>
-        <option value="18-25">18&ndash;25 ans</option>
-        <option value="26-35">26&ndash;35 ans</option>
-        <option value="36-45">36&ndash;45 ans</option>
+        <option value="">Tous les âges</option>
+        <option value="18-25">18–25 ans</option>
+        <option value="26-35">26–35 ans</option>
+        <option value="36-45">36–45 ans</option>
         <option value="46+">46 ans et +</option>
       </select>
     </div>
 
     <div class="premium-banner premium-cta-hide">
-      <div class="premium-icon">&#128081;</div>
-      <div class="premium-text"><h3>Premium &mdash; Classements illimit&#233;s</h3><p>Ville, &#226;ge, genre &mdash; tous les filtres sans d&#233;penser de points</p></div>
-      <button class="btn-unlock" onclick="window.open('https://buy.stripe.com/8x2eVc13waSN5msb6m4wM04','_blank')">D&#201;BLOQUER</button>
+      <div class="premium-icon">👑</div>
+      <div class="premium-text"><h3>Premium — Classements illimités</h3><p>Ville, âge, genre — tous les filtres sans dépenser de points</p></div>
+      <button class="btn-unlock" onclick="window.open('https://buy.stripe.com/8x2eVc13waSN5msb6m4wM04','_blank')">DÉBLOQUER</button>
     </div>
 
     <div class="leaderboard">
       <div class="lb-header">
-        <div class="lb-title" id="lb-title">&#127760; Classement global</div>
-        <div class="lb-count" id="lb-count">&mdash; membres</div>
+        <div class="lb-title" id="lb-title">🌍 Classement global</div>
+        <div class="lb-count" id="lb-count">— membres</div>
       </div>
       <div class="top3" id="top3"><div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;width:100%">Chargement...</div></div>
       <div class="rank-list" id="rank-list"></div>
@@ -244,7 +232,7 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
   </div>
 </main>
 
-<button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">&#9776;</button>
+<button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
 
 <script>
 const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
@@ -262,6 +250,7 @@ async function init(){
     if(profile){
       userProfile=profile;
       Premium.init(profile);
+      // ✅ Photo de profil sidebar
       const avEl=document.getElementById('user-avatar');
       if(profile.avatar_url){avEl.innerHTML=`<img src="${profile.avatar_url}" />`;}
       else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
@@ -275,6 +264,7 @@ async function init(){
 }
 
 async function loadRanking(){
+  // ✅ Charger avatar_url en plus
   const{data:users,error}=await sb.from('users').select('id,prenom,ville,age,genre,points,avatar_url');
   if(error||!users)return;
   const{data:photos}=await sb.from('photos').select('user_id,note_moyenne,nb_votes').eq('active',true);
@@ -307,6 +297,7 @@ async function loadRanking(){
       document.getElementById('my-rang').textContent='#'+(myPos+1);
       document.getElementById('my-note').textContent=me.avgNote>0?me.avgNote.toFixed(1):'—';
       document.getElementById('my-votes').textContent=me.totalVotes;
+      // ✅ Photo dans le banner "Mon rang"
       const myAvEl=document.getElementById('my-av');
       if(me.avatar_url){myAvEl.innerHTML=`<img src="${me.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;myAvEl.style.fontSize='0';}
       else{myAvEl.textContent=me.prenom?.charAt(0).toUpperCase()||'?';}
@@ -376,6 +367,14 @@ function renderFiltered(list){
   renderList(ranked,list,total);
 }
 
+// ✅ Affiche photo de profil dans le top3
+function avatarContent(u,size){
+  if(u.avatar_url){
+    return `<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+  }
+  return (u.prenom||'?').charAt(0).toUpperCase();
+}
+
 function renderTop3(top){
   const container=document.getElementById('top3');
   if(top.length===0){container.innerHTML='<div style="color:var(--muted);font-size:13px;padding:28px;text-align:center;width:100%">Aucun membre avec des votes dans ce filtre.<br><span style="font-size:12px">Soumettez une photo pour apparaître !</span></div>';return;}
@@ -388,7 +387,10 @@ function renderTop3(top){
     const score=u.avgNote>0?u.avgNote.toFixed(1)+'/10':'—';
     const ageMeta=u.age?` · ${u.age} ans`:'';
     const bg=cls==='first'?'#FFD700,#FFA500':cls==='second'?'#C0C0C0,#808080':'#CD7F32,#8B4513';
-    const avInner=u.avatar_url?`<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:(u.prenom||'?').charAt(0).toUpperCase();
+    // ✅ Photo ou initiale dans le top3
+    const avInner=u.avatar_url
+      ?`<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
+      :(u.prenom||'?').charAt(0).toUpperCase();
     return `<div class="top3-item ${cls}">
       <div class="top3-crown">${crowns[i]}</div>
       <div class="top3-av" style="${u.avatar_url?'':'background:linear-gradient(135deg,'+bg+')'}">${avInner}</div>
@@ -406,6 +408,7 @@ function renderList(ranked,all,total){
     const pos=i+4;const isMe=currentUser&&u.id===currentUser.id;
     const score=u.avgNote>0?u.avgNote.toFixed(1)+'/10':'—';
     const ageMeta=u.age?` · ${u.age} ans`:'';
+    // ✅ Photo ou initiale dans la liste
     const avInner=u.avatar_url?`<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:(u.prenom||'?').charAt(0).toUpperCase();
     html+=`<div class="rank-row ${isMe?'is-me':''}">
       <div class="rank-pos ${isMe?'me':''}">${pos}</div>
@@ -443,15 +446,15 @@ async function doLogout(){await sb.auth.signOut();window.location.href='login.ht
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 init();
-<\/script>
+</script>
 
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
   <ul>
-    <li class=""><a href="dashboard.html"><span class="mnav-icon">&#127968;</span><span class="mnav-label">Accueil</span></a></li>
-    <li class=""><a href="noter.html"><span class="mnav-icon">&#11088;</span><span class="mnav-label">Noter</span></a></li>
-    <li class=""><a href="mesnotes.html"><span class="mnav-icon">&#128202;</span><span class="mnav-label">Mes notes</span></a></li>
-    <li class=""><a href="messages.html"><span class="mnav-icon">&#128172;</span><span class="mnav-label">Messages</span><span class="mnav-badge"></span></a></li>
-    <li class=""><a href="profil.html"><span class="mnav-icon">&#128100;</span><span class="mnav-label">Profil</span></a></li>
+    <li class=""><a href="dashboard.html"><span class="mnav-icon">🏠</span><span class="mnav-label">Accueil</span></a></li>
+    <li class=""><a href="noter.html"><span class="mnav-icon">⭐</span><span class="mnav-label">Noter</span></a></li>
+    <li class=""><a href="mesnotes.html"><span class="mnav-icon">📊</span><span class="mnav-label">Mes notes</span></a></li>
+    <li class=""><a href="messages.html"><span class="mnav-icon">💬</span><span class="mnav-label">Messages</span><span class="mnav-badge"></span></a></li>
+    <li class=""><a href="profil.html"><span class="mnav-icon">👤</span><span class="mnav-label">Profil</span></a></li>
   </ul>
 </nav>
 </body>
