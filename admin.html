@@ -974,6 +974,8 @@
             <tr>
               <th>Utilisateur</th>
               <th>Email</th>
+              <th>Ville</th>
+              <th>Sexe</th>
               <th>Points</th>
               <th>Statut</th>
               <th>Photos</th>
@@ -1313,7 +1315,7 @@
     tbody.innerHTML = '<tr><td colspan="8" class="loader">Chargement...</td></tr>';
 
     const { data: users, error: usersError } = await sb.from('users')
-      .select('id, email, prenom, points, is_premium, promo_code, avatar_url, created_at')
+      .select('id, email, prenom, points, is_premium, promo_code, avatar_url, created_at, ville, sexe')
       .order('created_at', { ascending: false })
       .limit(500);
 
@@ -1324,7 +1326,7 @@
     }
 
     if (!users || users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="loader">Aucun utilisateur trouvé</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" class="loader">Aucun utilisateur trouvé</td></tr>';
       allUsers = [];
       filterUsers();
       return;
@@ -1381,7 +1383,7 @@
     const page = filteredUsers.slice(start, start + PAGE_SIZE);
 
     if (!page.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="loader">Aucun résultat</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" class="loader">Aucun résultat</td></tr>';
       renderUsersPagination();
       return;
     }
@@ -1396,6 +1398,8 @@
           </div>
         </td>
         <td style="color:var(--muted);font-size:0.75rem">${u.email || '—'}</td>
+        <td style="color:var(--muted)">${u.ville || '—'}</td>
+        <td style="color:var(--muted)">${u.sexe || '—'}</td>
         <td>
           <span style="color:var(--gold)">${u.points ?? 0}</span>
           <span style="color:var(--muted);font-size:0.7rem"> pts</span>
