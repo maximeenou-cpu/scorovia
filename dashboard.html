@@ -504,9 +504,17 @@ let knownMessageIds = new Set();
 
 async function initNotifications(){
   if(!('Notification'in window))return;
-  if(Notification.permission==='default') await Notification.requestPermission();
 
-  // Étape 1 : charge les non-lus existants dans le Set ET met à jour le badge
+  // La permission ne peut être demandée que sur action utilisateur
+  // On attend le premier clic pour la demander
+  if(Notification.permission==='default'){
+    document.addEventListener('click', async function askOnce(){
+      await Notification.requestPermission();
+      document.removeEventListener('click', askOnce);
+    }, {once: true});
+  }
+
+  // Charge les non-lus existants dans le Set ET met à jour le badge
   const { data: existing } = await sb.from('messages')
     .select('id')
     .eq('receiver_id', currentUser.id)
@@ -514,10 +522,10 @@ async function initNotifications(){
 
   if(existing) existing.forEach(m => knownMessageIds.add(m.id));
 
-  // Étape 2 : affiche le badge avec le count réel
+  // Affiche le badge avec le count réel
   updateMessageBadge(knownMessageIds.size);
 
-  // Étape 3 : poll toutes les 30s pour détecter les NOUVEAUX messages
+  // Poll toutes les 30s pour détecter les NOUVEAUX messages
   setInterval(checkNewMessages, 30000);
 }
 
