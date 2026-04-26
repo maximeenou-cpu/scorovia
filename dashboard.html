@@ -92,7 +92,7 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 .premium-text h3{font-size:15px;font-weight:500;color:var(--gold2);margin-bottom:3px}
 .premium-text p{font-size:12px;color:var(--muted)}
 .btn-premium{margin-left:auto;background:linear-gradient(135deg,var(--gold),#E8A020);border:none;border-radius:10px;padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.08em;color:#000;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--pink);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--dark)}
+.notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--pink);color:#fff;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid var(--dark)}
 .notif-panel{display:none;position:absolute;top:56px;right:0;width:320px;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:200;overflow:hidden}
 .notif-panel.open{display:block;animation:fadeDownNotif 0.2s ease both}
 @keyframes fadeDownNotif{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
@@ -154,7 +154,8 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 .mobile-bottom-nav .mnav-label{font-size:10px;font-family:'DM Sans',sans-serif;color:rgba(240,238,248,0.4);letter-spacing:0.01em}
 .mobile-bottom-nav li.active .mnav-label{color:#FFE27A}
 .mobile-bottom-nav li.active .mnav-icon{filter:drop-shadow(0 0 6px rgba(245,200,66,0.5))}
-.mobile-bottom-nav .mnav-badge{position:absolute;top:4px;right:calc(50% - 16px);width:8px;height:8px;border-radius:50%;background:#FF4D8D;border:2px solid rgba(13,13,26,0.97)}
+/* Badge masqué par défaut — affiché uniquement via JS si messages non lus */
+.mobile-bottom-nav .mnav-badge{position:absolute;top:4px;right:calc(50% - 16px);width:8px;height:8px;border-radius:50%;background:#FF4D8D;border:2px solid rgba(13,13,26,0.97);display:none}
 @media(max-width:768px){
   .mobile-bottom-nav{display:block}
   .sidebar{display:none !important}
@@ -213,7 +214,7 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
       <a href="points.html" class="pts-pill">⚡ <span id="pts-display">—</span> pts</a>
       <div class="notif-btn" id="notif-btn" onclick="toggleNotif()">
         🔔
-        <div class="notif-badge" id="notif-badge" style="display:none;">0</div>
+        <div class="notif-badge" id="notif-badge">0</div>
       </div>
       <div class="notif-panel" id="notif-panel">
         <div class="notif-header">🔔 Notifications<span class="notif-mark-read" onclick="markAllRead()">Tout marquer lu</span></div>
@@ -327,10 +328,31 @@ const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userVotes=[];
 
+// ── SON DE NOTIFICATION ────────────────────────────────────────────
+// Génère un son "ding" via Web Audio API — aucun fichier audio nécessaire
+function playNotifSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);           // La5 — note principale
+    osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.15); // descend vers Mi5
+    gain.gain.setValueAtTime(0.35, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch(e) {
+    // Web Audio non supporté — silencieux
+  }
+}
+// ──────────────────────────────────────────────────────────────────
+
 async function sendWelcomeEmail(user, profile){
   try{
-    if(profile.welcome_email_sent) return; // déjà envoyé
-    // Marquer immédiatement pour éviter les doublons
+    if(profile.welcome_email_sent) return;
     await sb.from('users').update({welcome_email_sent:true}).eq('id',user.id);
     await fetch('https://rsdlcqsmuvaqkohjqsjs.supabase.co/functions/v1/send-welcome-email',{
       method:'POST',
@@ -355,9 +377,7 @@ async function init(){
   const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
   if(!profile){window.location.href='login.html';return;}
 
-  // ── Email de bienvenue (première connexion uniquement) ──
   sendWelcomeEmail(currentUser, profile);
-  // ────────────────────────────────────────────────────────
 
   Premium.init(profile);
   PointsConfig.load().then(() => PointsConfig.updateDOM());
@@ -430,12 +450,13 @@ async function init(){
 function loadNotifications(totalVotes,avgNote){
   const notifs=[];
   if(totalVotes>0&&avgNote)notifs.push({icon:'⭐',text:`Vous avez <strong>${totalVotes} votes</strong> — note moyenne <strong>${avgNote}/10</strong>`,time:"Aujourd'hui",unread:true});
-  if(totalVotes===0)notifs.push({icon:'\uD83D\uDCF8',text:"Soumettez votre premi\u00e8re photo pour commencer \u00e0 recevoir des notes !",time:'Maintenant',unread:true});
+  if(totalVotes===0)notifs.push({icon:'📸',text:"Soumettez votre première photo pour commencer à recevoir des notes !",time:'Maintenant',unread:true});
   const badge=document.getElementById('notif-badge');const list=document.getElementById('notif-list');
   const unreadCount=notifs.filter(n=>n.unread).length;
   if(unreadCount>0){badge.textContent=unreadCount;badge.style.display='flex';}
+  else{badge.style.display='none';}
   if(notifs.length===0){list.innerHTML='<div class="notif-empty">Aucune notification pour l\'instant</div>';return;}
-  list.innerHTML=notifs.map(n=>`<div class="notif-item ${n.unread?'unread':''}"><div class="notif-icon">${n.icon}</div><div class="notif-body"><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div>${n.unread?'<div class="notif-dot"></div>':''}</div>`).join('');
+  list.innerHTML=notifs.map(n=>`<div class="notif-item ${n.unread?'unread':''}" onclick="window.location.href='mesnotes.html'"><div class="notif-icon">${n.icon}</div><div class="notif-body"><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div>${n.unread?'<div class="notif-dot"></div>':''}</div>`).join('');
 }
 
 function toggleNotif(){
@@ -478,24 +499,82 @@ function copyInvite(){
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 
+// ── NOTIFICATIONS MESSAGES ────────────────────────────────────────
+// Garde en mémoire les IDs déjà vus pour détecter les vrais nouveaux messages
+let knownMessageIds = new Set();
+let notifInitialized = false;
+
 async function initNotifications(){
   if(!('Notification'in window))return;
-  if(Notification.permission==='default')await Notification.requestPermission();
-  async function checkMessages(){
-    if(!currentUser)return;
-    const{count}=await sb.from('messages').select('id',{count:'exact',head:true}).eq('receiver_id',currentUser.id).eq('read',false);
-    if(count>0){
-      const badge=document.querySelector('.mobile-bottom-nav li:nth-child(4) .mnav-badge');
-      if(badge)badge.style.display='block';
-      if(Notification.permission==='granted'&&document.hidden){
-        const n=new Notification(`💬 ${count} message${count>1?'s':''} non lu${count>1?'s':''} — SCOROVIA`,{body:'Cliquez pour lire vos messages',icon:'/favicon.ico',tag:'scorovia-msg',renotify:false});
-        n.onclick=()=>{window.focus();window.location.href='messages.html';n.close();};
-      }
-    }
-  }
-  checkMessages();
-  setInterval(checkMessages,30000);
+  if(Notification.permission==='default') await Notification.requestPermission();
+
+  // Première passe : charge les IDs existants sans notifier
+  await seedKnownMessages();
+  notifInitialized = true;
+
+  // Puis poll toutes les 30 secondes
+  setInterval(checkNewMessages, 30000);
 }
+
+// Charge silencieusement les messages non lus existants au démarrage
+async function seedKnownMessages(){
+  if(!currentUser) return;
+  const { data } = await sb.from('messages')
+    .select('id')
+    .eq('receiver_id', currentUser.id)
+    .eq('read', false);
+  if(data) data.forEach(m => knownMessageIds.add(m.id));
+
+  // Met à jour le badge avec le count initial
+  updateMessageBadge(knownMessageIds.size);
+}
+
+// Vérifie les nouveaux messages et notifie pour chacun individuellement
+async function checkNewMessages(){
+  if(!currentUser || !notifInitialized) return;
+
+  const { data } = await sb.from('messages')
+    .select('id, content, sender_id')
+    .eq('receiver_id', currentUser.id)
+    .eq('read', false);
+
+  if(!data) return;
+
+  // Trouve les vrais nouveaux messages (pas encore dans knownMessageIds)
+  const newMessages = data.filter(m => !knownMessageIds.has(m.id));
+
+  if(newMessages.length > 0){
+    // Joue le son une seule fois pour tous les nouveaux messages
+    playNotifSound();
+
+    // Envoie une notification par message si la page est en arrière-plan
+    if(Notification.permission === 'granted' && document.hidden){
+      newMessages.forEach(m => {
+        const preview = m.content.length > 60 ? m.content.substring(0, 60) + '…' : m.content;
+        const n = new Notification('💬 Nouveau message — SCOROVIA', {
+          body: preview,
+          icon: '/favicon.ico',
+          tag: `scorovia-msg-${m.id}`,   // tag unique = une notif par message
+          renotify: true
+        });
+        n.onclick = () => { window.focus(); window.location.href = 'messages.html'; n.close(); };
+      });
+    }
+
+    // Ajoute les nouveaux IDs au Set
+    newMessages.forEach(m => knownMessageIds.add(m.id));
+  }
+
+  // Met à jour le badge avec le total des non-lus
+  updateMessageBadge(data.length);
+}
+
+// Affiche ou masque le badge selon le count
+function updateMessageBadge(count){
+  const badge = document.querySelector('.mobile-bottom-nav li:nth-child(4) .mnav-badge');
+  if(badge) badge.style.display = count > 0 ? 'block' : 'none';
+}
+// ──────────────────────────────────────────────────────────────────
 
 init();
 </script>

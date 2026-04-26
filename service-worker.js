@@ -1,6 +1,5 @@
-const CACHE_NAME = 'scorovia-v1';
+const CACHE_NAME = 'scorovia-v2';
 
-// Assets statiques à mettre en cache
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -21,7 +20,7 @@ const STATIC_ASSETS = [
   '/apple-touch-icon.png'
 ];
 
-// Installation : mise en cache des assets statiques
+// ── INSTALLATION ──────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -31,7 +30,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activation : nettoyage des anciens caches
+// ── ACTIVATION ────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -45,11 +44,11 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Stratégie : Network First pour les requêtes API/Supabase, Cache First pour les assets statiques
+// ── FETCH ─────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Ne pas intercepter les requêtes Supabase, Stripe, Sightengine (toujours réseau)
+  // Ne pas intercepter les requêtes externes
   if (
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('stripe.com') ||
@@ -57,12 +56,15 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('google') ||
     url.hostname.includes('googleapis') ||
     url.hostname.includes('doubleclick') ||
-    url.hostname.includes('googlesyndication')
+    url.hostname.includes('googlesyndication') ||
+    url.hostname.includes('jsdelivr') ||
+    url.hostname.includes('fonts.gstatic') ||
+    url.hostname.includes('fonts.googleapis')
   ) {
     return;
   }
 
-  // Pour les pages HTML : Network First (contenu toujours à jour)
+  // Pages HTML : Network First
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -82,7 +84,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Pour les assets statiques : Cache First
+  // Assets statiques : Cache First
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
@@ -96,4 +98,65 @@ self.addEventListener('fetch', (event) => {
       });
     })
   );
+});
+
+// ── NOTIFICATIONS PUSH ────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch(e) {
+    data = { title: '💬 Nouveau message', body: event.data.text() };
+  }
+
+  const options = {
+    body: data.body || 'Vous avez un nouveau message sur SCOROVIA',
+    icon: '/favicon-512.png',
+    badge: '/favicon-32x32.png',
+    tag: data.tag || 'scorovia-message',
+    renotify: true,
+    vibrate: [200, 100, 200],
+    data: { url: data.url || '/messages.html' },
+    actions: [
+      { action: 'open', title: 'Lire le message' },
+      { action: 'close', title: 'Fermer' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || '💬 Nouveau message — SCOROVIA', options)
+  );
+});
+
+// ── CLIC SUR NOTIFICATION ─────────────────────────────────────────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'close') return;
+
+  const targetUrl = event.notification.data?.url || '/messages.html';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Si une fenêtre est déjà ouverte, la focus et naviguer
+      for (const client of clientList) {
+        if (client.url.includes('scorovia.com') && 'focus' in client) {
+          client.focus();
+          client.navigate(targetUrl);
+          return;
+        }
+      }
+      // Sinon ouvrir une nouvelle fenêtre
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+// ── FERMETURE NOTIFICATION ────────────────────────────────────────
+self.addEventListener('notificationclose', (event) => {
+  // Optionnel : tracker les fermetures si besoin
 });
