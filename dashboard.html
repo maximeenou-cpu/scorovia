@@ -154,7 +154,7 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 .mobile-bottom-nav .mnav-label{font-size:10px;font-family:'DM Sans',sans-serif;color:rgba(240,238,248,0.4);letter-spacing:0.01em}
 .mobile-bottom-nav li.active .mnav-label{color:#FFE27A}
 .mobile-bottom-nav li.active .mnav-icon{filter:drop-shadow(0 0 6px rgba(245,200,66,0.5))}
-/* Badge masqué par défaut — affiché uniquement via JS si messages non lus */
+/* Badge masqué par défaut — JS l'affiche uniquement si messages non lus */
 .mobile-bottom-nav .mnav-badge{position:absolute;top:4px;right:calc(50% - 16px);width:8px;height:8px;border-radius:50%;background:#FF4D8D;border:2px solid rgba(13,13,26,0.97);display:none}
 @media(max-width:768px){
   .mobile-bottom-nav{display:block}
@@ -328,8 +328,7 @@ const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userVotes=[];
 
-// ── SON DE NOTIFICATION ────────────────────────────────────────────
-// Génère un son "ding" via Web Audio API — aucun fichier audio nécessaire
+// ── SON DE NOTIFICATION ───────────────────────────────────────────
 function playNotifSound() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -338,17 +337,14 @@ function playNotifSound() {
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime);           // La5 — note principale
-    osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.15); // descend vers Mi5
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.15);
     gain.gain.setValueAtTime(0.35, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.5);
-  } catch(e) {
-    // Web Audio non supporté — silencieux
-  }
+  } catch(e) {}
 }
-// ──────────────────────────────────────────────────────────────────
 
 async function sendWelcomeEmail(user, profile){
   try{
@@ -378,7 +374,6 @@ async function init(){
   if(!profile){window.location.href='login.html';return;}
 
   sendWelcomeEmail(currentUser, profile);
-
   Premium.init(profile);
   PointsConfig.load().then(() => PointsConfig.updateDOM());
 
@@ -442,16 +437,19 @@ async function init(){
   if(refInput) refInput.value=refLink;
 
   loadNotifications(totalVotes,avgNote);
-  initNotifications();
   renderVotersList();
   document.getElementById('loading').style.display='none';
+
+  // Lance les notifications APRÈS que tout est chargé
+  initNotifications();
 }
 
 function loadNotifications(totalVotes,avgNote){
   const notifs=[];
   if(totalVotes>0&&avgNote)notifs.push({icon:'⭐',text:`Vous avez <strong>${totalVotes} votes</strong> — note moyenne <strong>${avgNote}/10</strong>`,time:"Aujourd'hui",unread:true});
   if(totalVotes===0)notifs.push({icon:'📸',text:"Soumettez votre première photo pour commencer à recevoir des notes !",time:'Maintenant',unread:true});
-  const badge=document.getElementById('notif-badge');const list=document.getElementById('notif-list');
+  const badge=document.getElementById('notif-badge');
+  const list=document.getElementById('notif-list');
   const unreadCount=notifs.filter(n=>n.unread).length;
   if(unreadCount>0){badge.textContent=unreadCount;badge.style.display='flex';}
   else{badge.style.display='none';}
@@ -500,39 +498,31 @@ function showToast(msg,type){const t=document.getElementById('toast');t.textCont
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 
 // ── NOTIFICATIONS MESSAGES ────────────────────────────────────────
-// Garde en mémoire les IDs déjà vus pour détecter les vrais nouveaux messages
+// knownMessageIds = IDs déjà connus AU DÉMARRAGE (ne déclenchent pas de notif)
+// Seuls les IDs qui apparaissent APRÈS le démarrage déclenchent son + notif
 let knownMessageIds = new Set();
-let notifInitialized = false;
 
 async function initNotifications(){
   if(!('Notification'in window))return;
   if(Notification.permission==='default') await Notification.requestPermission();
 
-  // Première passe : charge les IDs existants sans notifier
-  await seedKnownMessages();
-  notifInitialized = true;
-
-// Lance immédiatement puis toutes les 30 secondes
-  checkNewMessages();
-  setInterval(checkNewMessages, 30000);
-}
-
-// Charge silencieusement les messages non lus existants au démarrage
-async function seedKnownMessages(){
-  if(!currentUser) return;
-  const { data } = await sb.from('messages')
+  // Étape 1 : charge les non-lus existants dans le Set ET met à jour le badge
+  const { data: existing } = await sb.from('messages')
     .select('id')
     .eq('receiver_id', currentUser.id)
     .eq('read', false);
-  if(data) data.forEach(m => knownMessageIds.add(m.id));
 
-  // Met à jour le badge avec le count initial
+  if(existing) existing.forEach(m => knownMessageIds.add(m.id));
+
+  // Étape 2 : affiche le badge avec le count réel
   updateMessageBadge(knownMessageIds.size);
+
+  // Étape 3 : poll toutes les 30s pour détecter les NOUVEAUX messages
+  setInterval(checkNewMessages, 30000);
 }
 
-// Vérifie les nouveaux messages et notifie pour chacun individuellement
 async function checkNewMessages(){
-  if(!currentUser || !notifInitialized) return;
+  if(!currentUser) return;
 
   const { data } = await sb.from('messages')
     .select('id, content, sender_id')
@@ -541,21 +531,21 @@ async function checkNewMessages(){
 
   if(!data) return;
 
-  // Trouve les vrais nouveaux messages (pas encore dans knownMessageIds)
+  // Nouveaux = présents dans Supabase mais pas encore dans notre Set
   const newMessages = data.filter(m => !knownMessageIds.has(m.id));
 
   if(newMessages.length > 0){
-    // Joue le son une seule fois pour tous les nouveaux messages
+    // Son unique pour tous les nouveaux messages
     playNotifSound();
 
-    // Envoie une notification par message si la page est en arrière-plan
+    // Une notification par message (arrière-plan uniquement)
     if(Notification.permission === 'granted' && document.hidden){
       newMessages.forEach(m => {
         const preview = m.content.length > 60 ? m.content.substring(0, 60) + '…' : m.content;
         const n = new Notification('💬 Nouveau message — SCOROVIA', {
           body: preview,
           icon: '/favicon.ico',
-          tag: `scorovia-msg-${m.id}`,   // tag unique = une notif par message
+          tag: `scorovia-msg-${m.id}`,
           renotify: true
         });
         n.onclick = () => { window.focus(); window.location.href = 'messages.html'; n.close(); };
@@ -566,11 +556,10 @@ async function checkNewMessages(){
     newMessages.forEach(m => knownMessageIds.add(m.id));
   }
 
-  // Met à jour le badge avec le total des non-lus
+  // Badge = total des non-lus actuels (y compris ceux déjà connus)
   updateMessageBadge(data.length);
 }
 
-// Affiche ou masque le badge selon le count
 function updateMessageBadge(count){
   const badge = document.querySelector('.mobile-bottom-nav li:nth-child(4) .mnav-badge');
   if(badge) badge.style.display = count > 0 ? 'block' : 'none';
