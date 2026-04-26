@@ -512,7 +512,8 @@ async function initNotifications(){
   await seedKnownMessages();
   notifInitialized = true;
 
-  // Puis poll toutes les 30 secondes
+// Lance immédiatement puis toutes les 30 secondes
+  checkNewMessages();
   setInterval(checkNewMessages, 30000);
 }
 
