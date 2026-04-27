@@ -508,9 +508,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 
 <script>
 const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+// Clé anon publique Supabase — conçue pour être visible côté client.
+// La sécurité repose sur les politiques RLS configurées dans Supabase.
 const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' ? url : null;
+  } catch { return null; }
+}
 
 const FALLBACK_TICKER = [
   { prenom: 'Marie', ville: 'Paris', note: 8.4, avatar: null },
@@ -572,14 +592,19 @@ async function buildTicker() {
   }
   const track = document.getElementById('ticker-track');
   const allItems = [...items, ...items];
-  track.innerHTML = allItems.map(item => `
+  track.innerHTML = allItems.map(item => {
+    const av = safeUrl(item.avatar);
+    const nom = escapeHtml(item.prenom);
+    const ville = escapeHtml(item.ville);
+    return `
     <div class="ticker-item">
-      <div class="t-av">${item.avatar ? `<img src="${item.avatar}" alt="${item.prenom}" loading="lazy">` : '👤'}</div>
-      <span class="t-name">${item.prenom}${item.ville ? ' · ' + item.ville : ''}</span>
+      <div class="t-av">${av ? `<img src="${av}" alt="${nom}" loading="lazy">` : '👤'}</div>
+      <span class="t-name">${nom}${ville ? ' · ' + ville : ''}</span>
       <div class="t-dot"></div>
       <div class="t-score">${item.note.toFixed(1)}/10</div>
     </div>
-  `).join('');
+  `;
+  }).join('');
   requestAnimationFrame(() => track.classList.add('animating'));
 }
 
@@ -588,7 +613,11 @@ async function buildProof() {
     const { data: users } = await sb.from('users').select('prenom, avatar_url').not('avatar_url', 'is', null).order('created_at', { ascending: false }).limit(5);
     if (!users || users.length === 0) return;
     const container = document.getElementById('proof-avatars');
-    container.innerHTML = users.map(u => `<div class="proof-av"><img src="${u.avatar_url}" alt="${u.prenom || ''}" loading="lazy"></div>`).join('');
+    container.innerHTML = users.map(u => {
+      const av = safeUrl(u.avatar_url);
+      const nom = escapeHtml(u.prenom);
+      return av ? `<div class="proof-av"><img src="${av}" alt="${nom}" loading="lazy"></div>` : '';
+    }).join('');
   } catch (e) {}
 }
 
@@ -600,7 +629,10 @@ async function buildMockPhone() {
       const nameEl = document.getElementById('mock-name1');
       const avEl = document.getElementById('mock-av1');
       if (nameEl) nameEl.textContent = u.prenom || 'Membre';
-      if (avEl && u.avatar_url) avEl.innerHTML = `<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      if (avEl && u.avatar_url) {
+        const av = safeUrl(u.avatar_url);
+        if (av) avEl.innerHTML = `<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      }
     }
   } catch (e) {}
 }
@@ -623,17 +655,21 @@ async function buildTestimonials() {
     grid.innerHTML = photos.map(p => {
       const u = p.users;
       const note = (Math.round(p.note_moyenne * 10) / 10).toFixed(1);
+      const av = safeUrl(u.avatar_url);
+      const nom = escapeHtml(u.prenom || 'Membre');
+      const ville = escapeHtml(u.ville || 'France');
+      const votes = Number(p.nb_votes);
       return `
         <div class="testi-card reveal">
           <div class="testi-header">
-            <div class="testi-av">${u.avatar_url ? `<img src="${u.avatar_url}" alt="${u.prenom}" loading="lazy">` : '👤'}</div>
+            <div class="testi-av">${av ? `<img src="${av}" alt="${nom}" loading="lazy">` : '👤'}</div>
             <div>
-              <div class="testi-name">${u.prenom || 'Membre'}</div>
-              <div class="testi-loc">${u.ville || 'France'}</div>
+              <div class="testi-name">${nom}</div>
+              <div class="testi-loc">${ville}</div>
             </div>
             <div style="margin-left:auto;text-align:right">
               <div class="testi-score">${note}</div>
-              <div class="testi-votes">${p.nb_votes} votes</div>
+              <div class="testi-votes">${votes} votes</div>
             </div>
           </div>
         </div>
@@ -679,7 +715,7 @@ document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
 PointsConfig.load().then(() => PointsConfig.updateDOM());
 
-Promise.all([loadCounter(), buildTicker(), buildProof(), buildMockPhone(), buildTestimonials()]);
+Promise.all([loadCounter(), buildTicker(), buildProof(), buildMockPhone(), buildTestimonials()]).catch(() => {});
 </script>
 </body>
 </html>
