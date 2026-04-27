@@ -428,9 +428,20 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 
 <script>
 const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+// Clé anon publique Supabase — conçue pour être visible côté client.
+// La sécurité repose sur les politiques RLS configurées dans Supabase.
 const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function safeUrl(url) {
+  if (!url) return null;
+  try { const u = new URL(url); return u.protocol === 'https:' ? url : null; } catch { return null; }
+}
 
 let currentUser = null;
 let userProfile = null;
@@ -572,7 +583,7 @@ async function doRate() {
       document.getElementById('pts-display').textContent = newPts;
       document.getElementById('user-pts').textContent = newPts;
       sessionPts += 1;
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error(e); showToast('❌ Erreur lors de l\'envoi du vote', ''); }
   } else {
     anonymousVotes++;
     const newVotes = (photo.nb_votes || 0) + 1;
@@ -651,12 +662,16 @@ function addToHistory(photo, score) {
   historyItems.unshift({ photo, score });
   if (historyItems.length > 5) historyItems.pop();
   const list = document.getElementById('history-list');
-  list.innerHTML = historyItems.map(item => `
+  list.innerHTML = historyItems.map(item => {
+    const av = safeUrl(item.photo.url);
+    const nom = escapeHtml(item.photo.users?.prenom || 'Anonyme');
+    return `
     <div class="history-row">
-      <div class="history-av">${item.photo.url ? `<img src="${item.photo.url}" alt="" />` : '👤'}</div>
-      <div class="history-name">${item.photo.users?.prenom || 'Anonyme'}</div>
+      <div class="history-av">${av ? `<img src="${av}" alt="" />` : '👤'}</div>
+      <div class="history-name">${nom}</div>
       <div class="history-score">${item.score}/10</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function closePopup() { document.getElementById('signup-popup').classList.remove('show'); }
