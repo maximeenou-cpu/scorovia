@@ -1188,7 +1188,7 @@
 <script>
   // ─── CONFIG ───────────────────────────────────────────────
   const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZGxjcXNtdXZhcWtvaGpxc2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDU4MzYsImV4cCI6MjA5MjE4MTgzNn0._1oxero_MGI2zEq07RUcmjq5Ifmf-uEcg_rVv9AXips';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZGxjcXNtdXZhcWtvaGpxc2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDU4MzYsImV4cCI6MjA5MjE4MTgzNn0._1oxero_MGI2zEq07RUcmjq5Ifmf-uEcg_rVv9AXips'; // Clé publique Supabase — sécurité assurée par RLS côté serveur
   const ADMIN_EMAIL = 'maxime.enou@gmail.com';
   const PAGE_SIZE = 20;
 
@@ -1293,22 +1293,24 @@
       tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun utilisateur</td></tr>';
       return;
     }
-    tbody.innerHTML = recentUsers.map(u => `
+    tbody.innerHTML = recentUsers.map(u => {
+      const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—'); const pc=escapeHtml(u.promo_code||'');
+      return `
       <tr>
         <td>
           <div style="display:flex;align-items:center">
-            <span class="avatar-circle">${u.avatar_url ? `<img src="${u.avatar_url}">` : '👤'}</span>
-            ${u.prenom || '—'}
+            <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
+            ${pr}
           </div>
         </td>
-        <td style="color:var(--muted);font-size:0.75rem">${u.email || '—'}</td>
-        <td>${u.ville || '—'}</td>
+        <td style="color:var(--muted);font-size:0.75rem">${em}</td>
+        <td>${vi}</td>
         <td>${u.points ?? 0} pts</td>
         <td>${u.is_premium ? '<span class="badge badge-premium">Premium</span>' : '—'}</td>
-        <td>${u.promo_code ? `<code style="color:var(--gold)">${u.promo_code}</code>` : '—'}</td>
+        <td>${pc ? `<code style="color:var(--gold)">${pc}</code>` : '—'}</td>
         <td>${formatDate(u.created_at)}</td>
       </tr>
-    `).join('');
+    `;}).join('');
   }
 
   function statCard(label, value, sub, color) {
@@ -1408,18 +1410,20 @@
       return;
     }
 
-    tbody.innerHTML = page.map(u => `
+    tbody.innerHTML = page.map(u => {
+      const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—'); const ge=escapeHtml(u.genre||'—');
+      return `
       <tr>
         <td>
           <div style="display:flex;align-items:center">
-            <span class="avatar-circle">${u.avatar_url ? `<img src="${u.avatar_url}">` : '👤'}</span>
-            <span>${u.prenom || '—'}</span>
+            <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
+            <span>${pr}</span>
             ${u.is_banned ? '<span class="badge badge-banned" style="margin-left:8px">Banni</span>' : ''}
           </div>
         </td>
-        <td style="color:var(--muted);font-size:0.75rem">${u.email || '—'}</td>
-        <td style="color:var(--muted)">${u.ville || '—'}</td>
-        <td style="color:var(--muted)">${u.genre || '—'}</td>
+        <td style="color:var(--muted);font-size:0.75rem">${em}</td>
+        <td style="color:var(--muted)">${vi}</td>
+        <td style="color:var(--muted)">${ge}</td>
         <td>
           <span style="color:var(--gold)">${u.points ?? 0}</span>
           <span style="color:var(--muted);font-size:0.7rem"> pts</span>
@@ -1432,8 +1436,8 @@
         <td>
           <button class="btn-toggle" onclick="openUserModal('${u.id}')">Détails</button>
         </td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
 
     renderUsersPagination();
   }
@@ -1481,9 +1485,9 @@
 
     const photosHtml = photos && photos.length ? `
       <div class="photos-grid">
-        ${photos.map(p => `
+        ${photos.map(p => { const pu=safeUrl(p.url); return `
           <div class="photo-thumb">
-            ${p.url ? `<img src="${p.url}" alt="photo">` : '<div style="width:100%;height:100%;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.7rem">Pas d\'image</div>'}
+            ${pu ? `<img src="${pu}" alt="photo">` : '<div style="width:100%;height:100%;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.7rem">Pas d\'image</div>'}
             <div class="photo-thumb-info">
               <span>★ ${(p.note_moyenne || 0).toFixed(1)}</span>
               <span>${p.nb_votes || 0} votes</span>
@@ -1492,7 +1496,7 @@
               ${p.active ? 'Active' : 'Off'}
             </span>
           </div>
-        `).join('')}
+        `;}).join('')}
       </div>
     ` : '<p style="color:var(--muted);font-size:0.8rem">Aucune photo</p>';
 
@@ -1519,7 +1523,7 @@
         </tr>
         ${pointsHistory.map(h => `
           <tr>
-            <td style="padding:6px 8px;border-bottom:1px solid var(--border)">${h.label || h.action || '—'}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid var(--border)">${escapeHtml(h.label || h.action || '—')}</td>
             <td style="padding:6px 8px;border-bottom:1px solid var(--border);color:${h.points >= 0 ? 'var(--green)' : 'var(--red)'}">
               ${h.points >= 0 ? '+' : ''}${h.points}
             </td>
@@ -1529,17 +1533,18 @@
       </table>
     ` : '<p style="color:var(--muted);font-size:0.8rem">Aucun historique</p>';
 
+    const uAv=safeUrl(user.avatar_url); const uPr=escapeHtml(user.prenom||'—'); const uEm=escapeHtml(user.email||'—'); const uVi=escapeHtml(user.ville||'—'); const uPc=escapeHtml(user.promo_code||'');
     document.getElementById('modal-user-body').innerHTML = `
       <!-- INFOS GÉNÉRALES -->
       <div class="modal-section">
         <div class="modal-section-title">Informations générales</div>
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
           <div style="width:56px;height:56px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);overflow:hidden;flex-shrink:0">
-            ${user.avatar_url ? `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">👤</div>'}
+            ${uAv ? `<img src="${uAv}" style="width:100%;height:100%;object-fit:cover">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">👤</div>'}
           </div>
           <div>
-            <div style="font-family:Syne,sans-serif;font-size:1.1rem;font-weight:700">${user.prenom || '—'}</div>
-            <div style="color:var(--muted);font-size:0.8rem">${user.email || '—'}</div>
+            <div style="font-family:Syne,sans-serif;font-size:1.1rem;font-weight:700">${uPr}</div>
+            <div style="color:var(--muted);font-size:0.8rem">${uEm}</div>
           </div>
           <div style="margin-left:auto;display:flex;gap:8px">
             ${user.is_premium ? '<span class="badge badge-premium">Premium</span>' : ''}
@@ -1549,11 +1554,11 @@
         <div class="info-grid">
           <div class="info-row">
             <span class="info-key">Ville</span>
-            <span class="info-val">${user.ville || '—'}</span>
+            <span class="info-val">${uVi}</span>
           </div>
           <div class="info-row">
             <span class="info-key">Code promo utilisé</span>
-            <span class="info-val">${user.promo_code ? `<code style="color:var(--gold)">${user.promo_code}</code>` : '—'}</span>
+            <span class="info-val">${uPc ? `<code style="color:var(--gold)">${uPc}</code>` : '—'}</span>
           </div>
           <div class="info-row">
             <span class="info-key">Inscrit le</span>
@@ -1688,18 +1693,20 @@
       return;
     }
 
-    grid.innerHTML = page.map(p => `
+    grid.innerHTML = page.map(p => {
+      const pu=safeUrl(p.url); const uAv=safeUrl(p.users?.avatar_url); const uPr=escapeHtml(p.users?.prenom||'—'); const uEm=escapeHtml(p.users?.email||'—');
+      return `
       <div class="photo-mod-card">
-        ${p.url ? `<img src="${p.url}" alt="photo" loading="lazy">` : '<div style="width:100%;height:200px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.8rem">Pas d\'image</div>'}
+        ${pu ? `<img src="${pu}" alt="photo" loading="lazy">` : '<div style="width:100%;height:200px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.8rem">Pas d\'image</div>'}
         <div class="photo-mod-card-body">
           <div class="photo-mod-meta">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
               <span class="avatar-circle" style="width:20px;height:20px">
-                ${p.users?.avatar_url ? `<img src="${p.users.avatar_url}">` : '👤'}
+                ${uAv ? `<img src="${uAv}">` : '👤'}
               </span>
-              <span style="color:var(--text)">${p.users?.prenom || '—'}</span>
+              <span style="color:var(--text)">${uPr}</span>
             </div>
-            <div>${p.users?.email || '—'}</div>
+            <div>${uEm}</div>
             <div>★ ${(p.note_moyenne || 0).toFixed(1)} · ${p.nb_votes || 0} votes</div>
             <div>${formatDate(p.created_at)}</div>
             <div><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Active' : 'Désactivée'}</span></div>
@@ -1711,7 +1718,7 @@
           </div>
         </div>
       </div>
-    `).join('');
+    `;}).join('');
 
     renderPhotosPagination();
   }
@@ -1796,13 +1803,15 @@
 
     wrap.innerHTML = `<div>` + filteredConversations.map(c => {
       const lastMsg = c.messages[0];
-      const preview = lastMsg ? lastMsg.content.substring(0, 60) + (lastMsg.content.length > 60 ? '...' : '') : '';
+      const rawPreview = lastMsg ? lastMsg.content.substring(0, 60) + (lastMsg.content.length > 60 ? '...' : '') : '';
+      const preview = escapeHtml(rawPreview);
+      const p1 = escapeHtml(c.user1?.prenom || 'Inconnu'); const p2 = escapeHtml(c.user2?.prenom || 'Inconnu');
       return `
         <div class="conv-item" onclick="openConvModal('${c.key}')">
           ${c.unread > 0 ? '<div class="unread-dot"></div>' : '<div style="width:8px;flex-shrink:0"></div>'}
           <div class="conv-names">
             <div style="font-size:0.85rem">
-              ${c.user1?.prenom || 'Inconnu'} <span style="color:var(--muted)">↔</span> ${c.user2?.prenom || 'Inconnu'}
+              ${p1} <span style="color:var(--muted)">↔</span> ${p2}
             </div>
             <div class="conv-preview">${preview}</div>
           </div>
@@ -1820,6 +1829,8 @@
     const conv = allConversations.find(c => c.key === convKey);
     if (!conv) return;
 
+    const cp1=escapeHtml(conv.user1?.prenom||'Inconnu'); const cp2=escapeHtml(conv.user2?.prenom||'Inconnu');
+    const ce1=escapeHtml(conv.user1?.email||'—'); const ce2=escapeHtml(conv.user2?.email||'—');
     document.getElementById('conv-modal-title').textContent =
       `${conv.user1?.prenom || 'Inconnu'} ↔ ${conv.user2?.prenom || 'Inconnu'}`;
     document.getElementById('conv-modal').classList.add('open');
@@ -1832,10 +1843,10 @@
       </div>
       <div style="margin-bottom:8px;font-size:0.75rem;color:var(--muted)">
         <span style="display:inline-block;width:12px;height:12px;background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.2);margin-right:4px"></span>
-        ${conv.user1?.prenom || 'Inconnu'} (${conv.user1?.email || '—'})
+        ${cp1} (${ce1})
         &nbsp;&nbsp;
         <span style="display:inline-block;width:12px;height:12px;background:var(--bg2);border:1px solid var(--border);margin-right:4px"></span>
-        ${conv.user2?.prenom || 'Inconnu'} (${conv.user2?.email || '—'})
+        ${cp2} (${ce2})
       </div>
       <div class="messages-thread">
         ${sorted.map(m => `
@@ -1876,23 +1887,25 @@
     if (!premiums || !premiums.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="loader">Aucun abonné</td></tr>';
     } else {
-      tbody.innerHTML = premiums.map(u => `
+      tbody.innerHTML = premiums.map(u => {
+        const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—');
+        return `
         <tr>
           <td>
             <div style="display:flex;align-items:center">
-              <span class="avatar-circle">${u.avatar_url ? `<img src="${u.avatar_url}">` : '👤'}</span>
-              ${u.prenom || '—'}
+              <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
+              ${pr}
             </div>
           </td>
-          <td style="color:var(--muted);font-size:0.75rem">${u.email || '—'}</td>
+          <td style="color:var(--muted);font-size:0.75rem">${em}</td>
           <td style="color:var(--muted);font-size:0.75rem">${u.premium_since ? formatDate(u.premium_since) : formatDate(u.created_at)}</td>
           <td><span style="color:var(--gold)">${u.points ?? 0}</span> pts</td>
-          <td>${u.ville || '—'}</td>
+          <td>${vi}</td>
           <td>
             <button class="btn-danger" onclick="revokePremium('${u.id}')">Révoquer</button>
           </td>
         </tr>
-      `).join('');
+      `;}).join('');
     }
 
   }
@@ -1911,15 +1924,17 @@
     const grid = document.getElementById('config-grid');
     if (!data) { grid.innerHTML = '<div class="loader">Erreur</div>'; return; }
 
-    grid.innerHTML = data.map(cfg => `
+    grid.innerHTML = data.map(cfg => {
+      const lbl=escapeHtml(cfg.label||'');
+      return `
       <div class="config-card">
-        <div class="config-label">${cfg.label}</div>
+        <div class="config-label">${lbl}</div>
         <div class="config-input-wrap">
           <input class="config-input" type="number" value="${cfg.points}" id="cfg-${cfg.id}">
-          <button class="btn-save-config" onclick="savePointsConfig('${cfg.id}', '${cfg.label}')">OK</button>
+          <button class="btn-save-config" onclick="savePointsConfig('${cfg.id}', '${lbl}')">OK</button>
         </div>
       </div>
-    `).join('');
+    `;}).join('');
   }
 
   async function savePointsConfig(id, label) {
@@ -1938,17 +1953,19 @@
       tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun code créé</td></tr>';
       return;
     }
-    tbody.innerHTML = data.map(p => `
+    tbody.innerHTML = data.map(p => {
+      const pc=escapeHtml(p.code||''); const pn=escapeHtml(p.influencer_name||'—');
+      return `
       <tr>
-        <td><code style="color:var(--gold);font-size:0.9rem">${p.code}</code></td>
-        <td>${p.influencer_name}</td>
+        <td><code style="color:var(--gold);font-size:0.9rem">${pc}</code></td>
+        <td>${pn}</td>
         <td>+${p.points_bonus} pts</td>
         <td>${p.uses}</td>
         <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Actif' : 'Désactivé'}</span></td>
         <td>${formatDate(p.created_at)}</td>
         <td><button class="btn-toggle" onclick="togglePromo('${p.id}', ${p.active})">${p.active ? 'Désactiver' : 'Activer'}</button></td>
       </tr>
-    `).join('');
+    `;}).join('');
   }
 
   async function createPromoCode() {
@@ -1985,23 +2002,25 @@
       tbody.innerHTML = '<tr><td colspan="5" class="loader">Aucun signalement</td></tr>';
       return;
     }
-    tbody.innerHTML = data.map(r => `
+    tbody.innerHTML = data.map(r => {
+      const pu=safeUrl(r.photos?.url); const rp=escapeHtml(r.reporter?.prenom||'—'); const re=escapeHtml(r.reporter?.email||''); const ra=escapeHtml(r.raison||'—');
+      return `
       <tr>
         <td>
-          ${r.photos?.url ? `<img src="${r.photos.url}" style="width:56px;height:56px;object-fit:cover;border:1px solid var(--border)">` : '—'}
+          ${pu ? `<img src="${pu}" style="width:56px;height:56px;object-fit:cover;border:1px solid var(--border)">` : '—'}
         </td>
         <td style="color:var(--muted);font-size:0.75rem">
-          ${r.reporter?.prenom || '—'}<br>
-          <span style="font-size:0.65rem">${r.reporter?.email || ''}</span>
+          ${rp}<br>
+          <span style="font-size:0.65rem">${re}</span>
         </td>
-        <td>${r.raison || '—'}</td>
+        <td>${ra}</td>
         <td>${formatDate(r.created_at)}</td>
         <td style="display:flex;gap:8px">
           <button class="btn-danger" onclick="deletePhoto('${r.photo_id}', '${r.id}')">Supprimer photo</button>
           <button class="btn-toggle" onclick="dismissReport('${r.id}')">Ignorer</button>
         </td>
       </tr>
-    `).join('');
+    `;}).join('');
   }
 
   async function deletePhoto(photoId, reportId) {
@@ -2030,9 +2049,10 @@
   }
 
   function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    if (str == null) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
+  function safeUrl(url) { if (!url) return null; try { const u = new URL(url); return u.protocol === 'https:' ? url : null; } catch { return null; } }
 
   let toastTimer;
   function showToast(msg, isError = false) {
