@@ -273,9 +273,11 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 
 <script>
 const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
-const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
+const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w'; // Clé publique Supabase — sécurité assurée par RLS côté serveur
 const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+function escapeHtml(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}}
 
 const STRIPE_LINKS={
   100:'https://buy.stripe.com/4gM14maE62mh5ms7Ua4wM00',
@@ -302,7 +304,8 @@ async function init(){
   PointsConfig.updateDOM();
 
   const avEl=document.getElementById('user-avatar');
-  if(profile.avatar_url){avEl.innerHTML=`<img src="${profile.avatar_url}" />`;}
+  const avatarSafe=safeUrl(profile.avatar_url);
+  if(avatarSafe){avEl.innerHTML=`<img src="${avatarSafe}" />`;}
   else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
 
   document.getElementById('user-name').textContent=profile.prenom||'Membre';
@@ -394,7 +397,7 @@ async function loadHistory(){
   list.innerHTML=data.map(item=>{
     const meta=icons[item.action]||{icon:'⚡',bg:'rgba(245,200,66,0.1)'};
     const dateStr=new Date(item.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    return `<div class="history-item"><div class="h-icon" style="background:${meta.bg}">${meta.icon}</div><div class="h-info"><div class="h-title">${item.action}</div><div class="h-date">${dateStr}</div></div><div class="h-pts ${item.points>0?'plus':'minus'}">${item.points>0?'+':''}${item.points} pts</div></div>`;
+    return `<div class="history-item"><div class="h-icon" style="background:${meta.bg}">${meta.icon}</div><div class="h-info"><div class="h-title">${escapeHtml(item.action)}</div><div class="h-date">${dateStr}</div></div><div class="h-pts ${item.points>0?'plus':'minus'}">${item.points>0?'+':''}${item.points} pts</div></div>`;
   }).join('');
 }
 
