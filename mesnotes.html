@@ -338,10 +338,12 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 
 <script>
 const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
-const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
+const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w'; // Clé publique Supabase — sécurité assurée par RLS côté serveur
 const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userProfile=null,selectedFile=null;
+function escapeHtml(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}}
 
 async function init(){
   const{data:{session}}=await sb.auth.getSession();
@@ -355,7 +357,8 @@ async function init(){
   const prenom=profile.prenom||'Membre';
   // ✅ Photo de profil dans la sidebar
   const avEl=document.getElementById('user-avatar');
-  if(profile.avatar_url){avEl.innerHTML=`<img src="${profile.avatar_url}" />`;}
+  const avatarSafe=safeUrl(profile.avatar_url);
+  if(avatarSafe){avEl.innerHTML=`<img src="${avatarSafe}" />`;}
   else{avEl.textContent=prenom.charAt(0).toUpperCase();}
   document.getElementById('user-name').textContent=prenom;
   document.getElementById('user-pts').textContent=profile.points;
@@ -390,15 +393,16 @@ async function loadPhotos(){
     const score=photo.note_moyenne&&photo.nb_votes>0?parseFloat(photo.note_moyenne).toFixed(1):'—';
     const votes=photo.nb_votes||0;
     const pct=photo.note_moyenne&&votes>0?(photo.note_moyenne/10*100).toFixed(0):0;
+    const photoUrl=safeUrl(photo.url)||'';
     return `<div class="photo-card">
       <div class="photo-thumb">
-        ${photo.url?`<img src="${photo.url}" alt="Photo" />`:'📸'}
+        ${photoUrl?`<img src="${photoUrl}" alt="Photo" />`:'📸'}
         <div class="photo-status-badge ${photo.active?'badge-active':'badge-pending'}">${photo.active?'● Active':'⏳ En attente'}</div>
         <div class="photo-votes-overlay">
           <div class="photo-score-big">${score!=='—'?score+'/10':'—'}</div>
           <div class="photo-votes-count">${votes} vote${votes>1?'s':''}</div>
         </div>
-        ${votes>0?`<button class="btn-see-voters" onclick="openVotersPanel('${photo.id}','${photo.url||''}',${votes})">👥 ${votes} votant${votes>1?'s':''}</button>`:''}
+        ${votes>0?`<button class="btn-see-voters" onclick="openVotersPanel('${photo.id}','${photoUrl}',${votes})">👥 ${votes} votant${votes>1?'s':''}</button>`:''}
       </div>
       <div class="photo-info">
         <div class="score-bar-wrap">
@@ -407,7 +411,7 @@ async function loadPhotos(){
         </div>
         <div class="photo-actions">
           <button class="btn-photo-action btn-share" onclick="sharePhoto('${photo.id}')">📤 Partager</button>
-          <button class="btn-photo-action btn-delete" onclick="deletePhoto('${photo.id}','${photo.url}')">🗑️ Supprimer</button>
+          <button class="btn-photo-action btn-delete" onclick="deletePhoto('${photo.id}','${photoUrl}')">🗑️ Supprimer</button>
         </div>
       </div>
     </div>`;
@@ -516,11 +520,13 @@ async function openVotersPanel(photoId,photoUrl,nbVotes){
     const color=colors[i%colors.length];
     const va=voterAvgs[v.voter_id];const voterAvg=va&&va.n>0?(va.sum/va.n).toFixed(1):null;const avgColor=voterAvg>=8?'var(--green)':voterAvg>=6?'var(--gold2)':'var(--pink)';
     if(isUnlocked&&profile){
-      const meta=[profile.ville,profile.age?profile.age+' ans':null].filter(Boolean).join(' · ');
-      const avContent=profile.avatar_url?`<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:(profile.prenom||'?').charAt(0).toUpperCase();
+      const meta=[escapeHtml(profile.ville||''),profile.age?profile.age+' ans':null].filter(Boolean).join(' · ');
+      const safeAv=safeUrl(profile.avatar_url);
+      const avContent=safeAv?`<img src="${safeAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:(profile.prenom||'?').charAt(0).toUpperCase();
+      const displayName=escapeHtml(profile.prenom||'Membre');
       return `<div class="voter-panel-row" style="border:1px solid rgba(34,212,160,0.2);">
         <div class="voter-panel-av" style="background:linear-gradient(135deg,var(--gold),var(--pink))">${avContent}</div>
-        <div class="voter-panel-info"><div class="voter-panel-name">${profile.prenom||'Membre'}${window._isPremium?' <span style="font-size:10px;color:var(--gold2)">★</span>':''}</div><div class="voter-panel-meta">${meta||'Membre SCOROVIA'} · ${ago}</div></div>
+        <div class="voter-panel-info"><div class="voter-panel-name">${displayName}${window._isPremium?' <span style="font-size:10px;color:var(--gold2)">★</span>':''}</div><div class="voter-panel-meta">${meta||'Membre SCOROVIA'} · ${ago}</div></div>
         <div class="voter-panel-score" style="color:${sc}">${v.note}/10</div>
         <div style="margin-left:8px;"><button class="btn-panel-msg" onclick="goToConversation('${v.voter_id}')" style="font-size:11px;padding:5px 10px;">💬</button></div>
       </div>`;
@@ -544,7 +550,8 @@ async function unlockVoterPanel(voterId,rowIndex){
       const row=document.getElementById(`vpr-${rowIndex}`);
       if(row){
         const avEl=row.querySelector('.voter-panel-av');const nameEl=row.querySelector('.voter-panel-name');const metaEl=row.querySelector('.voter-panel-meta');const overlay=document.getElementById(`vpu-${rowIndex}`);
-        const avContent=voter.avatar_url?`<img src="${voter.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:(voter.prenom||'?').charAt(0).toUpperCase();
+        const safeAvUp=safeUrl(voter.avatar_url);
+        const avContent=safeAvUp?`<img src="${safeAvUp}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:(voter.prenom||'?').charAt(0).toUpperCase();
         if(avEl){avEl.innerHTML=avContent;avEl.classList.remove('blurred');avEl.style.background='linear-gradient(135deg,var(--gold),var(--pink))';}
         if(nameEl){nameEl.textContent=voter.prenom||'Membre';nameEl.classList.remove('blurred');}
         if(metaEl){metaEl.textContent=[voter.ville,voter.age?voter.age+' ans':null].filter(Boolean).join(' · ')||'Membre SCOROVIA';}
@@ -599,13 +606,15 @@ async function loadVoters(){
     const sc=v.note>=8?'var(--green)':v.note>=6?'var(--gold2)':'var(--pink)';
     if(window._isPremium){
       const p=premiumProfiles[v.voter_id];
-      const bgContent=p?.avatar_url?`<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;" />`:`<span style="font-size:48px;filter:none">${(p?.prenom||'?').charAt(0).toUpperCase()}</span>`;
-      const meta=p?[p.ville,p.age?p.age+' ans':null].filter(Boolean).join(' · '):'';
+      const pAv=safeUrl(p?.avatar_url);
+      const bgContent=pAv?`<img src="${pAv}" style="width:100%;height:100%;object-fit:cover;" />`:`<span style="font-size:48px;filter:none">${(p?.prenom||'?').charAt(0).toUpperCase()}</span>`;
+      const pName=escapeHtml(p?.prenom||'Membre');
+      const meta=p?[escapeHtml(p.ville||''),p.age?p.age+' ans':null].filter(Boolean).join(' · '):'';
       return `<div class="voter-card" id="voter-card-${i}" style="border:1px solid rgba(34,212,160,0.2);" onclick="goToConversation('${v.voter_id}')">
         <div class="voter-card-bg revealed">${bgContent}</div>
         <div class="voter-card-overlay">
           <div class="voter-card-score" style="color:${sc}">${v.note}/10</div>
-          <div class="voter-card-name revealed">${p?.prenom||'Membre'} <span style="font-size:10px;color:var(--gold2)">★</span></div>
+          <div class="voter-card-name revealed">${pName} <span style="font-size:10px;color:var(--gold2)">★</span></div>
           <div class="voter-card-meta">${meta||'Membre SCOROVIA'}</div>
         </div>
       </div>`;
@@ -631,7 +640,8 @@ async function unlockVoterFromNotes(i){
     const{data:voter}=await sb.from('users').select('prenom,ville,age,genre,avatar_url').eq('id',vi.voterId).single();
     if(voter){
       const bgEl=document.getElementById(`voter-bg-${i}`);const nameEl=document.getElementById(`voter-name-${i}`);const metaEl=document.getElementById(`voter-meta-${i}`);const lockEl=document.getElementById(`voter-lock-${i}`);const cardEl=document.getElementById(`voter-card-${i}`);
-      if(bgEl){bgEl.innerHTML=voter.avatar_url?`<img src="${voter.avatar_url}" style="width:100%;height:100%;object-fit:cover;" />`:`<span style="font-size:48px">${(voter.prenom||'?').charAt(0).toUpperCase()}</span>`;bgEl.classList.add('revealed');}
+      const safeAvR=safeUrl(voter.avatar_url);
+    if(bgEl){bgEl.innerHTML=safeAvR?`<img src="${safeAvR}" style="width:100%;height:100%;object-fit:cover;" />`:`<span style="font-size:48px">${(voter.prenom||'?').charAt(0).toUpperCase()}</span>`;bgEl.classList.add('revealed');}
       if(nameEl){nameEl.textContent=voter.prenom||'Membre';nameEl.classList.add('revealed');}
       if(metaEl)metaEl.textContent=[voter.ville,voter.age?voter.age+' ans':null].filter(Boolean).join(' · ');
       if(lockEl)lockEl.classList.add('hidden');
@@ -650,7 +660,8 @@ async function unlockVoterFromNotes(i){
   const{data:voter}=await sb.from('users').select('prenom,ville,age,genre,avatar_url').eq('id',vi.voterId).single();
   if(voter){
     const bgEl=document.getElementById(`voter-bg-${i}`);const nameEl=document.getElementById(`voter-name-${i}`);const metaEl=document.getElementById(`voter-meta-${i}`);const lockEl=document.getElementById(`voter-lock-${i}`);const cardEl=document.getElementById(`voter-card-${i}`);
-    if(bgEl){bgEl.innerHTML=voter.avatar_url?`<img src="${voter.avatar_url}" style="width:100%;height:100%;object-fit:cover;" />`:`<span style="font-size:48px">${(voter.prenom||'?').charAt(0).toUpperCase()}</span>`;bgEl.classList.add('revealed');}
+    const safeAvR=safeUrl(voter.avatar_url);
+    if(bgEl){bgEl.innerHTML=safeAvR?`<img src="${safeAvR}" style="width:100%;height:100%;object-fit:cover;" />`:`<span style="font-size:48px">${(voter.prenom||'?').charAt(0).toUpperCase()}</span>`;bgEl.classList.add('revealed');}
     if(nameEl){nameEl.textContent=voter.prenom||'Membre';nameEl.classList.add('revealed');}
     if(metaEl)metaEl.textContent=[voter.ville,voter.age?voter.age+' ans':null,voter.genre==='homme'?'👨':voter.genre==='femme'?'👩':null].filter(Boolean).join(' · ');
     if(lockEl)lockEl.innerHTML=`<button class="btn-voter-msg" onclick="goToConversation('${vi.voterId}')">💬 Envoyer un message · -20 pts</button>`;
