@@ -309,6 +309,8 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;h
 
 <script>
 const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+// Clé anon publique Supabase — conçue pour être visible côté client.
+// La sécurité repose sur les politiques RLS configurées dans Supabase.
 const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
 const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -352,7 +354,8 @@ async function init(){
   isPremium=Premium.init(profile);
 
   const avEl=document.getElementById('user-avatar');
-  if(profile.avatar_url){avEl.innerHTML=`<img src="${profile.avatar_url}" />`;}
+  const avSb=safeUrl(profile.avatar_url);
+  if(avSb){avEl.innerHTML=`<img src="${avSb}" />`;}
   else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
 
   document.getElementById('user-name').textContent=profile.prenom||'Membre';
@@ -479,13 +482,15 @@ function renderConvList(convs){
   list.innerHTML=convs.map(conv=>{
     const sc=conv.note?(conv.note>=8?'var(--green)':conv.note>=6?'var(--gold2)':'var(--pink)'):'var(--muted)';
     const timeStr=timeAgo(conv.lastActivityDate);
-    const preview=conv.lastMsg
+    const rawPreview=conv.lastMsg
       ?conv.lastMsg.content.substring(0,36)+(conv.lastMsg.content.length>36?'…':'')
       :(conv.isVoter?`A voté ${conv.note}/10 pour vous`:'Nouveau message');
-    const avatarContent=conv.avatarUrl
-      ?`<img src="${conv.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
+    const preview=escapeHtml(rawPreview);
+    const convAv=safeUrl(conv.avatarUrl);
+    const avatarContent=convAv
+      ?`<img src="${convAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
       :(conv.isUnlocked?(conv.displayName||conv.fakeName).charAt(0).toUpperCase():'👤');
-    const displayName=conv.isUnlocked?(conv.displayName||conv.fakeName):conv.fakeName;
+    const displayName=escapeHtml(conv.isUnlocked?(conv.displayName||conv.fakeName):conv.fakeName);
 
     if(conv.isUnlocked){
       return `<div class="conv-item ${activeConvId===conv.id?'active':''}" onclick="openConv('${conv.id}')">
@@ -636,18 +641,19 @@ function renderChatArea(conv,messages){
   const vp=conv.voterProfile;
   const photos=conv.voterPhotos||[];
   const avgNote=photos.length>0?(photos.reduce((s,p)=>s+(p.note_moyenne||0),0)/photos.length).toFixed(1):null;
-  const metaParts=[vp?.genre==='homme'?'👨 Homme':vp?.genre==='femme'?'👩 Femme':vp?.genre==='autre'?'🧑 Autre':null,vp?.ville,vp?.age?vp.age+' ans':null].filter(Boolean);
+  const metaParts=[vp?.genre==='homme'?'👨 Homme':vp?.genre==='femme'?'👩 Femme':vp?.genre==='autre'?'🧑 Autre':null,vp?.ville?escapeHtml(vp.ville):null,vp?.age?vp.age+' ans':null].filter(Boolean);
   const photosHtml=photos.length>0
-    ?photos.map(p=>`<img class="profile-reveal-photo" src="${p.url}" alt="" title="${p.note_moyenne?parseFloat(p.note_moyenne).toFixed(1)+'/10':'—'}" onclick="openPhotoModal('${p.url}',${p.note_moyenne||0},${p.nb_votes||0})" />`).join('')
+    ?photos.map(p=>{const pu=safeUrl(p.url);return pu?`<img class="profile-reveal-photo" src="${pu}" alt="" title="${p.note_moyenne?parseFloat(p.note_moyenne).toFixed(1)+'/10':'—'}" onclick="openPhotoModal('${pu}',${p.note_moyenne||0},${p.nb_votes||0})" />`:'';}).join('')
     :`<div style="font-size:12px;color:var(--muted);padding:8px 0">Aucune photo active</div>`;
   const totalVotes=photos.reduce((s,p)=>s+(p.nb_votes||0),0);
-  const displayName=conv.voterProfile?.prenom||conv.displayName||conv.fakeName;
-  const avatarContent=conv.voterProfile?.avatar_url?`<img src="${conv.voterProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:(conv.isUnlocked?displayName.charAt(0).toUpperCase():'👤');
+  const displayName=escapeHtml(conv.voterProfile?.prenom||conv.displayName||conv.fakeName);
+  const voterAv=safeUrl(conv.voterProfile?.avatar_url);
+  const avatarContent=voterAv?`<img src="${voterAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:(conv.isUnlocked?displayName.charAt(0).toUpperCase():'👤');
   const profileBannerHtml=conv.isUnlocked&&vp?`
     <div class="profile-reveal-banner">
       <div class="profile-reveal-photos">${photosHtml}</div>
       <div class="profile-reveal-info">
-        <div class="profile-reveal-name">${vp?.prenom||conv.displayName}</div>
+        <div class="profile-reveal-name">${escapeHtml(vp?.prenom||conv.displayName)}</div>
         <div class="profile-reveal-meta">${metaParts.join(' · ')||'France'} · ${totalVotes} vote${totalVotes>1?'s':''} reçu${totalVotes>1?'s':''}</div>
       </div>
       ${avgNote?`<div style="text-align:center"><div class="profile-reveal-score">${avgNote}</div><div class="profile-reveal-score-label">/10 — Note moy.</div></div>`:''}
@@ -665,7 +671,7 @@ function renderChatArea(conv,messages){
 
   area.innerHTML=`
     <div class="chat-header">
-      <div class="chat-av" style="background:${conv.avColor};cursor:pointer;" onclick="openAvatarModal(this.dataset.av,this.dataset.name,this.dataset.note)" data-av="${conv.voterProfile?.avatar_url||''}" data-name="${(conv.voterProfile?.prenom||conv.displayName||conv.fakeName)}" data-note="${conv.note?conv.note+'/10':''}">${avatarContent}</div>
+      <div class="chat-av" style="background:${conv.avColor};cursor:pointer;" onclick="openAvatarModal(this.dataset.av,this.dataset.name,this.dataset.note)" data-av="${voterAv||''}" data-name="${displayName}" data-note="${conv.note?conv.note+'/10':''}">${avatarContent}</div>
       <div><div class="chat-name">${displayName}</div><div class="chat-sub">${conv.isUnlocked&&vp?(metaParts.join(' · ')||'Membre SCOROVIA'):'Profil anonyme'}</div></div>
       <div class="chat-score-badge">${scoreBadge}</div>
     </div>
@@ -691,8 +697,10 @@ function renderMessage(m,myInitial,conv){
   const time=new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   const theirName=conv.voterProfile?.prenom||conv.displayName||conv.fakeName;
   const theirAvUrl=conv.voterProfile?.avatar_url||null;
-  const theirAvatar=theirAvUrl?`<img src="${theirAvUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:theirName.charAt(0).toUpperCase();
-  const myAvatar=userProfile.avatar_url?`<img src="${userProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:myInitial;
+  const safeTheirAv=safeUrl(theirAvUrl);
+  const theirAvatar=safeTheirAv?`<img src="${safeTheirAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:theirName.charAt(0).toUpperCase();
+  const safeMyAv=safeUrl(userProfile.avatar_url);
+  const myAvatar=safeMyAv?`<img src="${safeMyAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`:myInitial;
   let statusHtml='';
   if(isMe){
     statusHtml=m.read
@@ -701,7 +709,7 @@ function renderMessage(m,myInitial,conv){
   }
   // Avatar flouté si profil non déverrouillé
   const theirAvStyle = conv.isUnlocked ? '' : 'filter:blur(4px);';
-  const theirAvClick=conv.isUnlocked?`onclick="openAvatarModal('${theirAvUrl||''}','${theirName.replace(/'/g,"\\'")}','${conv.note?conv.note+'/10':''}')"` :'';
+  const theirAvClick=conv.isUnlocked?`onclick="openAvatarModal('${safeTheirAv||''}','${theirName.replace(/'/g,"\\'")}','${conv.note?conv.note+'/10':''}')"` :'';
   return `<div class="msg-bubble-wrap ${isMe?'me':''}">
     <div class="msg-av-small" style="background:${isMe?'linear-gradient(135deg,var(--gold),var(--pink))':conv.avColor};${!isMe?'cursor:pointer;':''};${!isMe?theirAvStyle:''}" ${!isMe?theirAvClick:''}>${isMe?myAvatar:(conv.isUnlocked?theirAvatar:'👤')}</div>
     <div><div class="msg-bubble ${isMe?'me':'them'}">${escapeHtml(m.content)}</div><div class="msg-time">${time}</div>${statusHtml}</div>
@@ -830,7 +838,8 @@ function handleMsgKey(e){
   }
 }
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
-function escapeHtml(str){return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escapeHtml(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}}
 function timeAgo(dateStr){
   const diff=Math.floor((Date.now()-new Date(dateStr))/1000);
   if(diff<60)return 'À l\'instant';
@@ -894,8 +903,9 @@ function openAvatarModal(avatarUrl,name,note){
   const content=document.getElementById('avatar-modal-content');
   document.getElementById('avatar-modal-name').textContent=name;
   document.getElementById('avatar-modal-note').textContent=note?'A donné '+note:'';
-  if(avatarUrl){content.innerHTML=`<img class="avatar-modal-img" src="${avatarUrl}" alt="${name}" />`;}
-  else{content.innerHTML=`<div class="avatar-modal-initial">${name.charAt(0).toUpperCase()}</div>`;}
+  const av=safeUrl(avatarUrl);
+  if(av){content.innerHTML=`<img class="avatar-modal-img" src="${av}" alt="${escapeHtml(name)}" />`;}
+  else{content.innerHTML=`<div class="avatar-modal-initial">${escapeHtml(name.charAt(0).toUpperCase())}</div>`;}
   modal.classList.add('open');
 }
 function closeAvatarModal(){document.getElementById('avatar-modal').classList.remove('open');}
