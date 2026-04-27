@@ -323,10 +323,21 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 
 <script>
 const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+// Clé anon publique Supabase — conçue pour être visible côté client.
+// La sécurité repose sur les politiques RLS configurées dans Supabase.
 const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
 const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userVotes=[];
+
+function escapeHtml(str){
+  if(str==null)return'';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function safeUrl(url){
+  if(!url)return null;
+  try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}
+}
 
 // ── SON DE NOTIFICATION ───────────────────────────────────────────
 function playNotifSound() {
@@ -354,6 +365,7 @@ async function sendWelcomeEmail(user, profile){
       method:'POST',
       headers:{
         'Content-Type':'application/json',
+        // Clé anon requise pour authentifier les appels aux Edge Functions Supabase
         'Authorization':'Bearer sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w',
         'apikey':'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w'
       },
@@ -409,7 +421,8 @@ async function init(){
   const pts=profile.points||0;
 
   const avEl=document.getElementById('user-avatar');
-  if(profile.avatar_url){avEl.innerHTML=`<img src="${profile.avatar_url}" />`;}
+  const av=safeUrl(profile.avatar_url);
+  if(av){avEl.innerHTML=`<img src="${av}" />`;}
   else{avEl.textContent=prenom.charAt(0).toUpperCase();}
 
   document.getElementById('user-name').textContent=prenom+(profile.ville?` · ${profile.ville}`:'');
