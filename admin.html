@@ -1214,25 +1214,29 @@
   }
 
   async function logout() {
-    await sb.auth.signOut();
+    try { await sb.auth.signOut(); } catch (e) { console.error('[admin] logout:', e); }
     location.reload();
   }
 
   async function checkAuth() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) return;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return;
 
-    const email = session.user.email;
-    if (email !== ADMIN_EMAIL) {
-      document.getElementById('auth-error').style.display = 'block';
-      await sb.auth.signOut();
-      return;
+      const email = session.user.email;
+      if (email !== ADMIN_EMAIL) {
+        document.getElementById('auth-error').style.display = 'block';
+        await sb.auth.signOut();
+        return;
+      }
+
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('admin-app').style.display = 'block';
+      document.getElementById('admin-email').textContent = email;
+      loadStats();
+    } catch (e) {
+      console.error('[admin] checkAuth:', e);
     }
-
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('admin-app').style.display = 'block';
-    document.getElementById('admin-email').textContent = email;
-    loadStats();
   }
 
   // ─── NAVIGATION ───────────────────────────────────────────
@@ -1253,64 +1257,69 @@
 
   // ─── STATS ────────────────────────────────────────────────
   async function loadStats() {
-    const [
-      { count: totalUsers },
-      { count: totalVotes },
-      { count: totalPhotos },
-      { count: totalMessages },
-      { count: totalReports },
-      { count: premiumUsers },
-      { data: pointsData },
-      { data: recentUsers }
-    ] = await Promise.all([
-      sb.from('users').select('*', { count: 'exact', head: true }),
-      sb.from('votes').select('*', { count: 'exact', head: true }),
-      sb.from('photos').select('*', { count: 'exact', head: true }).eq('active', true),
-      sb.from('messages').select('*', { count: 'exact', head: true }),
-      sb.from('reports').select('*', { count: 'exact', head: true }),
-      sb.from('users').select('*', { count: 'exact', head: true }).eq('is_premium', true),
-      sb.from('points_history').select('points'),
-      sb.from('users')
-        .select('id, email, prenom, ville, points, is_premium, promo_code, created_at, avatar_url')
-        .order('created_at', { ascending: false })
-        .limit(10)
-    ]);
+    try {
+      const [
+        { count: totalUsers },
+        { count: totalVotes },
+        { count: totalPhotos },
+        { count: totalMessages },
+        { count: totalReports },
+        { count: premiumUsers },
+        { data: pointsData },
+        { data: recentUsers }
+      ] = await Promise.all([
+        sb.from('users').select('*', { count: 'exact', head: true }),
+        sb.from('votes').select('*', { count: 'exact', head: true }),
+        sb.from('photos').select('*', { count: 'exact', head: true }).eq('active', true),
+        sb.from('messages').select('*', { count: 'exact', head: true }),
+        sb.from('reports').select('*', { count: 'exact', head: true }),
+        sb.from('users').select('*', { count: 'exact', head: true }).eq('is_premium', true),
+        sb.from('points_history').select('points'),
+        sb.from('users')
+          .select('id, email, prenom, ville, points, is_premium, promo_code, created_at, avatar_url')
+          .order('created_at', { ascending: false })
+          .limit(10)
+      ]);
 
-    const totalPoints = pointsData ? pointsData.reduce((s, r) => s + (r.points > 0 ? r.points : 0), 0) : 0;
+      const totalPoints = pointsData ? pointsData.reduce((s, r) => s + (r.points > 0 ? r.points : 0), 0) : 0;
 
-    document.getElementById('stats-grid').innerHTML = `
-      ${statCard('Inscrits', totalUsers ?? 0, '', '')}
-      ${statCard('Votes', totalVotes ?? 0, '', 'green')}
-      ${statCard('Photos actives', totalPhotos ?? 0, '', 'blue')}
-      ${statCard('Messages', totalMessages ?? 0, '', '')}
-      ${statCard('Premium', premiumUsers ?? 0, 'abonnés actifs', '')}
-      ${statCard('Points distribués', (totalPoints).toLocaleString('fr'), 'total cumulé', 'green')}
-      ${statCard('Signalements', totalReports ?? 0, 'en attente', 'red')}
-    `;
+      document.getElementById('stats-grid').innerHTML = `
+        ${statCard('Inscrits', totalUsers ?? 0, '', '')}
+        ${statCard('Votes', totalVotes ?? 0, '', 'green')}
+        ${statCard('Photos actives', totalPhotos ?? 0, '', 'blue')}
+        ${statCard('Messages', totalMessages ?? 0, '', '')}
+        ${statCard('Premium', premiumUsers ?? 0, 'abonnés actifs', '')}
+        ${statCard('Points distribués', (totalPoints).toLocaleString('fr'), 'total cumulé', 'green')}
+        ${statCard('Signalements', totalReports ?? 0, 'en attente', 'red')}
+      `;
 
-    const tbody = document.getElementById('recent-users-tbody');
-    if (!recentUsers || recentUsers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun utilisateur</td></tr>';
-      return;
+      const tbody = document.getElementById('recent-users-tbody');
+      if (!recentUsers || recentUsers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun utilisateur</td></tr>';
+        return;
+      }
+      tbody.innerHTML = recentUsers.map(u => {
+        const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—'); const pc=escapeHtml(u.promo_code||'');
+        return `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center">
+              <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
+              ${pr}
+            </div>
+          </td>
+          <td style="color:var(--muted);font-size:0.75rem">${em}</td>
+          <td>${vi}</td>
+          <td>${u.points ?? 0} pts</td>
+          <td>${u.is_premium ? '<span class="badge badge-premium">Premium</span>' : '—'}</td>
+          <td>${pc ? `<code style="color:var(--gold)">${pc}</code>` : '—'}</td>
+          <td>${formatDate(u.created_at)}</td>
+        </tr>
+      `;}).join('');
+    } catch (e) {
+      console.error('[admin] loadStats:', e);
+      document.getElementById('stats-grid').innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
     }
-    tbody.innerHTML = recentUsers.map(u => {
-      const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—'); const pc=escapeHtml(u.promo_code||'');
-      return `
-      <tr>
-        <td>
-          <div style="display:flex;align-items:center">
-            <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
-            ${pr}
-          </div>
-        </td>
-        <td style="color:var(--muted);font-size:0.75rem">${em}</td>
-        <td>${vi}</td>
-        <td>${u.points ?? 0} pts</td>
-        <td>${u.is_premium ? '<span class="badge badge-premium">Premium</span>' : '—'}</td>
-        <td>${pc ? `<code style="color:var(--gold)">${pc}</code>` : '—'}</td>
-        <td>${formatDate(u.created_at)}</td>
-      </tr>
-    `;}).join('');
   }
 
   function statCard(label, value, sub, color) {
@@ -1346,24 +1355,22 @@
       return;
     }
 
-    // Récupère les counts photos et votes séparément
-    const [{ data: photoCounts }, { data: votesDonnes }, { data: votesRecus }] = await Promise.all([
-      sb.from('photos').select('user_id').eq('active', true),
-      sb.from('votes').select('voter_id'),
-      sb.from('votes').select('photo_id, photos!inner(user_id)')
-    ]);
-
-    const photoMap = {};
-    (photoCounts || []).forEach(p => { photoMap[p.user_id] = (photoMap[p.user_id] || 0) + 1; });
-
-    const voteMap = {};
-    (votesDonnes || []).forEach(v => { voteMap[v.voter_id] = (voteMap[v.voter_id] || 0) + 1; });
-
-    const votesRecusMap = {};
-    (votesRecus || []).forEach(v => {
-      const uid = v.photos?.user_id;
-      if (uid) votesRecusMap[uid] = (votesRecusMap[uid] || 0) + 1;
-    });
+    let photoMap = {}, voteMap = {}, votesRecusMap = {};
+    try {
+      const [{ data: photoCounts }, { data: votesDonnes }, { data: votesRecus }] = await Promise.all([
+        sb.from('photos').select('user_id').eq('active', true),
+        sb.from('votes').select('voter_id'),
+        sb.from('votes').select('photo_id, photos!inner(user_id)')
+      ]);
+      (photoCounts || []).forEach(p => { photoMap[p.user_id] = (photoMap[p.user_id] || 0) + 1; });
+      (votesDonnes || []).forEach(v => { voteMap[v.voter_id] = (voteMap[v.voter_id] || 0) + 1; });
+      (votesRecus || []).forEach(v => {
+        const uid = v.photos?.user_id;
+        if (uid) votesRecusMap[uid] = (votesRecusMap[uid] || 0) + 1;
+      });
+    } catch (e) {
+      console.warn('[admin] loadUsers counts:', e);
+    }
 
     allUsers = users.map(u => ({
       ...u,
@@ -1464,17 +1471,24 @@
     document.getElementById('user-modal').classList.add('open');
     document.getElementById('modal-user-body').innerHTML = '<div class="loader">Chargement...</div>';
 
-    const [
-      { data: user },
-      { data: photos },
-      { data: votes },
-      { data: pointsHistory }
-    ] = await Promise.all([
-      sb.from('users').select('*').eq('id', userId).single(),
-      sb.from('photos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-      sb.from('votes').select('*, photos(user_id, url)').eq('voter_id', userId).order('created_at', { ascending: false }).limit(20),
-      sb.from('points_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
-    ]);
+    let user, photos, votes, pointsHistory;
+    try {
+      ([
+        { data: user },
+        { data: photos },
+        { data: votes },
+        { data: pointsHistory }
+      ] = await Promise.all([
+        sb.from('users').select('*').eq('id', userId).single(),
+        sb.from('photos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+        sb.from('votes').select('*, photos(user_id, url)').eq('voter_id', userId).order('created_at', { ascending: false }).limit(20),
+        sb.from('points_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
+      ]));
+    } catch (e) {
+      console.error('[admin] openUserModal:', e);
+      document.getElementById('modal-user-body').innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
+      return;
+    }
 
     if (!user) {
       document.getElementById('modal-user-body').innerHTML = '<div class="loader">Utilisateur introuvable</div>';
@@ -1657,7 +1671,8 @@
   }
 
   async function resendWelcomeEmail(userId) {
-    await sb.from('users').update({ welcome_email_sent: false }).eq('id', userId);
+    const { error } = await sb.from('users').update({ welcome_email_sent: false }).eq('id', userId);
+    if (error) return showToast('Erreur: ' + error.message, true);
     showToast('✓ Email bienvenue sera renvoyé au prochain passage du cron');
   }
 
@@ -1665,21 +1680,26 @@
   async function loadPhotos() {
     document.getElementById('photos-mod-grid').innerHTML = '<div class="loader">Chargement...</div>';
     const filter = document.getElementById('filter-photos').value;
+    try {
+      let query = sb.from('photos')
+        .select('id, url, active, nb_votes, note_moyenne, created_at, user_id, users(prenom, email, avatar_url)')
+        .order('created_at', { ascending: false })
+        .limit(200);
 
-    let query = sb.from('photos')
-      .select('id, url, active, nb_votes, note_moyenne, created_at, user_id, users(prenom, email, avatar_url)')
-      .order('created_at', { ascending: false })
-      .limit(200);
+      if (filter === 'active') query = query.eq('active', true);
+      if (filter === 'inactive') query = query.eq('active', false);
 
-    if (filter === 'active') query = query.eq('active', true);
-    if (filter === 'inactive') query = query.eq('active', false);
+      const { data: photos, error } = await query;
+      if (error) throw error;
+      allPhotos = photos || [];
 
-    const { data: photos } = await query;
-    allPhotos = photos || [];
-
-    document.getElementById('photo-count-label').textContent = `${allPhotos.length} photo(s)`;
-    photosPage = 0;
-    renderPhotosGrid();
+      document.getElementById('photo-count-label').textContent = `${allPhotos.length} photo(s)`;
+      photosPage = 0;
+      renderPhotosGrid();
+    } catch (e) {
+      console.error('[admin] loadPhotos:', e);
+      document.getElementById('photos-mod-grid').innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
+    }
   }
 
   function renderPhotosGrid() {
@@ -1748,11 +1768,13 @@
   // ─── MESSAGES / CONVERSATIONS ─────────────────────────────
   async function loadConversations() {
     document.getElementById('conv-list-wrap').innerHTML = '<div class="loader">Chargement...</div>';
-
-    const { data: messages } = await sb.from('messages')
+    try {
+    const { data: messages, error } = await sb.from('messages')
       .select('id, sender_id, receiver_id, content, read, created_at, users_sender:users!messages_sender_id_fkey(prenom, email), users_receiver:users!messages_receiver_id_fkey(prenom, email)')
       .order('created_at', { ascending: false })
       .limit(500);
+
+    if (error) throw error;
 
     // Groupe par paire sender/receiver
     const convMap = {};
@@ -1778,6 +1800,10 @@
     allConversations = Object.values(convMap).sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
     filteredConversations = allConversations;
     renderConversations();
+    } catch (e) {
+      console.error('[admin] loadConversations:', e);
+      document.getElementById('conv-list-wrap').innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
+    }
   }
 
   function filterConversations() {
@@ -1869,45 +1895,51 @@
 
   // ─── PREMIUM ──────────────────────────────────────────────
   async function loadPremium() {
-    const { data: premiums } = await sb.from('users')
-      .select('id, email, prenom, points, ville, avatar_url, premium_since, created_at')
-      .eq('is_premium', true)
-      .order('created_at', { ascending: false });
+    try {
+      const { data: premiums, error } = await sb.from('users')
+        .select('id, email, prenom, points, ville, avatar_url, premium_since, created_at')
+        .eq('is_premium', true)
+        .order('created_at', { ascending: false });
 
-    const count = premiums ? premiums.length : 0;
-    const revenue = count * 9.99;
+      if (error) throw error;
 
-    document.getElementById('premium-stats-grid').innerHTML = `
-      ${statCard('Abonnés actifs', count, '', '')}
-      ${statCard('Revenu mensuel est.', revenue.toFixed(2) + ' €', 'basé sur 9,99€/mois', 'green')}
-      ${statCard('Revenu annuel est.', (revenue * 12).toFixed(0) + ' €', 'projection', 'green')}
-    `;
+      const count = premiums ? premiums.length : 0;
+      const revenue = count * 9.99;
 
-    const tbody = document.getElementById('premium-tbody');
-    if (!premiums || !premiums.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="loader">Aucun abonné</td></tr>';
-    } else {
-      tbody.innerHTML = premiums.map(u => {
-        const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—');
-        return `
-        <tr>
-          <td>
-            <div style="display:flex;align-items:center">
-              <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
-              ${pr}
-            </div>
-          </td>
-          <td style="color:var(--muted);font-size:0.75rem">${em}</td>
-          <td style="color:var(--muted);font-size:0.75rem">${u.premium_since ? formatDate(u.premium_since) : formatDate(u.created_at)}</td>
-          <td><span style="color:var(--gold)">${u.points ?? 0}</span> pts</td>
-          <td>${vi}</td>
-          <td>
-            <button class="btn-danger" onclick="revokePremium('${u.id}')">Révoquer</button>
-          </td>
-        </tr>
-      `;}).join('');
+      document.getElementById('premium-stats-grid').innerHTML = `
+        ${statCard('Abonnés actifs', count, '', '')}
+        ${statCard('Revenu mensuel est.', revenue.toFixed(2) + ' €', 'basé sur 9,99€/mois', 'green')}
+        ${statCard('Revenu annuel est.', (revenue * 12).toFixed(0) + ' €', 'projection', 'green')}
+      `;
+
+      const tbody = document.getElementById('premium-tbody');
+      if (!premiums || !premiums.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="loader">Aucun abonné</td></tr>';
+      } else {
+        tbody.innerHTML = premiums.map(u => {
+          const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—');
+          return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center">
+                <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
+                ${pr}
+              </div>
+            </td>
+            <td style="color:var(--muted);font-size:0.75rem">${em}</td>
+            <td style="color:var(--muted);font-size:0.75rem">${u.premium_since ? formatDate(u.premium_since) : formatDate(u.created_at)}</td>
+            <td><span style="color:var(--gold)">${u.points ?? 0}</span> pts</td>
+            <td>${vi}</td>
+            <td>
+              <button class="btn-danger" onclick="revokePremium('${u.id}')">Révoquer</button>
+            </td>
+          </tr>
+        `;}).join('');
+      }
+    } catch (e) {
+      console.error('[admin] loadPremium:', e);
+      document.getElementById('premium-tbody').innerHTML = '<tr><td colspan="6" class="loader" style="color:var(--red)">Erreur de chargement</td></tr>';
     }
-
   }
 
   async function revokePremium(userId) {
@@ -1920,21 +1952,27 @@
 
   // ─── POINTS CONFIG ────────────────────────────────────────
   async function loadPointsConfig() {
-    const { data } = await sb.from('points_config').select('*').order('id');
     const grid = document.getElementById('config-grid');
-    if (!data) { grid.innerHTML = '<div class="loader">Erreur</div>'; return; }
+    try {
+      const { data, error } = await sb.from('points_config').select('*').order('id');
+      if (error) throw error;
+      if (!data) { grid.innerHTML = '<div class="loader">Aucune configuration</div>'; return; }
 
-    grid.innerHTML = data.map(cfg => {
-      const lbl=escapeHtml(cfg.label||'');
-      return `
-      <div class="config-card">
-        <div class="config-label">${lbl}</div>
-        <div class="config-input-wrap">
-          <input class="config-input" type="number" value="${cfg.points}" id="cfg-${cfg.id}">
-          <button class="btn-save-config" onclick="savePointsConfig('${cfg.id}', '${lbl}')">OK</button>
+      grid.innerHTML = data.map(cfg => {
+        const lbl=escapeHtml(cfg.label||'');
+        return `
+        <div class="config-card">
+          <div class="config-label">${lbl}</div>
+          <div class="config-input-wrap">
+            <input class="config-input" type="number" value="${cfg.points}" id="cfg-${cfg.id}">
+            <button class="btn-save-config" onclick="savePointsConfig('${cfg.id}', '${lbl}')">OK</button>
+          </div>
         </div>
-      </div>
-    `;}).join('');
+      `;}).join('');
+    } catch (e) {
+      console.error('[admin] loadPointsConfig:', e);
+      grid.innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
+    }
   }
 
   async function savePointsConfig(id, label) {
@@ -1947,25 +1985,31 @@
 
   // ─── PROMO CODES ──────────────────────────────────────────
   async function loadPromoCodes() {
-    const { data } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false });
     const tbody = document.getElementById('promos-tbody');
-    if (!data || !data.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun code créé</td></tr>';
-      return;
+    try {
+      const { data, error } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      if (!data || !data.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun code créé</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(p => {
+        const pc=escapeHtml(p.code||''); const pn=escapeHtml(p.influencer_name||'—');
+        return `
+        <tr>
+          <td><code style="color:var(--gold);font-size:0.9rem">${pc}</code></td>
+          <td>${pn}</td>
+          <td>+${p.points_bonus} pts</td>
+          <td>${p.uses}</td>
+          <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Actif' : 'Désactivé'}</span></td>
+          <td>${formatDate(p.created_at)}</td>
+          <td><button class="btn-toggle" onclick="togglePromo('${p.id}', ${p.active})">${p.active ? 'Désactiver' : 'Activer'}</button></td>
+        </tr>
+      `;}).join('');
+    } catch (e) {
+      console.error('[admin] loadPromoCodes:', e);
+      tbody.innerHTML = '<tr><td colspan="7" class="loader" style="color:var(--red)">Erreur de chargement</td></tr>';
     }
-    tbody.innerHTML = data.map(p => {
-      const pc=escapeHtml(p.code||''); const pn=escapeHtml(p.influencer_name||'—');
-      return `
-      <tr>
-        <td><code style="color:var(--gold);font-size:0.9rem">${pc}</code></td>
-        <td>${pn}</td>
-        <td>+${p.points_bonus} pts</td>
-        <td>${p.uses}</td>
-        <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Actif' : 'Désactivé'}</span></td>
-        <td>${formatDate(p.created_at)}</td>
-        <td><button class="btn-toggle" onclick="togglePromo('${p.id}', ${p.active})">${p.active ? 'Désactiver' : 'Activer'}</button></td>
-      </tr>
-    `;}).join('');
   }
 
   async function createPromoCode() {
@@ -1992,47 +2036,56 @@
 
   // ─── REPORTS ──────────────────────────────────────────────
   async function loadReports() {
-    const { data } = await sb.from('reports')
-      .select('id, raison, created_at, photo_id, reporter_id, photos(url, user_id, users(prenom)), reporter:users!reports_reporter_id_fkey(prenom, email)')
-      .order('created_at', { ascending: false })
-      .limit(50);
-
     const tbody = document.getElementById('reports-tbody');
-    if (!data || !data.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="loader">Aucun signalement</td></tr>';
-      return;
+    try {
+      const { data, error } = await sb.from('reports')
+        .select('id, raison, created_at, photo_id, reporter_id, photos(url, user_id, users(prenom)), reporter:users!reports_reporter_id_fkey(prenom, email)')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      if (!data || !data.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="loader">Aucun signalement</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => {
+        const pu=safeUrl(r.photos?.url); const rp=escapeHtml(r.reporter?.prenom||'—'); const re=escapeHtml(r.reporter?.email||''); const ra=escapeHtml(r.raison||'—');
+        return `
+        <tr>
+          <td>
+            ${pu ? `<img src="${pu}" style="width:56px;height:56px;object-fit:cover;border:1px solid var(--border)">` : '—'}
+          </td>
+          <td style="color:var(--muted);font-size:0.75rem">
+            ${rp}<br>
+            <span style="font-size:0.65rem">${re}</span>
+          </td>
+          <td>${ra}</td>
+          <td>${formatDate(r.created_at)}</td>
+          <td style="display:flex;gap:8px">
+            <button class="btn-danger" onclick="deletePhoto('${r.photo_id}', '${r.id}')">Supprimer photo</button>
+            <button class="btn-toggle" onclick="dismissReport('${r.id}')">Ignorer</button>
+          </td>
+        </tr>
+      `;}).join('');
+    } catch (e) {
+      console.error('[admin] loadReports:', e);
+      tbody.innerHTML = '<tr><td colspan="5" class="loader" style="color:var(--red)">Erreur de chargement</td></tr>';
     }
-    tbody.innerHTML = data.map(r => {
-      const pu=safeUrl(r.photos?.url); const rp=escapeHtml(r.reporter?.prenom||'—'); const re=escapeHtml(r.reporter?.email||''); const ra=escapeHtml(r.raison||'—');
-      return `
-      <tr>
-        <td>
-          ${pu ? `<img src="${pu}" style="width:56px;height:56px;object-fit:cover;border:1px solid var(--border)">` : '—'}
-        </td>
-        <td style="color:var(--muted);font-size:0.75rem">
-          ${rp}<br>
-          <span style="font-size:0.65rem">${re}</span>
-        </td>
-        <td>${ra}</td>
-        <td>${formatDate(r.created_at)}</td>
-        <td style="display:flex;gap:8px">
-          <button class="btn-danger" onclick="deletePhoto('${r.photo_id}', '${r.id}')">Supprimer photo</button>
-          <button class="btn-toggle" onclick="dismissReport('${r.id}')">Ignorer</button>
-        </td>
-      </tr>
-    `;}).join('');
   }
 
   async function deletePhoto(photoId, reportId) {
     if (!confirm('Supprimer cette photo ?')) return;
-    await sb.from('photos').update({ active: false }).eq('id', photoId);
-    await sb.from('reports').delete().eq('id', reportId);
+    const { error: e1 } = await sb.from('photos').update({ active: false }).eq('id', photoId);
+    if (e1) return showToast('Erreur: ' + e1.message, true);
+    const { error: e2 } = await sb.from('reports').delete().eq('id', reportId);
+    if (e2) return showToast('Erreur: ' + e2.message, true);
     showToast('✓ Photo supprimée');
     loadReports();
   }
 
   async function dismissReport(reportId) {
-    await sb.from('reports').delete().eq('id', reportId);
+    const { error } = await sb.from('reports').delete().eq('id', reportId);
+    if (error) return showToast('Erreur: ' + error.message, true);
     showToast('✓ Signalement ignoré');
     loadReports();
   }
