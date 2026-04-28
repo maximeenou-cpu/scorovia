@@ -260,29 +260,33 @@ function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.prot
 let currentUser=null,userProfile=null,allRanked=[],currentFilter='global',unlockedFilters={ville:false,age:false};
 
 async function init(){
-  const{data:{session}}=await sb.auth.getSession();
-  if(session){
-    currentUser=session.user;
-    const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
-    if(profile){
-      userProfile=profile;
-      Premium.init(profile);
-      // ✅ Photo de profil sidebar
-      const avEl=document.getElementById('user-avatar');
-      const avSb=safeUrl(profile.avatar_url);
-      if(avSb){avEl.innerHTML=`<img src="${avSb}" />`;}
-      else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
-      document.getElementById('user-name').textContent=profile.prenom||'Membre';
-      document.getElementById('user-pts').textContent=profile.points||0;
-      document.getElementById('pts-display').textContent=profile.points||0;
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(session){
+      currentUser=session.user;
+      const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
+      if(profile){
+        userProfile=profile;
+        Premium.init(profile);
+        const avEl=document.getElementById('user-avatar');
+        const avSb=safeUrl(profile.avatar_url);
+        if(avSb){avEl.innerHTML=`<img src="${avSb}" />`;}
+        else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
+        document.getElementById('user-name').textContent=profile.prenom||'Membre';
+        document.getElementById('user-pts').textContent=profile.points||0;
+        document.getElementById('pts-display').textContent=profile.points||0;
+      }
     }
+    await loadRanking();
+    document.getElementById('loading').style.display='none';
+  }catch(e){
+    console.error('[classement] init:',e);
+    document.getElementById('loading').style.display='none';
+    showToast('Erreur de chargement. Veuillez recharger la page.','');
   }
-  await loadRanking();
-  document.getElementById('loading').style.display='none';
 }
 
 async function loadRanking(){
-  // ✅ Charger avatar_url en plus
   const{data:users,error}=await sb.from('users').select('id,prenom,ville,age,genre,points,avatar_url');
   if(error||!users)return;
   const{data:photos}=await sb.from('photos').select('user_id,note_moyenne,nb_votes').eq('active',true);
@@ -341,7 +345,7 @@ function setFilter(filter,e){
   renderFiltered(filtered);
 }
 
-function unlockFilter(type){
+async function unlockFilter(type){
   if(Premium.canFilterFree()){
     unlockedFilters[type]=true;
     document.getElementById(`filter-${type}-row`).classList.add('show');
@@ -354,17 +358,22 @@ function unlockFilter(type){
   if(!currentUser){showToast('⚠️ Connectez-vous pour utiliser cette fonctionnalité','');return;}
   const cost=5;
   if(!userProfile||userProfile.points<cost){showToast(`⚡ Points insuffisants — ${cost} pts requis`,'');setTimeout(()=>window.location.href='points.html',1800);return;}
-  sb.from('users').update({points:userProfile.points-cost}).eq('id',currentUser.id);
-  sb.from('points_history').insert({user_id:currentUser.id,action:`Classement par ${type}`,points:-cost});
-  userProfile.points-=cost;
-  document.getElementById('pts-display').textContent=userProfile.points;
-  document.getElementById('user-pts').textContent=userProfile.points;
-  unlockedFilters[type]=true;
-  showToast(`✅ Classement par ${type==='ville'?'ville':'âge'} déverrouillé !`,'success');
-  document.getElementById(`filter-${type}-row`).classList.add('show');
-  document.getElementById('lb-title').textContent=type==='ville'?'📍 Classement par ville':'🎂 Classement par âge';
-  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.filter-tab')[type==='ville'?3:4].classList.add('active');
+  try{
+    await sb.from('users').update({points:userProfile.points-cost}).eq('id',currentUser.id);
+    await sb.from('points_history').insert({user_id:currentUser.id,action:`Classement par ${type}`,points:-cost});
+    userProfile.points-=cost;
+    document.getElementById('pts-display').textContent=userProfile.points;
+    document.getElementById('user-pts').textContent=userProfile.points;
+    unlockedFilters[type]=true;
+    showToast(`✅ Classement par ${type==='ville'?'ville':'âge'} déverrouillé !`,'success');
+    document.getElementById(`filter-${type}-row`).classList.add('show');
+    document.getElementById('lb-title').textContent=type==='ville'?'📍 Classement par ville':'🎂 Classement par âge';
+    document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.filter-tab')[type==='ville'?3:4].classList.add('active');
+  }catch(e){
+    console.error('[classement] unlockFilter:',e);
+    showToast('❌ Erreur lors du déverrouillage — points non déduits','');
+  }
 }
 
 function filterByVille(ville){document.getElementById('lb-title').textContent=ville?`📍 Classement — ${ville}`:'📍 Classement par ville';renderFiltered(ville?allRanked.filter(u=>u.ville===ville):allRanked);}
@@ -384,14 +393,6 @@ function renderFiltered(list){
   document.getElementById('lb-count').textContent=total+' membre'+(total>1?'s':'');
   renderTop3(ranked.slice(0,3));
   renderList(ranked,list,total);
-}
-
-// ✅ Affiche photo de profil dans le top3
-function avatarContent(u,size){
-  if(u.avatar_url){
-    return `<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
-  }
-  return (u.prenom||'?').charAt(0).toUpperCase();
 }
 
 function renderTop3(top){
