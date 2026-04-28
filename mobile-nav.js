@@ -133,34 +133,32 @@
   document.body.classList.add('has-mobile-nav');
 
   // Vérifier les messages non lus (si Supabase disponible)
-  function checkUnreadMessages() {
+  async function checkUnreadMessages() {
     if (typeof supabase === 'undefined') return;
-    const stored = localStorage.getItem('scorovia_user');
-    if (!stored) return;
     try {
-      const user = JSON.parse(stored);
-      if (!user.id) return;
       const { createClient } = supabase;
       const sb = createClient(
         'https://rsdlcqsmuvaqkohjqsjs.supabase.co',
         'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w'
       );
-      sb.from('messages')
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.user?.id) return;
+      const { count } = await sb.from('messages')
         .select('id', { count: 'exact', head: true })
-        .eq('receiver_id', user.id)
-        .eq('read', false)
-        .then(({ count }) => {
-          if (count > 0) {
-            const msgItem = nav.querySelector('li:nth-child(4)');
-            if (msgItem && !msgItem.querySelector('.nav-badge')) {
-              msgItem.style.position = 'relative';
-              const badge = document.createElement('span');
-              badge.className = 'nav-badge';
-              msgItem.appendChild(badge);
-            }
-          }
-        });
-    } catch(e) {}
+        .eq('receiver_id', session.user.id)
+        .eq('read', false);
+      if (count > 0) {
+        const msgItem = nav.querySelector('li:nth-child(4)');
+        if (msgItem && !msgItem.querySelector('.nav-badge')) {
+          msgItem.style.position = 'relative';
+          const badge = document.createElement('span');
+          badge.className = 'nav-badge';
+          msgItem.appendChild(badge);
+        }
+      }
+    } catch(e) {
+      console.warn('[mobile-nav] checkUnreadMessages:', e);
+    }
   }
 
   // Vérifier après chargement de la page
