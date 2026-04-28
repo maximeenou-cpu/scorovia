@@ -455,25 +455,31 @@ let anonymousVotes = 0;
 const POPUP_THRESHOLD = 5;
 
 async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
-    userProfile = profile;
-    if (profile) {
-      document.getElementById('user-avatar').textContent = profile.prenom?.charAt(0).toUpperCase() || '?';
-      document.getElementById('user-name').textContent = profile.prenom || 'Membre';
-      document.getElementById('user-pts').textContent = profile.points || 0;
-      document.getElementById('pts-display').textContent = profile.points || 0;
-      document.getElementById('pts-pill').style.display = 'flex';
-      await loadTodayStats();
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
+      userProfile = profile;
+      if (profile) {
+        document.getElementById('user-avatar').textContent = profile.prenom?.charAt(0).toUpperCase() || '?';
+        document.getElementById('user-name').textContent = profile.prenom || 'Membre';
+        document.getElementById('user-pts').textContent = profile.points || 0;
+        document.getElementById('pts-display').textContent = profile.points || 0;
+        document.getElementById('pts-pill').style.display = 'flex';
+        await loadTodayStats();
+      }
+    } else {
+      document.getElementById('user-name').textContent = 'Visiteur';
+      document.getElementById('btn-login-top').style.display = 'block';
     }
-  } else {
-    document.getElementById('user-name').textContent = 'Visiteur';
-    document.getElementById('btn-login-top').style.display = 'block';
+    await loadPhotos();
+    document.getElementById('loading').style.display = 'none';
+  } catch(e) {
+    console.error('[noter] init:', e);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'block';
   }
-  await loadPhotos();
-  document.getElementById('loading').style.display = 'none';
 }
 
 async function loadPhotos() {
@@ -525,13 +531,14 @@ function showPhoto(index) {
   document.getElementById('card-name').textContent = prenom;
   document.getElementById('card-city').textContent = ville ? '📍 ' + ville : '';
   const cardPhoto = document.getElementById('card-photo');
-  document.getElementById('card-emoji').style.display = photo.url ? 'none' : 'block';
+  const safePhotoUrl = safeUrl(photo.url);
+  document.getElementById('card-emoji').style.display = safePhotoUrl ? 'none' : 'block';
   const existingImg = cardPhoto.querySelector('img');
   if (existingImg) existingImg.remove();
-  if (photo.url) {
+  if (safePhotoUrl) {
     const img = document.createElement('img');
-    img.src = photo.url;
-    img.alt = prenom;
+    img.src = safePhotoUrl;
+    img.alt = escapeHtml(prenom);
     cardPhoto.appendChild(img);
   }
   document.getElementById('result-overlay').classList.remove('show');
@@ -566,6 +573,7 @@ function resetStars() {
 
 async function doRate() {
   if (!selectedStar) return;
+  document.getElementById('btn-noter').disabled = true;
   const photo = photos[currentIndex];
   const note = selectedStar;
   if (currentUser) {
@@ -749,17 +757,21 @@ async function sendReport() {
 
 async function loadTodayStats() {
   if (!currentUser) return;
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const { data: todayVotes } = await sb.from('votes').select('note, created_at').eq('voter_id', currentUser.id).gte('created_at', todayStart.toISOString());
-  if (todayVotes && todayVotes.length > 0) {
-    sessionRated = todayVotes.length;
-    sessionPts = todayVotes.length;
-    sessionScores = todayVotes.map(v => v.note);
-    const avg = (sessionScores.reduce((a, b) => a + b, 0) / sessionScores.length).toFixed(1);
-    document.getElementById('s-rated').textContent = sessionRated;
-    document.getElementById('s-avg').textContent = avg + '/10';
-    document.getElementById('s-pts').textContent = '+' + sessionPts + ' pt' + (sessionPts > 1 ? 's' : '');
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const { data: todayVotes } = await sb.from('votes').select('note, created_at').eq('voter_id', currentUser.id).gte('created_at', todayStart.toISOString());
+    if (todayVotes && todayVotes.length > 0) {
+      sessionRated = todayVotes.length;
+      sessionPts = todayVotes.length;
+      sessionScores = todayVotes.map(v => v.note);
+      const avg = (sessionScores.reduce((a, b) => a + b, 0) / sessionScores.length).toFixed(1);
+      document.getElementById('s-rated').textContent = sessionRated;
+      document.getElementById('s-avg').textContent = avg + '/10';
+      document.getElementById('s-pts').textContent = '+' + sessionPts + ' pt' + (sessionPts > 1 ? 's' : '');
+    }
+  } catch(e) {
+    console.warn('[noter] loadTodayStats:', e);
   }
 }
 
