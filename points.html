@@ -292,71 +292,76 @@ function stripeLink(base,userId){return base+'?client_reference_id='+userId;}
 let currentUser=null,userProfile=null,adTimer=null,adSeconds=30;
 
 async function init(){
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){window.location.href='login.html';return;}
-  currentUser=session.user;
-  const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
-  if(!profile){window.location.href='login.html';return;}
-  userProfile=profile;
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){window.location.href='login.html';return;}
+    currentUser=session.user;
+    const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
+    if(!profile){window.location.href='login.html';return;}
+    userProfile=profile;
 
-  const isPremium=Premium.init(profile);
-  await PointsConfig.load();
-  PointsConfig.updateDOM();
+    const isPremium=Premium.init(profile);
+    await PointsConfig.load();
+    PointsConfig.updateDOM();
 
-  const avEl=document.getElementById('user-avatar');
-  const avatarSafe=safeUrl(profile.avatar_url);
-  if(avatarSafe){avEl.innerHTML=`<img src="${avatarSafe}" />`;}
-  else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
+    const avEl=document.getElementById('user-avatar');
+    const avatarSafe=safeUrl(profile.avatar_url);
+    if(avatarSafe){avEl.innerHTML=`<img src="${avatarSafe}" />`;}
+    else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
 
-  document.getElementById('user-name').textContent=profile.prenom||'Membre';
-  document.getElementById('user-pts').textContent=profile.points||0;
-  document.getElementById('pts-display').textContent=profile.points||0;
-  document.getElementById('balance-num').textContent=profile.points||0;
+    document.getElementById('user-name').textContent=profile.prenom||'Membre';
+    document.getElementById('user-pts').textContent=profile.points||0;
+    document.getElementById('pts-display').textContent=profile.points||0;
+    document.getElementById('balance-num').textContent=profile.points||0;
 
-  // Mettre à jour le texte de la modal pub avec la valeur dynamique
-  const pubPtsVal=PointsConfig.get('pub')||5;
-  document.getElementById('ad-sub').textContent=`Regardez jusqu'à la fin pour recevoir vos ${pubPtsVal} points`;
+    const pubPtsVal=PointsConfig.get('pub')||5;
+    document.getElementById('ad-sub').textContent=`Regardez jusqu'à la fin pour recevoir vos ${pubPtsVal} points`;
 
-  buildPacksGrid(currentUser.id);
+    buildPacksGrid(currentUser.id);
 
-  const premiumSection=document.getElementById('premium-section');
-  if(isPremium){
-    const until=profile.premium_until?new Date(profile.premium_until).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'actif';
-    premiumSection.innerHTML=`
-    <div class="already-premium-card">
-      <div class="already-premium-icon">👑</div>
-      <div class="already-premium-text">
-        <h3>★ VOUS ÊTES PREMIUM !</h3>
-        <p>Votre abonnement est actif jusqu'au ${until}.<br>Toutes les fonctionnalités sont débloquées.</p>
-      </div>
-    </div>`;
-  }else{
-    premiumSection.innerHTML=`
-    <div class="premium-card">
-      <div class="premium-header">
-        <div style="font-size:28px">👑</div>
-        <div><div class="premium-title">SCOROVIA PREMIUM</div><div style="font-size:13px;color:var(--muted)">L'expérience complète</div></div>
-      </div>
-      <div class="premium-features">
-        <div class="premium-feature">Voir qui vous a noté</div>
-        <div class="premium-feature">Messagerie illimitée</div>
-        <div class="premium-feature">Classement par ville</div>
-        <div class="premium-feature">Photos illimitées</div>
-        <div class="premium-feature">Badge Premium</div>
-        <div class="premium-feature">Sans pub obligatoire</div>
-      </div>
-      <div class="premium-price-row">
-        <div>
-          <div class="premium-price">9,99€ <span>/ mois</span></div>
-          <div style="font-size:12px;color:var(--muted)">Sans engagement · Annulable à tout moment</div>
+    const premiumSection=document.getElementById('premium-section');
+    if(isPremium){
+      const until=profile.premium_until?new Date(profile.premium_until).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'actif';
+      premiumSection.innerHTML=`
+      <div class="already-premium-card">
+        <div class="already-premium-icon">👑</div>
+        <div class="already-premium-text">
+          <h3>★ VOUS ÊTES PREMIUM !</h3>
+          <p>Votre abonnement est actif jusqu'au ${until}.<br>Toutes les fonctionnalités sont débloquées.</p>
         </div>
-        <a href="${stripeLink(STRIPE_LINKS.premium,currentUser.id)}" target="_blank" class="btn-premium" style="text-decoration:none;display:inline-block;">PASSER PREMIUM</a>
-      </div>
-    </div>`;
-  }
+      </div>`;
+    }else{
+      premiumSection.innerHTML=`
+      <div class="premium-card">
+        <div class="premium-header">
+          <div style="font-size:28px">👑</div>
+          <div><div class="premium-title">SCOROVIA PREMIUM</div><div style="font-size:13px;color:var(--muted)">L'expérience complète</div></div>
+        </div>
+        <div class="premium-features">
+          <div class="premium-feature">Voir qui vous a noté</div>
+          <div class="premium-feature">Messagerie illimitée</div>
+          <div class="premium-feature">Classement par ville</div>
+          <div class="premium-feature">Photos illimitées</div>
+          <div class="premium-feature">Badge Premium</div>
+          <div class="premium-feature">Sans pub obligatoire</div>
+        </div>
+        <div class="premium-price-row">
+          <div>
+            <div class="premium-price">9,99€ <span>/ mois</span></div>
+            <div style="font-size:12px;color:var(--muted)">Sans engagement · Annulable à tout moment</div>
+          </div>
+          <a href="${stripeLink(STRIPE_LINKS.premium,currentUser.id)}" target="_blank" class="btn-premium" style="text-decoration:none;display:inline-block;">PASSER PREMIUM</a>
+        </div>
+      </div>`;
+    }
 
-  await loadHistory();
-  document.getElementById('loading').style.display='none';
+    await loadHistory();
+    document.getElementById('loading').style.display='none';
+  }catch(e){
+    console.error('[points] init:',e);
+    document.getElementById('loading').style.display='none';
+    showToast('Erreur de chargement. Veuillez recharger la page.','');
+  }
 }
 
 function buildPacksGrid(userId){
@@ -390,15 +395,20 @@ function scrollToPacks(){
 }
 
 async function loadHistory(){
-  const{data}=await sb.from('points_history').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
-  const list=document.getElementById('history-list');
-  if(!data||data.length===0){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Aucune transaction pour l\'instant</div>';return;}
-  const icons={'Note donnée':{icon:'⭐',bg:'rgba(245,200,66,0.1)'},'Pub regardée':{icon:'📺',bg:'rgba(139,92,246,0.1)'},'Photo soumise':{icon:'📸',bg:'rgba(255,77,141,0.1)'},'Parrainage':{icon:'👥',bg:'rgba(34,212,160,0.1)'},'Bonus inscription':{icon:'🎁',bg:'rgba(245,200,66,0.1)'},'Bonus profil':{icon:'✅',bg:'rgba(34,212,160,0.1)'}};
-  list.innerHTML=data.map(item=>{
-    const meta=icons[item.action]||{icon:'⚡',bg:'rgba(245,200,66,0.1)'};
-    const dateStr=new Date(item.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    return `<div class="history-item"><div class="h-icon" style="background:${meta.bg}">${meta.icon}</div><div class="h-info"><div class="h-title">${escapeHtml(item.action)}</div><div class="h-date">${dateStr}</div></div><div class="h-pts ${item.points>0?'plus':'minus'}">${item.points>0?'+':''}${item.points} pts</div></div>`;
-  }).join('');
+  try{
+    const{data}=await sb.from('points_history').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
+    const list=document.getElementById('history-list');
+    if(!data||data.length===0){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Aucune transaction pour l\'instant</div>';return;}
+    const icons={'Note donnée':{icon:'⭐',bg:'rgba(245,200,66,0.1)'},'Pub regardée':{icon:'📺',bg:'rgba(139,92,246,0.1)'},'Photo soumise':{icon:'📸',bg:'rgba(255,77,141,0.1)'},'Parrainage':{icon:'👥',bg:'rgba(34,212,160,0.1)'},'Bonus inscription':{icon:'🎁',bg:'rgba(245,200,66,0.1)'},'Bonus profil':{icon:'✅',bg:'rgba(34,212,160,0.1)'}};
+    list.innerHTML=data.map(item=>{
+      const meta=icons[item.action]||{icon:'⚡',bg:'rgba(245,200,66,0.1)'};
+      const dateStr=new Date(item.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      return `<div class="history-item"><div class="h-icon" style="background:${meta.bg}">${meta.icon}</div><div class="h-info"><div class="h-title">${escapeHtml(item.action)}</div><div class="h-date">${dateStr}</div></div><div class="h-pts ${item.points>0?'plus':'minus'}">${item.points>0?'+':''}${item.points} pts</div></div>`;
+    }).join('');
+  }catch(e){
+    console.error('[points] loadHistory:',e);
+    document.getElementById('history-list').innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Erreur de chargement de l\'historique</div>';
+  }
 }
 
 function openAd(){
@@ -423,20 +433,29 @@ function openAd(){
 }
 
 async function finishAd(){
-  if(!document.getElementById('btn-skip').classList.contains('ready'))return;
+  const btn=document.getElementById('btn-skip');
+  if(!btn.classList.contains('ready'))return;
+  btn.disabled=true;
   clearInterval(adTimer);
   document.getElementById('ad-modal').classList.remove('open');
   document.body.style.overflow='';
   const pubPts=PointsConfig.get('pub')||5;
   const newPts=(userProfile.points||0)+pubPts;
-  await sb.from('users').update({points:newPts}).eq('id',currentUser.id);
-  await sb.from('points_history').insert({user_id:currentUser.id,action:'Pub regardée',points:pubPts});
-  userProfile.points=newPts;
-  document.getElementById('pts-display').textContent=newPts;
-  document.getElementById('user-pts').textContent=newPts;
-  document.getElementById('balance-num').textContent=newPts;
-  await loadHistory();
-  showToast('⚡ +'+pubPts+' points crédités !','success');
+  try{
+    await sb.from('users').update({points:newPts}).eq('id',currentUser.id);
+    await sb.from('points_history').insert({user_id:currentUser.id,action:'Pub regardée',points:pubPts});
+    userProfile.points=newPts;
+    document.getElementById('pts-display').textContent=newPts;
+    document.getElementById('user-pts').textContent=newPts;
+    document.getElementById('balance-num').textContent=newPts;
+    await loadHistory();
+    showToast('⚡ +'+pubPts+' points crédités !','success');
+  }catch(e){
+    console.error('[points] finishAd:',e);
+    showToast('❌ Erreur lors du crédit de points','');
+  }finally{
+    btn.disabled=false;
+  }
 }
 
 function copyInvite(){
@@ -444,7 +463,7 @@ function copyInvite(){
   navigator.clipboard.writeText(link).then(()=>showToast('🔗 Lien copié : '+link,'success')).catch(()=>showToast('🔗 '+link,'success'));
 }
 
-async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
+async function doLogout(){try{await sb.auth.signOut();}catch(e){console.error('[points] doLogout:',e);}window.location.href='login.html';}
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 init();
