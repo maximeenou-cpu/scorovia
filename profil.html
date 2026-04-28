@@ -306,65 +306,64 @@ function escapeHtml(str){if(str==null)return'';return String(str).replace(/&/g,'
 function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}}
 
 async function init(){
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){window.location.href='login.html';return;}
-  currentUser=session.user;
-  const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
-  if(!profile){window.location.href='login.html';return;}
-  userProfile=profile;
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){window.location.href='login.html';return;}
+    currentUser=session.user;
+    const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
+    if(!profile){window.location.href='login.html';return;}
+    userProfile=profile;
 
-  // ✅ Premium via premium.js
-  const isPremium=Premium.init(profile);
+    const isPremium=Premium.init(profile);
+    const prenom=profile.prenom||'Membre';
 
-  const prenom=profile.prenom||'Membre';
+    const avSmEl=document.getElementById('user-avatar');
+    const avatarSafe=safeUrl(profile.avatar_url);
+    if(avatarSafe){avSmEl.innerHTML=`<img src="${avatarSafe}" />`;}
+    else{avSmEl.textContent=prenom.charAt(0).toUpperCase();}
 
-  // ✅ Photo de profil sidebar
-  const avSmEl=document.getElementById('user-avatar');
-  const avatarSafe=safeUrl(profile.avatar_url);
-  if(avatarSafe){avSmEl.innerHTML=`<img src="${avatarSafe}" />`;}
-  else{avSmEl.textContent=prenom.charAt(0).toUpperCase();}
+    document.getElementById('user-name').textContent=prenom;
+    document.getElementById('user-pts').textContent=profile.points||0;
+    document.getElementById('pts-display').textContent=profile.points||0;
 
-  document.getElementById('user-name').textContent=prenom;
-  document.getElementById('user-pts').textContent=profile.points||0;
-  document.getElementById('pts-display').textContent=profile.points||0;
+    const avEl=document.getElementById('profile-av');
+    if(avatarSafe){
+      avEl.innerHTML=`<img src="${avatarSafe}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+      avEl.style.fontSize='0';
+    }else{
+      avEl.textContent=prenom.charAt(0).toUpperCase();
+    }
 
-  // Hero avatar
-  const avEl=document.getElementById('profile-av');
-  if(avatarSafe){
-    avEl.innerHTML=`<img src="${avatarSafe}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
-    avEl.style.fontSize='0';
-  }else{
-    avEl.textContent=prenom.charAt(0).toUpperCase();
+    document.getElementById('profile-name').textContent=prenom;
+    document.getElementById('profile-meta').textContent=[
+      profile.genre?(profile.genre==='homme'?'👨 Homme':profile.genre==='femme'?'👩 Femme':'🧑 Autre'):null,
+      profile.ville,profile.age?profile.age+' ans':null
+    ].filter(Boolean).join(' · ')||'Membre SCOROVIA';
+
+    document.getElementById('stat-pts').textContent=profile.points||0;
+
+    if(isPremium){
+      document.getElementById('profile-premium-badge').style.display='inline-flex';
+    }
+
+    document.getElementById('edit-prenom').value=profile.prenom||'';
+    document.getElementById('edit-age').value=profile.age||'';
+    document.getElementById('edit-ville').value=profile.ville||'';
+    document.getElementById('edit-email').value=profile.email||currentUser.email||'';
+    if(profile.genre)selectGenre(profile.genre);
+
+    if(isPremium){
+      const msgBtn=document.getElementById('modal-msg-btn');
+      if(msgBtn)msgBtn.textContent='💬 Envoyer un message gratuit';
+    }
+
+    await loadStats();
+    document.getElementById('loading').style.display='none';
+  }catch(e){
+    console.error('[profil] init:',e);
+    document.getElementById('loading').style.display='none';
+    showToast('Erreur de chargement. Veuillez recharger la page.','error');
   }
-
-  document.getElementById('profile-name').textContent=prenom;
-  document.getElementById('profile-meta').textContent=[
-    profile.genre?(profile.genre==='homme'?'👨 Homme':profile.genre==='femme'?'👩 Femme':'🧑 Autre'):null,
-    profile.ville,profile.age?profile.age+' ans':null
-  ].filter(Boolean).join(' · ')||'Membre SCOROVIA';
-
-  document.getElementById('stat-pts').textContent=profile.points||0;
-
-  // ✅ Badge Premium sur la page profil
-  if(isPremium){
-    document.getElementById('profile-premium-badge').style.display='inline-flex';
-  }
-
-  // Form
-  document.getElementById('edit-prenom').value=profile.prenom||'';
-  document.getElementById('edit-age').value=profile.age||'';
-  document.getElementById('edit-ville').value=profile.ville||'';
-  document.getElementById('edit-email').value=profile.email||currentUser.email||'';
-  if(profile.genre)selectGenre(profile.genre);
-
-  // Bouton message gratuit si Premium
-  if(isPremium){
-    const msgBtn=document.getElementById('modal-msg-btn');
-    if(msgBtn)msgBtn.textContent='💬 Envoyer un message gratuit';
-  }
-
-  await loadStats();
-  document.getElementById('loading').style.display='none';
 }
 
 async function uploadAvatar(input){
@@ -412,16 +411,20 @@ function resizeImage(file,size){
 }
 
 async function loadStats(){
-  const{data:photos}=await sb.from('photos').select('nb_votes,note_moyenne').eq('user_id',currentUser.id);
-  const{data:votes}=await sb.from('votes').select('id').eq('voter_id',currentUser.id);
-  const totalVotes=photos?photos.reduce((s,p)=>s+(p.nb_votes||0),0):0;
-  const photosWithVotes=photos?photos.filter(p=>p.nb_votes>0):[];
-  const avgNote=photosWithVotes.length>0?(photosWithVotes.reduce((s,p)=>s+(p.note_moyenne||0),0)/photosWithVotes.length).toFixed(1):null;
-  document.getElementById('stat-votes').textContent=totalVotes;
-  document.getElementById('stat-photos').textContent=photos?.length||0;
-  document.getElementById('stat-given').textContent=votes?.length||0;
-  document.getElementById('profile-score').textContent=avgNote||'—';
-  document.getElementById('profile-rank').textContent=totalVotes+' vote'+(totalVotes>1?'s':'')+' reçus';
+  try{
+    const{data:photos}=await sb.from('photos').select('nb_votes,note_moyenne').eq('user_id',currentUser.id);
+    const{data:votes}=await sb.from('votes').select('id').eq('voter_id',currentUser.id);
+    const totalVotes=photos?photos.reduce((s,p)=>s+(p.nb_votes||0),0):0;
+    const photosWithVotes=photos?photos.filter(p=>p.nb_votes>0):[];
+    const avgNote=photosWithVotes.length>0?(photosWithVotes.reduce((s,p)=>s+(p.note_moyenne||0),0)/photosWithVotes.length).toFixed(1):null;
+    document.getElementById('stat-votes').textContent=totalVotes;
+    document.getElementById('stat-photos').textContent=photos?.length||0;
+    document.getElementById('stat-given').textContent=votes?.length||0;
+    document.getElementById('profile-score').textContent=avgNote||'—';
+    document.getElementById('profile-rank').textContent=totalVotes+' vote'+(totalVotes>1?'s':'')+' reçus';
+  }catch(e){
+    console.warn('[profil] loadStats:',e);
+  }
 }
 
 function selectGenre(g){
@@ -460,9 +463,14 @@ async function saveProfile(){
 
 async function deleteAllPhotos(){
   if(!confirm('Supprimer toutes vos photos ? Cette action est irréversible.'))return;
-  const{data:photos}=await sb.from('photos').select('id,url').eq('user_id',currentUser.id);
-  if(photos){for(const photo of photos){if(photo.url){const path=photo.url.split('/photos/')[1];if(path)await sb.storage.from('photos').remove([path]);}await sb.from('photos').delete().eq('id',photo.id);}}
-  await loadStats();showToast('🗑️ Toutes vos photos ont été supprimées','success');
+  try{
+    const{data:photos}=await sb.from('photos').select('id,url').eq('user_id',currentUser.id);
+    if(photos){for(const photo of photos){if(photo.url){const path=photo.url.split('/photos/')[1];if(path)await sb.storage.from('photos').remove([path]);}await sb.from('photos').delete().eq('id',photo.id);}}
+    await loadStats();showToast('🗑️ Toutes vos photos ont été supprimées','success');
+  }catch(e){
+    console.error('[profil] deleteAllPhotos:',e);
+    showToast('❌ Erreur lors de la suppression','error');
+  }
 }
 
 async function exportData(){
@@ -475,22 +483,36 @@ async function exportData(){
 async function deleteAccount(){
   if(!confirm('Supprimer définitivement votre compte ? Toutes vos données seront perdues.'))return;
   if(!confirm('Êtes-vous vraiment sûr ? Cette action est irréversible.'))return;
-  await deleteAllPhotos();await sb.from('users').delete().eq('id',currentUser.id);await sb.auth.signOut();window.location.href='index.html';
+  try{
+    await deleteAllPhotos();
+    const{error}=await sb.from('users').delete().eq('id',currentUser.id);
+    if(error)throw error;
+    await sb.auth.signOut();
+    window.location.href='index.html';
+  }catch(e){
+    console.error('[profil] deleteAccount:',e);
+    showToast('❌ Erreur lors de la suppression du compte','error');
+  }
 }
 
 async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
 
 async function openHistoryModal(){
   document.getElementById('history-modal').classList.add('open');document.body.style.overflow='hidden';
-  const{data:votes}=await sb.from('votes').select('id,note,created_at,photo_id,photos(url,users(prenom))').eq('voter_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
-  const total=votes?.length||0;
-  document.getElementById('history-modal-sub').textContent=total>0?`${total} note${total>1?'s':''} donnée${total>1?'s':''} au total`:'Aucune note donnée pour l\'instant.';
-  if(!votes||votes.length===0){document.getElementById('history-modal-list').innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Commencez à noter des profils !</div>';return;}
-  document.getElementById('history-modal-list').innerHTML=votes.map(v=>{
-    const sc=v.note>=8?'var(--green)':v.note>=6?'var(--gold2)':'var(--pink)';
-    const ago=timeAgo(v.created_at);const prenom=escapeHtml(v.photos?.users?.prenom||'Anonyme');const safeAv=safeUrl(v.photos?.url);
-    return `<div class="hist-row"><div class="hist-av">${safeAv?`<img src="${safeAv}" alt="" />`:'👤'}</div><div class="hist-info"><div class="hist-name">${prenom}</div><div class="hist-time">${ago}</div></div><div class="hist-score" style="color:${sc}">${v.note}/10</div></div>`;
-  }).join('');
+  try{
+    const{data:votes}=await sb.from('votes').select('id,note,created_at,photo_id,photos(url,users(prenom))').eq('voter_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
+    const total=votes?.length||0;
+    document.getElementById('history-modal-sub').textContent=total>0?`${total} note${total>1?'s':''} donnée${total>1?'s':''} au total`:'Aucune note donnée pour l\'instant.';
+    if(!votes||votes.length===0){document.getElementById('history-modal-list').innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Commencez à noter des profils !</div>';return;}
+    document.getElementById('history-modal-list').innerHTML=votes.map(v=>{
+      const sc=v.note>=8?'var(--green)':v.note>=6?'var(--gold2)':'var(--pink)';
+      const ago=timeAgo(v.created_at);const prenom=escapeHtml(v.photos?.users?.prenom||'Anonyme');const safeAv=safeUrl(v.photos?.url);
+      return `<div class="hist-row"><div class="hist-av">${safeAv?`<img src="${safeAv}" alt="" />`:'👤'}</div><div class="hist-info"><div class="hist-name">${prenom}</div><div class="hist-time">${ago}</div></div><div class="hist-score" style="color:${sc}">${v.note}/10</div></div>`;
+    }).join('');
+  }catch(e){
+    console.error('[profil] openHistoryModal:',e);
+    document.getElementById('history-modal-list').innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Erreur de chargement.</div>';
+  }
 }
 
 function closeModal(id,e){if(e.target===document.getElementById(id))closeModalDirect(id);}
