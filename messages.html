@@ -378,6 +378,7 @@ async function init(){
 }
 
 async function loadConversations(){
+  try {
   // ── 1. Votes reçus sur mes photos ────────────────────────────────
   const{data:myPhotos}=await sb.from('photos').select('id').eq('user_id',currentUser.id);
   const photoIds=myPhotos?myPhotos.map(p=>p.id):[];
@@ -472,6 +473,10 @@ async function loadConversations(){
 
   allConvs.sort((a,b) => new Date(b.lastActivityDate) - new Date(a.lastActivityDate));
   renderConvList(allConvs);
+  } catch(e) {
+    console.error('[messages] loadConversations:', e);
+    showToast('❌ Erreur lors du chargement des conversations', 'error');
+  }
 }
 
 function generateFakeName(voterId){let h=0;for(let c of voterId)h=(h*31+c.charCodeAt(0))%1000;const fn=['Alex','Jordan','Morgan','Taylor','Casey','Riley','Avery','Quinn','Blake','Skyler','Drew','Jamie'];const ln=['B.','C.','D.','F.','G.','H.','K.','L.','M.','N.','P.','R.'];return fn[h%fn.length]+' '+ln[Math.floor(h/12)%ln.length];}
@@ -795,6 +800,7 @@ function openUnlockModal(voterId,note){
 
 async function confirmUnlock(){
   if(!pendingUnlockId)return;
+  try {
   const{data:existing}=await sb.from('unlocked_profiles').select('voter_id').eq('user_id',currentUser.id).eq('voter_id',pendingUnlockId).single();
   document.getElementById('unlock-modal').classList.remove('open');
   if(existing){
@@ -818,6 +824,11 @@ async function confirmUnlock(){
   if(conv){conv.isUnlocked=true;renderConvList(allConvs);openConv(pendingUnlockId);}
   showToast(`✅ Profil déverrouillé ! -${COST_UNLOCK} pts`,'success');
   pendingUnlockId=null;
+  } catch(e) {
+    console.error('[messages] confirmUnlock:', e);
+    showToast('❌ Erreur lors du déverrouillage', 'error');
+    pendingUnlockId=null;
+  }
 }
 
 function closeUnlockModal(e){if(e.target===document.getElementById('unlock-modal'))document.getElementById('unlock-modal').classList.remove('open');}
@@ -857,6 +868,7 @@ function sendNotification(title,body,url){
 let lastMessageCount=0;
 async function pollNewMessages(){
   if(!currentUser)return;
+  try {
   const{count}=await sb.from('messages').select('id',{count:'exact',head:true}).eq('receiver_id',currentUser.id).eq('read',false);
 
   if(count>lastMessageCount&&lastMessageCount>0){
@@ -892,6 +904,9 @@ async function pollNewMessages(){
     await loadConversations();
   }
   lastMessageCount=count||0;
+  } catch(e) {
+    console.warn('[messages] pollNewMessages:', e);
+  }
 }
 
 async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
