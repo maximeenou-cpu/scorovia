@@ -379,87 +379,93 @@ async function sendWelcomeEmail(user, profile){
 }
 
 async function init(){
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){window.location.href='login.html';return;}
-  currentUser=session.user;
-  const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
-  if(!profile){window.location.href='login.html';return;}
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){window.location.href='login.html';return;}
+    currentUser=session.user;
+    const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
+    if(!profile){window.location.href='login.html';return;}
 
-  sendWelcomeEmail(currentUser, profile);
-  Premium.init(profile);
-  PointsConfig.load().then(() => PointsConfig.updateDOM());
+    sendWelcomeEmail(currentUser, profile);
+    Premium.init(profile);
+    PointsConfig.load().then(() => PointsConfig.updateDOM());
 
-  const{data:photos}=await sb.from('photos').select('id,nb_votes,note_moyenne').eq('user_id',currentUser.id).eq('active',true);
-  const totalVotes=photos?photos.reduce((sum,p)=>sum+(p.nb_votes||0),0):0;
+    const{data:photos}=await sb.from('photos').select('id,nb_votes,note_moyenne').eq('user_id',currentUser.id).eq('active',true);
+    const totalVotes=photos?photos.reduce((sum,p)=>sum+(p.nb_votes||0),0):0;
 
-  const photosWithVotes=photos?photos.filter(p=>p.nb_votes>0):[];
-  const avgNote=photosWithVotes.length>0
-    ?(photosWithVotes.reduce((sum,p)=>sum+(p.note_moyenne||0),0)/photosWithVotes.length).toFixed(1)
-    :null;
+    const photosWithVotes=photos?photos.filter(p=>p.nb_votes>0):[];
+    const avgNote=photosWithVotes.length>0
+      ?(photosWithVotes.reduce((sum,p)=>sum+(p.note_moyenne||0),0)/photosWithVotes.length).toFixed(1)
+      :null;
 
-  let rang=null;
-  if(avgNote){
-    const{data:allPhotos}=await sb.from('photos').select('user_id,note_moyenne').eq('active',true).gt('nb_votes',0);
-    if(allPhotos){
-      const avgByUser={};
-      allPhotos.forEach(p=>{if(!avgByUser[p.user_id])avgByUser[p.user_id]=[];avgByUser[p.user_id].push(p.note_moyenne);});
-      const myAvg=parseFloat(avgNote);let ahead=0;
-      Object.values(avgByUser).forEach(notes=>{const ua=notes.reduce((a,b)=>a+b,0)/notes.length;if(ua>myAvg)ahead++;});
-      rang=ahead+1;
+    let rang=null;
+    if(avgNote){
+      const{data:allPhotos}=await sb.from('photos').select('user_id,note_moyenne').eq('active',true).gt('nb_votes',0);
+      if(allPhotos){
+        const avgByUser={};
+        allPhotos.forEach(p=>{if(!avgByUser[p.user_id])avgByUser[p.user_id]=[];avgByUser[p.user_id].push(p.note_moyenne);});
+        const myAvg=parseFloat(avgNote);let ahead=0;
+        Object.values(avgByUser).forEach(notes=>{const ua=notes.reduce((a,b)=>a+b,0)/notes.length;if(ua>myAvg)ahead++;});
+        rang=ahead+1;
+      }
     }
+
+    const{count:totalMembers}=await sb.from('users').select('*',{count:'exact',head:true});
+
+    if(photos&&photos.length>0){
+      const photoIds=photos.map(p=>p.id);
+      const{data:votes}=await sb.from('votes').select('id,voter_id,note,created_at,photo_id').in('photo_id',photoIds).order('created_at',{ascending:false}).limit(20);
+      userVotes=votes||[];
+    }
+
+    const prenom=profile.prenom||'Membre';
+    const pts=profile.points||0;
+
+    const avEl=document.getElementById('user-avatar');
+    const av=safeUrl(profile.avatar_url);
+    if(av){avEl.innerHTML=`<img src="${av}" />`;}
+    else{avEl.textContent=prenom.charAt(0).toUpperCase();}
+
+    document.getElementById('user-name').textContent=prenom+(profile.ville?` · ${profile.ville}`:'');
+    document.getElementById('user-pts').textContent=pts;
+    document.getElementById('pts-display').textContent=pts;
+    document.getElementById('welcome-name').textContent=prenom;
+
+    if(totalVotes>0){
+      document.getElementById('welcome-sub').innerHTML=`Vous avez reçu <a href="mesnotes.html" style="color:var(--gold2);font-weight:500;text-decoration:none;">${totalVotes} vote${totalVotes>1?'s':''} →</a> Cliquez pour voir qui vous a noté.`;
+    }else{
+      document.getElementById('welcome-sub').innerHTML=`Bienvenue sur SCOROVIA ! <a href="mesnotes.html" style="color:var(--gold2);font-weight:500;text-decoration:none;">Soumettez votre première photo →</a>`;
+    }
+
+    if(avgNote){document.getElementById('welcome-score').textContent=avgNote;document.getElementById('stat-note').textContent=avgNote+'/10';}
+    else{document.getElementById('welcome-score').textContent='—';document.getElementById('stat-note').textContent='—';}
+
+    document.getElementById('stat-votes').textContent=totalVotes;
+    document.getElementById('stat-pts').textContent=pts;
+
+    if(rang){document.getElementById('stat-rang').textContent='#'+rang;document.getElementById('stat-rang-sub').innerHTML=`sur ${totalMembers||'?'} membres · <span style="color:var(--gold2);font-size:10px;">Voir le classement →</span>`;}
+    else{document.getElementById('stat-rang').textContent='—';}
+
+    const refLink=`https://scorovia.com/login.html?ref=${currentUser.id.slice(0,8)}`;
+    const refInput=document.getElementById('referral-link-input');
+    if(refInput) refInput.value=refLink;
+
+    loadNotifications(totalVotes,avgNote);
+    renderVotersList();
+    document.getElementById('loading').style.display='none';
+
+    // Lance les notifications APRÈS que tout est chargé
+    initNotifications();
+  }catch(e){
+    console.error('[dashboard] init:',e);
+    document.getElementById('loading').style.display='none';
+    showToast('Erreur de chargement. Veuillez recharger la page.','error');
   }
-
-  const{count:totalMembers}=await sb.from('users').select('*',{count:'exact',head:true});
-
-  if(photos&&photos.length>0){
-    const photoIds=photos.map(p=>p.id);
-    const{data:votes}=await sb.from('votes').select('id,voter_id,note,created_at,photo_id').in('photo_id',photoIds).order('created_at',{ascending:false}).limit(20);
-    userVotes=votes||[];
-  }
-
-  const prenom=profile.prenom||'Membre';
-  const pts=profile.points||0;
-
-  const avEl=document.getElementById('user-avatar');
-  const av=safeUrl(profile.avatar_url);
-  if(av){avEl.innerHTML=`<img src="${av}" />`;}
-  else{avEl.textContent=prenom.charAt(0).toUpperCase();}
-
-  document.getElementById('user-name').textContent=prenom+(profile.ville?` · ${profile.ville}`:'');
-  document.getElementById('user-pts').textContent=pts;
-  document.getElementById('pts-display').textContent=pts;
-  document.getElementById('welcome-name').textContent=prenom;
-
-  if(totalVotes>0){
-    document.getElementById('welcome-sub').innerHTML=`Vous avez reçu <a href="mesnotes.html" style="color:var(--gold2);font-weight:500;text-decoration:none;">${totalVotes} vote${totalVotes>1?'s':''} →</a> Cliquez pour voir qui vous a noté.`;
-  }else{
-    document.getElementById('welcome-sub').innerHTML=`Bienvenue sur SCOROVIA ! <a href="mesnotes.html" style="color:var(--gold2);font-weight:500;text-decoration:none;">Soumettez votre première photo →</a>`;
-  }
-
-  if(avgNote){document.getElementById('welcome-score').textContent=avgNote;document.getElementById('stat-note').textContent=avgNote+'/10';}
-  else{document.getElementById('welcome-score').textContent='—';document.getElementById('stat-note').textContent='—';}
-
-  document.getElementById('stat-votes').textContent=totalVotes;
-  document.getElementById('stat-pts').textContent=pts;
-
-  if(rang){document.getElementById('stat-rang').textContent='#'+rang;document.getElementById('stat-rang-sub').innerHTML=`sur ${totalMembers||'?'} membres · <span style="color:var(--gold2);font-size:10px;">Voir le classement →</span>`;}
-  else{document.getElementById('stat-rang').textContent='—';}
-
-  const refLink=`https://scorovia.com/login.html?ref=${currentUser.id.slice(0,8)}`;
-  const refInput=document.getElementById('referral-link-input');
-  if(refInput) refInput.value=refLink;
-
-  loadNotifications(totalVotes,avgNote);
-  renderVotersList();
-  document.getElementById('loading').style.display='none';
-
-  // Lance les notifications APRÈS que tout est chargé
-  initNotifications();
 }
 
 function loadNotifications(totalVotes,avgNote){
   const notifs=[];
-  if(totalVotes>0&&avgNote)notifs.push({icon:'⭐',text:`Vous avez <strong>${totalVotes} votes</strong> — note moyenne <strong>${avgNote}/10</strong>`,time:"Aujourd'hui",unread:true});
+  if(totalVotes>0&&avgNote)notifs.push({icon:'⭐',text:`Vous avez <strong>${escapeHtml(totalVotes)} votes</strong> — note moyenne <strong>${escapeHtml(avgNote)}/10</strong>`,time:"Aujourd'hui",unread:true});
   if(totalVotes===0)notifs.push({icon:'📸',text:"Soumettez votre première photo pour commencer à recevoir des notes !",time:'Maintenant',unread:true});
   const badge=document.getElementById('notif-badge');
   const list=document.getElementById('notif-list');
@@ -467,7 +473,7 @@ function loadNotifications(totalVotes,avgNote){
   if(unreadCount>0){badge.textContent=unreadCount;badge.style.display='flex';}
   else{badge.style.display='none';}
   if(notifs.length===0){list.innerHTML='<div class="notif-empty">Aucune notification pour l\'instant</div>';return;}
-  list.innerHTML=notifs.map(n=>`<div class="notif-item ${n.unread?'unread':''}" onclick="window.location.href='mesnotes.html'"><div class="notif-icon">${n.icon}</div><div class="notif-body"><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div>${n.unread?'<div class="notif-dot"></div>':''}</div>`).join('');
+  list.innerHTML=notifs.map(n=>`<div class="notif-item ${n.unread?'unread':''}" onclick="window.location.href='mesnotes.html'"><div class="notif-icon">${escapeHtml(n.icon)}</div><div class="notif-body"><div class="notif-text">${n.text}</div><div class="notif-time">${escapeHtml(n.time)}</div></div>${n.unread?'<div class="notif-dot"></div>':''}</div>`).join('');
 }
 
 function toggleNotif(){
@@ -544,41 +550,44 @@ async function initNotifications(){
 
 async function checkNewMessages(){
   if(!currentUser) return;
+  try{
+    const { data } = await sb.from('messages')
+      .select('id, content, sender_id')
+      .eq('receiver_id', currentUser.id)
+      .eq('read', false);
 
-  const { data } = await sb.from('messages')
-    .select('id, content, sender_id')
-    .eq('receiver_id', currentUser.id)
-    .eq('read', false);
+    if(!data) return;
 
-  if(!data) return;
+    // Nouveaux = présents dans Supabase mais pas encore dans notre Set
+    const newMessages = data.filter(m => !knownMessageIds.has(m.id));
 
-  // Nouveaux = présents dans Supabase mais pas encore dans notre Set
-  const newMessages = data.filter(m => !knownMessageIds.has(m.id));
+    if(newMessages.length > 0){
+      // Son unique pour tous les nouveaux messages
+      playNotifSound();
 
-  if(newMessages.length > 0){
-    // Son unique pour tous les nouveaux messages
-    playNotifSound();
-
-    // Une notification par message (arrière-plan uniquement)
-    if(Notification.permission === 'granted' && document.hidden){
-      newMessages.forEach(m => {
-        const preview = m.content.length > 60 ? m.content.substring(0, 60) + '…' : m.content;
-        const n = new Notification('💬 Nouveau message — SCOROVIA', {
-          body: preview,
-          icon: '/favicon.ico',
-          tag: `scorovia-msg-${m.id}`,
-          renotify: true
+      // Une notification par message (arrière-plan uniquement)
+      if(Notification.permission === 'granted' && document.hidden){
+        newMessages.forEach(m => {
+          const preview = m.content.length > 60 ? m.content.substring(0, 60) + '…' : m.content;
+          const n = new Notification('💬 Nouveau message — SCOROVIA', {
+            body: preview,
+            icon: '/favicon.ico',
+            tag: `scorovia-msg-${m.id}`,
+            renotify: true
+          });
+          n.onclick = () => { window.focus(); window.location.href = 'messages.html'; n.close(); };
         });
-        n.onclick = () => { window.focus(); window.location.href = 'messages.html'; n.close(); };
-      });
+      }
+
+      // Ajoute les nouveaux IDs au Set
+      newMessages.forEach(m => knownMessageIds.add(m.id));
     }
 
-    // Ajoute les nouveaux IDs au Set
-    newMessages.forEach(m => knownMessageIds.add(m.id));
+    // Badge = total des non-lus actuels (y compris ceux déjà connus)
+    updateMessageBadge(data.length);
+  }catch(e){
+    console.warn('[dashboard] checkNewMessages:',e);
   }
-
-  // Badge = total des non-lus actuels (y compris ceux déjà connus)
-  updateMessageBadge(data.length);
 }
 
 function updateMessageBadge(count){
