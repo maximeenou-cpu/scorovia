@@ -1,0 +1,31 @@
+{
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "script"
+  },
+  "globals": {
+    "supabase": "readonly",
+    "Premium": "readonly",
+    "PointsConfig": "readonly",
+    "grecaptcha": "readonly",
+    "adsbygoogle": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-undef": "error",
+    "no-console": "off",
+    "eqeqeq": ["error", "always"],
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "no-alert": "off"
+  },
+  "ignorePatterns": [
+    "service-worker.js"
+  ]
+}

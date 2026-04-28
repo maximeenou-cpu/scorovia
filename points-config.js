@@ -1,3 +1,4 @@
+/* exported PointsConfig */
 /**
  * points-config.js — SCOROVIA
  * Charge la configuration des points depuis Supabase et expose

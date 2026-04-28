@@ -1,3 +1,4 @@
+/* exported Premium */
 /**
  * premium.js — SCOROVIA
  * Inclure dans toutes les pages APRÈS supabase.js :
