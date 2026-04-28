@@ -7,7 +7,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.google.com https://www.gstatic.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.googletagservices.com https://partner.googleadservices.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://rsdlcqsmuvaqkohjqsjs.supabase.co https://*.googleusercontent.com https://www.gstatic.com https://*.googlesyndication.com https://*.doubleclick.net; connect-src 'self' https://rsdlcqsmuvaqkohjqsjs.supabase.co wss://rsdlcqsmuvaqkohjqsjs.supabase.co https://formspree.io https://www.google.com https://www.recaptcha.net https://api.sightengine.com https://*.googlesyndication.com https://*.doubleclick.net; frame-src https://www.google.com https://recaptcha.google.com https://www.gstatic.com https://*.doubleclick.net; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.google.com https://www.gstatic.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.googletagservices.com https://partner.googleadservices.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://rsdlcqsmuvaqkohjqsjs.supabase.co https://*.googleusercontent.com https://www.gstatic.com https://*.googlesyndication.com https://*.doubleclick.net; connect-src 'self' https://rsdlcqsmuvaqkohjqsjs.supabase.co wss://rsdlcqsmuvaqkohjqsjs.supabase.co https://formspree.io https://www.google.com https://www.recaptcha.net https://*.googlesyndication.com https://*.doubleclick.net; frame-src https://www.google.com https://recaptcha.google.com https://www.gstatic.com https://*.doubleclick.net; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io; upgrade-insecure-requests"
         },
         {
           "key": "X-Frame-Options",
@@ -24,6 +24,10 @@
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=(), payment=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
         }
       ]
     }
