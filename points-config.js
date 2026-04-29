@@ -1,3 +1,4 @@
+/* exported PointsConfig */
 /**
  * points-config.js — SCOROVIA
  * Charge la configuration des points depuis Supabase et expose
@@ -9,11 +10,9 @@
  *   await PointsConfig.load();
  *   PointsConfig.updateDOM();
  */
-
 const PointsConfig = (() => {
   const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
-
   // Valeurs par défaut (fallback si Supabase inaccessible)
   let config = {
     inscription:    { label: 'Inscription',               points: 20  },
@@ -24,9 +23,7 @@ const PointsConfig = (() => {
     unlock_profile: { label: 'Déverrouiller un profil',   points: -50 },
     message:        { label: 'Envoyer un message',         points: -20 },
   };
-
   let loaded = false;
-
   /** Charge la config depuis Supabase (une seule fois par page) */
   async function load() {
     if (loaded) return config;
@@ -51,18 +48,15 @@ const PointsConfig = (() => {
     }
     return config;
   }
-
   /** Retourne la valeur d'une clé (ex: PointsConfig.get('vote') → 1) */
   function get(key) {
     return config[key]?.points ?? 0;
   }
-
   /** Formate un nombre en "+X pts" ou "-X pts" */
   function fmt(key) {
     const v = get(key);
     return (v >= 0 ? '+' : '') + v + ' pt' + (Math.abs(v) > 1 ? 's' : '');
   }
-
   /**
    * Met à jour tous les éléments DOM portant data-pts-key="<key>"
    * avec la valeur formatée.
@@ -75,7 +69,6 @@ const PointsConfig = (() => {
         el.textContent = fmt(key);
       }
     });
-
     // Mise à jour des attributs data-pts-value (valeur brute pour JS)
     document.querySelectorAll('[data-pts-value]').forEach(el => {
       const key = el.getAttribute('data-pts-value');
@@ -84,6 +77,5 @@ const PointsConfig = (() => {
       }
     });
   }
-
   return { load, get, fmt, updateDOM };
 })();
