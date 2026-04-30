@@ -439,26 +439,31 @@ async function saveProfile(){
   if(!prenom){showToast('⚠️ Le prénom est obligatoire','error');return;}
   if(age&&age<18){showToast('⚠️ Vous devez avoir au moins 18 ans','error');return;}
   const btn=document.getElementById('btn-save');btn.textContent='Enregistrement...';btn.disabled=true;
-  const{error}=await sb.from('users').update({prenom,age:age||null,ville:ville||null,genre:selectedGenre||null}).eq('id',currentUser.id);
-  btn.textContent='ENREGISTRER LES MODIFICATIONS';btn.disabled=false;
-  if(error){showToast('❌ Erreur : '+error.message,'error');return;}
+  try{
+    const{error}=await sb.from('users').update({prenom,age:age||null,ville:ville||null,genre:selectedGenre||null}).eq('id',currentUser.id);
+    if(error)throw error;
 
-  // ✅ FIX : mettre à jour le texte sans écraser la photo
-  document.getElementById('user-name').textContent=prenom;
-  document.getElementById('profile-name').textContent=prenom;
-  document.getElementById('profile-meta').textContent=[
-    selectedGenre?(selectedGenre==='homme'?'👨 Homme':selectedGenre==='femme'?'👩 Femme':'🧑 Autre'):null,
-    ville,age?age+' ans':null
-  ].filter(Boolean).join(' · ');
+    // ✅ FIX : mettre à jour le texte sans écraser la photo
+    document.getElementById('user-name').textContent=prenom;
+    document.getElementById('profile-name').textContent=prenom;
+    document.getElementById('profile-meta').textContent=[
+      selectedGenre?(selectedGenre==='homme'?'👨 Homme':selectedGenre==='femme'?'👩 Femme':'🧑 Autre'):null,
+      ville,age?age+' ans':null
+    ].filter(Boolean).join(' · ');
 
-  // Mettre à jour initiale SEULEMENT s'il n'y a pas d'avatar
-  if(!userProfile.avatar_url){
-    document.getElementById('profile-av').textContent=prenom.charAt(0).toUpperCase();
-    document.getElementById('user-avatar').textContent=prenom.charAt(0).toUpperCase();
+    // Mettre à jour initiale SEULEMENT s'il n'y a pas d'avatar
+    if(!userProfile.avatar_url){
+      document.getElementById('profile-av').textContent=prenom.charAt(0).toUpperCase();
+      document.getElementById('user-avatar').textContent=prenom.charAt(0).toUpperCase();
+    }
+
+    userProfile.prenom=prenom;
+    showToast('✅ Profil mis à jour !','success');
+  }catch(e){
+    showToast('❌ Erreur : '+e.message,'error');
+  }finally{
+    btn.textContent='ENREGISTRER LES MODIFICATIONS';btn.disabled=false;
   }
-
-  userProfile.prenom=prenom;
-  showToast('✅ Profil mis à jour !','success');
 }
 
 async function deleteAllPhotos(){
@@ -495,7 +500,10 @@ async function deleteAccount(){
   }
 }
 
-async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
+async function doLogout(){
+  try{await sb.auth.signOut();}catch(e){console.error('[profil] doLogout:',e);}
+  window.location.href='login.html';
+}
 
 async function openHistoryModal(){
   document.getElementById('history-modal').classList.add('open');document.body.style.overflow='hidden';
