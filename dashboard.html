@@ -388,7 +388,7 @@ async function init(){
 
     sendWelcomeEmail(currentUser, profile);
     Premium.init(profile);
-    PointsConfig.load().then(() => PointsConfig.updateDOM());
+    PointsConfig.load().then(() => PointsConfig.updateDOM()).catch(e => console.error('[dashboard] PointsConfig.load:', e));
 
     const{data:photos}=await sb.from('photos').select('id,nb_votes,note_moyenne').eq('user_id',currentUser.id).eq('active',true);
     const totalVotes=photos?photos.reduce((sum,p)=>sum+(p.nb_votes||0),0):0;
@@ -499,7 +499,11 @@ function renderVotersList(){
 
 function timeAgo(dateStr){const diff=Math.floor((Date.now()-new Date(dateStr))/1000);if(diff<60)return 'Il y a quelques secondes';if(diff<3600)return `Il y a ${Math.floor(diff/60)} min`;if(diff<86400)return `Il y a ${Math.floor(diff/3600)}h`;return `Il y a ${Math.floor(diff/86400)} jour${Math.floor(diff/86400)>1?'s':''}`;}
 
-async function doLogout(){await sb.auth.signOut();localStorage.removeItem('scorovia_user');window.location.href='login.html';}
+async function doLogout(){
+  try{await sb.auth.signOut();}catch(e){console.error('[dashboard] doLogout:',e);}
+  localStorage.removeItem('scorovia_user');
+  window.location.href='login.html';
+}
 
 function copyInvite(){
   const link=`https://scorovia.com/login.html?ref=${currentUser?.id?.slice(0,8)||'user'}`;
@@ -534,15 +538,17 @@ async function initNotifications(){
   }
 
   // Charge les non-lus existants dans le Set ET met à jour le badge
-  const { data: existing } = await sb.from('messages')
-    .select('id')
-    .eq('receiver_id', currentUser.id)
-    .eq('read', false);
+  try {
+    const { data: existing } = await sb.from('messages')
+      .select('id')
+      .eq('receiver_id', currentUser.id)
+      .eq('read', false);
 
-  if(existing) existing.forEach(m => knownMessageIds.add(m.id));
-
-  // Affiche le badge avec le count réel
-  updateMessageBadge(knownMessageIds.size);
+    if(existing) existing.forEach(m => knownMessageIds.add(m.id));
+    updateMessageBadge(knownMessageIds.size);
+  } catch(e) {
+    console.error('[dashboard] initNotifications:', e);
+  }
 
   // Poll toutes les 30s pour détecter les NOUVEAUX messages
   setInterval(checkNewMessages, 30000);
