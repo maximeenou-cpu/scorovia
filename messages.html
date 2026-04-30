@@ -340,41 +340,47 @@ async function loadPointsConfig() {
 const AV_COLORS=['linear-gradient(135deg,#2D1F5E,#1A3A5E)','linear-gradient(135deg,#5E2D7A,#2D1F5E)','linear-gradient(135deg,#1A3A5E,#0D1B2A)','linear-gradient(135deg,#2D5E3A,#1A3A2A)','linear-gradient(135deg,#5E3A1A,#2D200D)','linear-gradient(135deg,#3A2D5E,#1A2D5E)'];
 
 async function init(){
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){window.location.href='login.html';return;}
-  currentUser=session.user;
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){window.location.href='login.html';return;}
+    currentUser=session.user;
 
-  const [{data:profile}] = await Promise.all([
-    sb.from('users').select('*').eq('id',currentUser.id).single(),
-    loadPointsConfig()
-  ]);
+    const [{data:profile}] = await Promise.all([
+      sb.from('users').select('*').eq('id',currentUser.id).single(),
+      loadPointsConfig()
+    ]);
 
-  if(!profile){window.location.href='login.html';return;}
-  userProfile=profile;
-  isPremium=Premium.init(profile);
+    if(!profile){window.location.href='login.html';return;}
+    userProfile=profile;
+    isPremium=Premium.init(profile);
 
-  const avEl=document.getElementById('user-avatar');
-  const avSb=safeUrl(profile.avatar_url);
-  if(avSb){avEl.innerHTML=`<img src="${avSb}" />`;}
-  else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
+    const avEl=document.getElementById('user-avatar');
+    const avSb=safeUrl(profile.avatar_url);
+    if(avSb){avEl.innerHTML=`<img src="${avSb}" />`;}
+    else{avEl.textContent=profile.prenom?.charAt(0).toUpperCase()||'?';}
 
-  document.getElementById('user-name').textContent=profile.prenom||'Membre';
-  document.getElementById('user-pts').textContent=profile.points||0;
-  document.getElementById('pts-display').textContent=profile.points||0;
+    document.getElementById('user-name').textContent=profile.prenom||'Membre';
+    document.getElementById('user-pts').textContent=profile.points||0;
+    document.getElementById('pts-display').textContent=profile.points||0;
 
-  await loadConversations();
-  document.getElementById('loading').style.display='none';
+    await loadConversations();
+    document.getElementById('loading').style.display='none';
 
-  const urlParams=new URLSearchParams(window.location.search);
-  const openId=urlParams.get('open');
-  if(openId){
-    const conv=allConvs.find(c=>c.id===openId);
-    if(conv){setTimeout(()=>openConv(openId),100);}
+    const urlParams=new URLSearchParams(window.location.search);
+    const openId=urlParams.get('open');
+    if(openId){
+      const conv=allConvs.find(c=>c.id===openId);
+      if(conv){setTimeout(()=>openConv(openId),100);}
+    }
+
+    await requestNotifPermission();
+    pollNewMessages();
+    setInterval(pollNewMessages,30000);
+  }catch(e){
+    console.error('[messages] init:',e);
+    document.getElementById('loading').style.display='none';
+    showToast('Erreur de chargement. Veuillez recharger la page.','error');
   }
-
-  await requestNotifPermission();
-  pollNewMessages();
-  setInterval(pollNewMessages,30000);
 }
 
 async function loadConversations(){
@@ -539,20 +545,24 @@ async function openConvReceived(voterId){
   const conv=allConvs.find(c=>c.id===voterId);
   if(!conv)return;
   hideCovPanel();
+  try{
+    // Marquer comme lu
+    if(conv.unread>0){
+      await sb.from('messages').update({read:true}).eq('sender_id',voterId).eq('receiver_id',currentUser.id);
+      conv.unread=0;
+    }
+    renderConvList(allConvs);
 
-  // Marquer comme lu
-  if(conv.unread>0){
-    await sb.from('messages').update({read:true}).eq('sender_id',voterId).eq('receiver_id',currentUser.id);
-    conv.unread=0;
+    const{data:msgs}=await sb.from('messages')
+      .select('*')
+      .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${voterId}),and(sender_id.eq.${voterId},receiver_id.eq.${currentUser.id})`)
+      .order('created_at',{ascending:true});
+
+    renderChatAreaReceived(conv, msgs||[]);
+  }catch(e){
+    console.error('[messages] openConvReceived:',e);
+    showToast('❌ Erreur lors du chargement de la conversation.','error');
   }
-  renderConvList(allConvs);
-
-  const{data:msgs}=await sb.from('messages')
-    .select('*')
-    .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${voterId}),and(sender_id.eq.${voterId},receiver_id.eq.${currentUser.id})`)
-    .order('created_at',{ascending:true});
-
-  renderChatAreaReceived(conv, msgs||[]);
 }
 
 // ── Chat pour messages reçus sans profil déverrouillé ──────────────
@@ -611,24 +621,29 @@ async function openConv(voterId){
   }
 
   hideCovPanel();
-  if(conv.unread>0){
-    await sb.from('messages').update({read:true}).eq('sender_id',voterId).eq('receiver_id',currentUser.id);
-    conv.unread=0;
-  }
-  renderConvList(allConvs);
+  try{
+    if(conv.unread>0){
+      await sb.from('messages').update({read:true}).eq('sender_id',voterId).eq('receiver_id',currentUser.id);
+      conv.unread=0;
+    }
+    renderConvList(allConvs);
 
-  const{data:unlockedCheck}=await sb.from('unlocked_profiles').select('voter_id').eq('user_id',currentUser.id).eq('voter_id',voterId).single();
-  let voterProfile=null,voterPhotos=[];
-  if(unlockedCheck||isPremium){
-    const{data:vp}=await sb.from('users').select('id,prenom,ville,age,genre,avatar_url').eq('id',voterId).single();
-    voterProfile=vp;
-    const{data:vPhotos}=await sb.from('photos').select('id,url,note_moyenne,nb_votes').eq('user_id',voterId).eq('active',true).order('note_moyenne',{ascending:false});
-    voterPhotos=vPhotos||[];
+    const{data:unlockedCheck}=await sb.from('unlocked_profiles').select('voter_id').eq('user_id',currentUser.id).eq('voter_id',voterId).single();
+    let voterProfile=null,voterPhotos=[];
+    if(unlockedCheck||isPremium){
+      const{data:vp}=await sb.from('users').select('id,prenom,ville,age,genre,avatar_url').eq('id',voterId).single();
+      voterProfile=vp;
+      const{data:vPhotos}=await sb.from('photos').select('id,url,note_moyenne,nb_votes').eq('user_id',voterId).eq('active',true).order('note_moyenne',{ascending:false});
+      voterPhotos=vPhotos||[];
+    }
+    const{data:msgs}=await sb.from('messages').select('*').or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${voterId}),and(sender_id.eq.${voterId},receiver_id.eq.${currentUser.id})`).order('created_at',{ascending:true});
+    conv.voterProfile=voterProfile;
+    conv.voterPhotos=voterPhotos||[];
+    renderChatArea(conv,msgs||[]);
+  }catch(e){
+    console.error('[messages] openConv:',e);
+    showToast('❌ Erreur lors du chargement de la conversation.','error');
   }
-  const{data:msgs}=await sb.from('messages').select('*').or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${voterId}),and(sender_id.eq.${voterId},receiver_id.eq.${currentUser.id})`).order('created_at',{ascending:true});
-  conv.voterProfile=voterProfile;
-  conv.voterPhotos=voterPhotos||[];
-  renderChatArea(conv,msgs||[]);
 }
 
 function openPhotoModal(url,score,votes){
@@ -909,7 +924,10 @@ async function pollNewMessages(){
   }
 }
 
-async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
+async function doLogout(){
+  try{await sb.auth.signOut();}catch(e){console.error('[messages] doLogout:',e);}
+  window.location.href='login.html';
+}
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 
