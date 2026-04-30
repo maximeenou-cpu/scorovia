@@ -683,7 +683,10 @@ function addToHistory(photo, score) {
 }
 
 function closePopup() { document.getElementById('signup-popup').classList.remove('show'); }
-async function doLogout() { await sb.auth.signOut(); window.location.href = 'login.html'; }
+async function doLogout() {
+  try { await sb.auth.signOut(); } catch(e) { console.error('[noter] doLogout:', e); }
+  window.location.href = 'login.html';
+}
 function showToast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type || ''); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 

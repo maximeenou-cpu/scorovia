@@ -287,6 +287,7 @@ async function init(){
 }
 
 async function loadRanking(){
+  try{
   const{data:users,error}=await sb.from('users').select('id,prenom,ville,age,genre,points,avatar_url');
   if(error||!users)return;
   const{data:photos}=await sb.from('photos').select('user_id,note_moyenne,nb_votes').eq('active',true);
@@ -330,6 +331,7 @@ async function loadRanking(){
     }
   }
   renderFiltered(allRanked);
+  }catch(e){console.error('[classement] loadRanking:',e);showToast('Erreur lors du chargement du classement.','');}
 }
 
 function setFilter(filter,e){
@@ -469,7 +471,10 @@ function renderList(ranked,all,total){
   list.innerHTML=html;
 }
 
-async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
+async function doLogout(){
+  try{await sb.auth.signOut();}catch(e){console.error('[classement] doLogout:',e);}
+  window.location.href='login.html';
+}
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 init();

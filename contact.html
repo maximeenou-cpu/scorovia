@@ -348,6 +348,12 @@ async function submitForm() {
   btn.innerHTML = '<div class="spinner"></div> Envoi en cours...';
   btn.disabled = true;
 
+  if (typeof grecaptcha === 'undefined') {
+    btn.innerHTML = 'ENVOYER MON MESSAGE'; btn.disabled = false;
+    showAlert('⚠️ Vérification anti-robot indisponible. Désactivez votre bloqueur de pub et réessayez.');
+    return;
+  }
+
   try {
     // Get reCAPTCHA token
     const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact' });
@@ -377,7 +383,7 @@ async function submitForm() {
   } catch (err) {
     btn.innerHTML = 'ENVOYER MON MESSAGE';
     btn.disabled = false;
-    showAlert('❌ Erreur lors de l'envoi. Veuillez réessayer.');
+    showAlert("❌ Erreur lors de l'envoi. Veuillez réessayer.");
   }
 }
 

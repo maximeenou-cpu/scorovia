@@ -713,7 +713,7 @@ const obs = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-PointsConfig.load().then(() => PointsConfig.updateDOM());
+PointsConfig.load().then(() => PointsConfig.updateDOM()).catch(e => console.error('[index] PointsConfig.load:', e));
 
 Promise.all([loadCounter(), buildTicker(), buildProof(), buildMockPhone(), buildTestimonials()]).catch(() => {});
 </script>

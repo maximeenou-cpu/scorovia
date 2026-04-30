@@ -346,30 +346,37 @@ function escapeHtml(str){if(str==null)return'';return String(str).replace(/&/g,'
 function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}}
 
 async function init(){
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){window.location.href='login.html';return;}
-  currentUser=session.user;
-  const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
-  if(!profile){window.location.href='login.html';return;}
-  userProfile=profile;
-  // ✅ Premium via premium.js
-  window._isPremium=Premium.init(profile);
-  const prenom=profile.prenom||'Membre';
-  // ✅ Photo de profil dans la sidebar
-  const avEl=document.getElementById('user-avatar');
-  const avatarSafe=safeUrl(profile.avatar_url);
-  if(avatarSafe){avEl.innerHTML=`<img src="${avatarSafe}" />`;}
-  else{avEl.textContent=prenom.charAt(0).toUpperCase();}
-  document.getElementById('user-name').textContent=prenom;
-  document.getElementById('user-pts').textContent=profile.points;
-  document.getElementById('pts-display').textContent=profile.points;
-  await loadPhotos();
-  await loadUnlockedVoters();
-  await loadVoters();
-  document.getElementById('loading').style.display='none';
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){window.location.href='login.html';return;}
+    currentUser=session.user;
+    const{data:profile}=await sb.from('users').select('*').eq('id',currentUser.id).single();
+    if(!profile){window.location.href='login.html';return;}
+    userProfile=profile;
+    // ✅ Premium via premium.js
+    window._isPremium=Premium.init(profile);
+    const prenom=profile.prenom||'Membre';
+    // ✅ Photo de profil dans la sidebar
+    const avEl=document.getElementById('user-avatar');
+    const avatarSafe=safeUrl(profile.avatar_url);
+    if(avatarSafe){avEl.innerHTML=`<img src="${avatarSafe}" />`;}
+    else{avEl.textContent=prenom.charAt(0).toUpperCase();}
+    document.getElementById('user-name').textContent=prenom;
+    document.getElementById('user-pts').textContent=profile.points;
+    document.getElementById('pts-display').textContent=profile.points;
+    await loadPhotos();
+    await loadUnlockedVoters();
+    await loadVoters();
+    document.getElementById('loading').style.display='none';
+  }catch(e){
+    console.error('[mesnotes] init:',e);
+    document.getElementById('loading').style.display='none';
+    showToast('Erreur de chargement. Veuillez recharger la page.','error');
+  }
 }
 
 async function loadPhotos(){
+  try{
   const{data:photos}=await sb.from('photos').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
   const grid=document.getElementById('photos-grid');
   if(!photos||photos.length===0){
@@ -417,6 +424,7 @@ async function loadPhotos(){
     </div>`;
   }).join('');
   if(photos.length<5){grid.innerHTML+=`<div class="photo-card" style="border:2px dashed rgba(245,200,66,0.15);cursor:pointer;background:rgba(245,200,66,0.02);" onclick="openModal()"><div class="photo-thumb" style="background:transparent;flex-direction:column;gap:8px"><div style="font-size:36px;color:rgba(240,238,248,0.15)">+</div><div style="font-size:13px;color:var(--muted)">Ajouter une photo</div><div style="font-size:11px;color:rgba(245,200,66,0.5)">⚡ 20 points</div></div><div class="photo-info" style="text-align:center"><div style="font-size:12px;color:var(--muted)">Slot disponible (${photos.length}/5)</div></div></div>`;}
+  }catch(e){console.error('[mesnotes] loadPhotos:',e);showToast('Erreur lors du chargement des photos.','error');}
 }
 
 async function openModal(){
@@ -488,7 +496,10 @@ async function submitPhoto(){
 }
 
 let unlockedVoters=new Set();
-async function loadUnlockedVoters(){const{data}=await sb.from('unlocked_profiles').select('voter_id').eq('user_id',currentUser.id);if(data)data.forEach(r=>unlockedVoters.add(r.voter_id));}
+async function loadUnlockedVoters(){
+  try{const{data}=await sb.from('unlocked_profiles').select('voter_id').eq('user_id',currentUser.id);if(data)data.forEach(r=>unlockedVoters.add(r.voter_id));}
+  catch(e){console.error('[mesnotes] loadUnlockedVoters:',e);}
+}
 
 // ✅ Redirection vers la conversation spécifique
 function goToConversation(voterId){window.location.href=`messages.html?open=${voterId}`;}
@@ -500,6 +511,7 @@ async function openVotersPanel(photoId,photoUrl,nbVotes){
   document.getElementById('vp-title').textContent=`${nbVotes} votant${nbVotes>1?'s':''}`;
   document.getElementById('vp-sub').textContent='Chargement...';
   list.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Chargement...</div>';
+  try{
   const{data:votes}=await sb.from('votes').select('id,voter_id,note,created_at').eq('photo_id',photoId).order('created_at',{ascending:false});
   if(!votes||votes.length===0){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Aucun vote pour l\'instant.</div>';return;}
   document.getElementById('vp-sub').textContent=window._isPremium?`${votes.length} vote${votes.length>1?'s':''} · ★ Tous révélés avec Premium`:`${votes.length} vote${votes.length>1?'s':''} — cliquez pour révéler`;
@@ -541,6 +553,7 @@ async function openVotersPanel(photoId,photoUrl,nbVotes){
       </div>
     </div>`;
   }).join('');
+  }catch(e){console.error('[mesnotes] openVotersPanel:',e);list.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Erreur lors du chargement.</div>';}
 }
 
 async function unlockVoterPanel(voterId,rowIndex){
@@ -565,23 +578,25 @@ async function unlockVoterPanel(voterId,rowIndex){
   const cost=50;
   if(!userProfile||userProfile.points<cost){showToast(`⚡ Points insuffisants — ${cost} pts requis`,'error');setTimeout(()=>window.location.href='points.html',2000);return;}
   if(unlockedVoters.has(voterId)){showToast('✅ Ce profil est déjà déverrouillé !','success');return;}
-  const newPts=userProfile.points-cost;
-  await sb.from('users').update({points:newPts}).eq('id',currentUser.id);
-  await sb.from('points_history').insert({user_id:currentUser.id,action:'Profil votant déverrouillé',points:-cost});
-  await sb.from('unlocked_profiles').insert({user_id:currentUser.id,voter_id:voterId});
-  unlockedVoters.add(voterId);userProfile.points=newPts;
-  document.getElementById('pts-display').textContent=newPts;document.getElementById('user-pts').textContent=newPts;
-  const{data:voter}=await sb.from('users').select('prenom,ville,age,genre').eq('id',voterId).single();
-  const row=document.getElementById(`vpr-${rowIndex}`);const overlay=document.getElementById(`vpu-${rowIndex}`);
-  if(row&&voter){
-    const avEl=row.querySelector('.voter-panel-av');const nameEl=row.querySelector('.voter-panel-name');const metaEl=row.querySelector('.voter-panel-meta');
-    if(avEl){avEl.textContent=(voter.prenom||'?').charAt(0).toUpperCase();avEl.classList.remove('blurred');avEl.style.background='linear-gradient(135deg,var(--gold),var(--pink))';}
-    if(nameEl){nameEl.textContent=voter.prenom||'Membre';nameEl.classList.remove('blurred');}
-    if(metaEl){metaEl.textContent=[voter.ville,voter.age?voter.age+' ans':null].filter(Boolean).join(' · ')||'Membre SCOROVIA';}
-    if(overlay)overlay.innerHTML=`<button class="btn-panel-msg" onclick="goToConversation('${voterId}')" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#E8A020);color:#000;border:none;border-radius:8px;">💬 Message</button>`;
-    row.style.border='1px solid rgba(34,212,160,0.2)';
-  }
-  showToast(`✅ Profil révélé ! -${cost} pts`,'success');
+  try{
+    const newPts=userProfile.points-cost;
+    await sb.from('users').update({points:newPts}).eq('id',currentUser.id);
+    await sb.from('points_history').insert({user_id:currentUser.id,action:'Profil votant déverrouillé',points:-cost});
+    await sb.from('unlocked_profiles').insert({user_id:currentUser.id,voter_id:voterId});
+    unlockedVoters.add(voterId);userProfile.points=newPts;
+    document.getElementById('pts-display').textContent=newPts;document.getElementById('user-pts').textContent=newPts;
+    const{data:voter}=await sb.from('users').select('prenom,ville,age,genre').eq('id',voterId).single();
+    const row=document.getElementById(`vpr-${rowIndex}`);const overlay=document.getElementById(`vpu-${rowIndex}`);
+    if(row&&voter){
+      const avEl=row.querySelector('.voter-panel-av');const nameEl=row.querySelector('.voter-panel-name');const metaEl=row.querySelector('.voter-panel-meta');
+      if(avEl){avEl.textContent=(voter.prenom||'?').charAt(0).toUpperCase();avEl.classList.remove('blurred');avEl.style.background='linear-gradient(135deg,var(--gold),var(--pink))';}
+      if(nameEl){nameEl.textContent=voter.prenom||'Membre';nameEl.classList.remove('blurred');}
+      if(metaEl){metaEl.textContent=[voter.ville,voter.age?voter.age+' ans':null].filter(Boolean).join(' · ')||'Membre SCOROVIA';}
+      if(overlay)overlay.innerHTML=`<button class="btn-panel-msg" onclick="goToConversation('${voterId}')" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#E8A020);color:#000;border:none;border-radius:8px;">💬 Message</button>`;
+      row.style.border='1px solid rgba(34,212,160,0.2)';
+    }
+    showToast(`✅ Profil révélé ! -${cost} pts`,'success');
+  }catch(e){console.error('[mesnotes] unlockVoterPanel:',e);showToast('❌ Erreur lors du déverrouillage.','error');}
 }
 
 function closeVotersPanel(e){if(e.target===document.getElementById('voters-panel-overlay')){document.getElementById('voters-panel-overlay').classList.remove('open');document.body.style.overflow='';}}
@@ -653,21 +668,23 @@ async function unlockVoterFromNotes(i){
   const cost=50;
   if(!userProfile||userProfile.points<cost){showToast(`⚡ Points insuffisants — ${cost} pts requis`,'error');setTimeout(()=>window.location.href='points.html',2000);return;}
   const vi=window._voterData?.[i];if(!vi)return;
-  const newPts=userProfile.points-cost;
-  await sb.from('users').update({points:newPts}).eq('id',currentUser.id);
-  await sb.from('points_history').insert({user_id:currentUser.id,action:'Identité votant révélée',points:-cost});
-  userProfile.points=newPts;document.getElementById('pts-display').textContent=newPts;document.getElementById('user-pts').textContent=newPts;
-  const{data:voter}=await sb.from('users').select('prenom,ville,age,genre,avatar_url').eq('id',vi.voterId).single();
-  if(voter){
-    const bgEl=document.getElementById(`voter-bg-${i}`);const nameEl=document.getElementById(`voter-name-${i}`);const metaEl=document.getElementById(`voter-meta-${i}`);const lockEl=document.getElementById(`voter-lock-${i}`);const cardEl=document.getElementById(`voter-card-${i}`);
-    const safeAvR=safeUrl(voter.avatar_url);
-    if(bgEl){bgEl.innerHTML=safeAvR?`<img src="${safeAvR}" style="width:100%;height:100%;object-fit:cover;" />`:`<span style="font-size:48px">${(voter.prenom||'?').charAt(0).toUpperCase()}</span>`;bgEl.classList.add('revealed');}
-    if(nameEl){nameEl.textContent=voter.prenom||'Membre';nameEl.classList.add('revealed');}
-    if(metaEl)metaEl.textContent=[voter.ville,voter.age?voter.age+' ans':null,voter.genre==='homme'?'👨':voter.genre==='femme'?'👩':null].filter(Boolean).join(' · ');
-    if(lockEl)lockEl.innerHTML=`<button class="btn-voter-msg" onclick="goToConversation('${vi.voterId}')">💬 Envoyer un message · -20 pts</button>`;
-    if(cardEl)cardEl.style.border='1px solid rgba(34,212,160,0.3)';
-    showToast(`✅ Identité révélée ! -${cost} pts`,'success');
-  }
+  try{
+    const newPts=userProfile.points-cost;
+    await sb.from('users').update({points:newPts}).eq('id',currentUser.id);
+    await sb.from('points_history').insert({user_id:currentUser.id,action:'Identité votant révélée',points:-cost});
+    userProfile.points=newPts;document.getElementById('pts-display').textContent=newPts;document.getElementById('user-pts').textContent=newPts;
+    const{data:voter}=await sb.from('users').select('prenom,ville,age,genre,avatar_url').eq('id',vi.voterId).single();
+    if(voter){
+      const bgEl=document.getElementById(`voter-bg-${i}`);const nameEl=document.getElementById(`voter-name-${i}`);const metaEl=document.getElementById(`voter-meta-${i}`);const lockEl=document.getElementById(`voter-lock-${i}`);const cardEl=document.getElementById(`voter-card-${i}`);
+      const safeAvR=safeUrl(voter.avatar_url);
+      if(bgEl){bgEl.innerHTML=safeAvR?`<img src="${safeAvR}" style="width:100%;height:100%;object-fit:cover;" />`:`<span style="font-size:48px">${(voter.prenom||'?').charAt(0).toUpperCase()}</span>`;bgEl.classList.add('revealed');}
+      if(nameEl){nameEl.textContent=voter.prenom||'Membre';nameEl.classList.add('revealed');}
+      if(metaEl)metaEl.textContent=[voter.ville,voter.age?voter.age+' ans':null,voter.genre==='homme'?'👨':voter.genre==='femme'?'👩':null].filter(Boolean).join(' · ');
+      if(lockEl)lockEl.innerHTML=`<button class="btn-voter-msg" onclick="goToConversation('${vi.voterId}')">💬 Envoyer un message · -20 pts</button>`;
+      if(cardEl)cardEl.style.border='1px solid rgba(34,212,160,0.3)';
+      showToast(`✅ Identité révélée ! -${cost} pts`,'success');
+    }
+  }catch(e){console.error('[mesnotes] unlockVoterFromNotes:',e);showToast('❌ Erreur lors du déverrouillage.','error');}
 }
 
 function msgVoterFromNotes(i){
@@ -684,7 +701,10 @@ function sharePhoto(photoId){const link=`${window.location.origin}/noter.html?ph
 function handleDragOver(e){e.preventDefault();document.getElementById('upload-zone').classList.add('dragover');}
 function handleDragLeave(e){document.getElementById('upload-zone').classList.remove('dragover');}
 function handleDrop(e){e.preventDefault();document.getElementById('upload-zone').classList.remove('dragover');openModal();}
-async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
+async function doLogout(){
+  try{await sb.auth.signOut();}catch(e){console.error('[mesnotes] doLogout:',e);}
+  window.location.href='login.html';
+}
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 init();

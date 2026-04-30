@@ -554,30 +554,38 @@ if (methodParam === 'google') {
 
 // Handle OAuth callback
 async function checkSession() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    await ensureProfile(session.user);
-    window.location.href = 'dashboard.html';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      await ensureProfile(session.user);
+      window.location.href = 'dashboard.html';
+    }
+  } catch (e) {
+    console.error('[login] checkSession:', e);
   }
 }
 checkSession();
 
 async function ensureProfile(user) {
-  const { data: existing } = await sb.from('users').select('id').eq('id', user.id).single();
-  if (!existing) {
-    const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Membre';
-    await sb.from('users').insert({
-      id: user.id,
-      email: user.email,
-      prenom: name,
-      points: 20
-    });
-    await sb.from('points_history').insert({
-      user_id: user.id,
-      action: 'Bonus inscription',
-      points: 20
-    });
-    await handleReferral(user.id);
+  try {
+    const { data: existing } = await sb.from('users').select('id').eq('id', user.id).single();
+    if (!existing) {
+      const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Membre';
+      await sb.from('users').insert({
+        id: user.id,
+        email: user.email,
+        prenom: name,
+        points: 20
+      });
+      await sb.from('points_history').insert({
+        user_id: user.id,
+        action: 'Bonus inscription',
+        points: 20
+      });
+      await handleReferral(user.id);
+    }
+  } catch (e) {
+    console.error('[login] ensureProfile:', e);
   }
 }
 
@@ -590,8 +598,12 @@ async function signInWithGoogle() {
 }
 
 async function loadStats() {
-  const { count } = await sb.from('users').select('*', { count: 'exact', head: true });
-  document.getElementById('stat-members').textContent = count ? count.toLocaleString('fr-FR') : '0';
+  try {
+    const { count } = await sb.from('users').select('*', { count: 'exact', head: true });
+    document.getElementById('stat-members').textContent = count ? count.toLocaleString('fr-FR') : '0';
+  } catch (e) {
+    console.error('[login] loadStats:', e);
+  }
 }
 loadStats();
 
@@ -771,41 +783,48 @@ async function doSignup() {
     }
     // ─────────────────────────────────────────────────────────────────
 
-    // Création du profil
-    await sb.from('users').insert({
-      id: data.user.id,
-      email: email,
-      prenom: prenom,
-      ville: ville || null,
-      age: age,
-      genre: genre || null,
-      points: totalPoints
-    });
-
-    // Historique points de bienvenue
-    await sb.from('points_history').insert({
-      user_id: data.user.id,
-      action: 'Bonus inscription',
-      points: 20
-    });
-
-    // ─── Historique + compteur si code promo valide ───────────────────
-    if (promoValid && promoData) {
-      await sb.from('points_history').insert({
-        user_id: data.user.id,
-        action: `Code promo ${promoCode}`,
-        points: promoBonus
+    try {
+      // Création du profil
+      await sb.from('users').insert({
+        id: data.user.id,
+        email: email,
+        prenom: prenom,
+        ville: ville || null,
+        age: age,
+        genre: genre || null,
+        points: totalPoints
       });
 
-      await sb.from('promo_codes')
-        .update({ uses: (promoData.uses || 0) + 1 })
-        .eq('id', promoData.id);
-    }
-    // ─────────────────────────────────────────────────────────────────
+      // Historique points de bienvenue
+      await sb.from('points_history').insert({
+        user_id: data.user.id,
+        action: 'Bonus inscription',
+        points: 20
+      });
 
-    // ─── Crédite le parrain si parrainage ───────────────────────────
-    await handleReferral(data.user.id);
-    // ────────────────────────────────────────────────────────────────
+      // ─── Historique + compteur si code promo valide ───────────────────
+      if (promoValid && promoData) {
+        await sb.from('points_history').insert({
+          user_id: data.user.id,
+          action: `Code promo ${promoCode}`,
+          points: promoBonus
+        });
+
+        await sb.from('promo_codes')
+          .update({ uses: (promoData.uses || 0) + 1 })
+          .eq('id', promoData.id);
+      }
+      // ─────────────────────────────────────────────────────────────────
+
+      // ─── Crédite le parrain si parrainage ───────────────────────────
+      await handleReferral(data.user.id);
+      // ────────────────────────────────────────────────────────────────
+    } catch (e) {
+      console.error('[login] doSignup profile creation:', e);
+      showAlert('signup-alert', '❌ Erreur lors de la création du profil. Réessayez.', 'error');
+      btn.innerHTML = 'CRÉER MON COMPTE GRATUIT'; btn.disabled = false;
+      return;
+    }
 
     // Ne stocker que l'id — les données de profil se récupèrent via Supabase
     localStorage.setItem('scorovia_user', JSON.stringify({ id: data.user.id }));
@@ -820,31 +839,36 @@ async function handleReferral(newUserId) {
   const ref = localStorage.getItem('scorovia_ref');
   if (!ref) return;
 
-  // Trouve le parrain via les 8 premiers chars de son UUID
-  const { data: parrain } = await sb
-    .from('users')
-    .select('id, points')
-    .ilike('id', ref + '%')
-    .single();
+  try {
+    // Trouve le parrain via les 8 premiers chars de son UUID
+    const { data: parrain } = await sb
+      .from('users')
+      .select('id, points')
+      .ilike('id', ref + '%')
+      .single();
 
-  // Sécurité : pas de self-parrainage
-  if (!parrain || parrain.id === newUserId) {
+    // Sécurité : pas de self-parrainage
+    if (!parrain || parrain.id === newUserId) {
+      localStorage.removeItem('scorovia_ref');
+      return;
+    }
+
+    // Crédite +50 pts au parrain
+    await sb.from('users')
+      .update({ points: (parrain.points || 0) + 50 })
+      .eq('id', parrain.id);
+
+    await sb.from('points_history').insert({
+      user_id: parrain.id,
+      action: 'Parrainage',
+      points: 50
+    });
+
     localStorage.removeItem('scorovia_ref');
-    return;
+  } catch (e) {
+    console.error('[login] handleReferral:', e);
+    localStorage.removeItem('scorovia_ref');
   }
-
-  // Crédite +50 pts au parrain
-  await sb.from('users')
-    .update({ points: (parrain.points || 0) + 50 })
-    .eq('id', parrain.id);
-
-  await sb.from('points_history').insert({
-    user_id: parrain.id,
-    action: 'Parrainage',
-    points: 50
-  });
-
-  localStorage.removeItem('scorovia_ref');
 }
 // ────────────────────────────────────────────────────────
 
