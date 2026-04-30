@@ -590,11 +590,16 @@ async function ensureProfile(user) {
 }
 
 async function signInWithGoogle() {
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.origin + '/dashboard.html' }
-  });
-  if (error) showToast('❌ Erreur Google : ' + error.message);
+  try {
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/dashboard.html' }
+    });
+    if (error) showToast('❌ Erreur Google : ' + error.message);
+  } catch (e) {
+    console.error('[login] signInWithGoogle:', e);
+    showToast('❌ Erreur de connexion Google. Réessayez.');
+  }
 }
 
 async function loadStats() {
@@ -655,28 +660,34 @@ async function checkPromoCode(code) {
   const fb = document.getElementById('promo-feedback');
   if (!code) { resetPromoFeedback(); return; }
 
-  const { data: promo, error } = await sb
-    .from('promo_codes')
-    .select('points_bonus, uses, active, max_uses')
-    .eq('code', code)
-    .eq('active', true)
-    .single();
+  try {
+    const { data: promo, error } = await sb
+      .from('promo_codes')
+      .select('points_bonus, uses, active, max_uses')
+      .eq('code', code)
+      .eq('active', true)
+      .single();
 
-  if (error || !promo) {
+    if (error || !promo) {
+      fb.className = 'promo-feedback invalid';
+      fb.textContent = '❌ Code invalide ou expiré';
+      return;
+    }
+
+    const underLimit = !promo.max_uses || (promo.uses || 0) < promo.max_uses;
+    if (!underLimit) {
+      fb.className = 'promo-feedback invalid';
+      fb.textContent = '❌ Ce code a atteint sa limite d\'utilisation';
+      return;
+    }
+
+    fb.className = 'promo-feedback valid';
+    fb.textContent = `✅ Code valide ! +${promo.points_bonus} points offerts à l'inscription`;
+  } catch (e) {
+    console.error('[login] checkPromoCode:', e);
     fb.className = 'promo-feedback invalid';
-    fb.textContent = '❌ Code invalide ou expiré';
-    return;
+    fb.textContent = '❌ Impossible de vérifier le code. Réessayez.';
   }
-
-  const underLimit = !promo.max_uses || (promo.uses || 0) < promo.max_uses;
-  if (!underLimit) {
-    fb.className = 'promo-feedback invalid';
-    fb.textContent = '❌ Ce code a atteint sa limite d\'utilisation';
-    return;
-  }
-
-  fb.className = 'promo-feedback valid';
-  fb.textContent = `✅ Code valide ! +${promo.points_bonus} points offerts à l'inscription`;
 }
 // ────────────────────────────────────────────────────────────────────
 
@@ -704,20 +715,28 @@ async function doLogin() {
   const btn = document.getElementById('btn-login');
   btn.innerHTML = '<span class="spinner"></span>Vérification...';
   btn.disabled = true;
-  const token = await getRecaptchaToken('login');
-  if (!token) {
-    showAlert('login-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
-    btn.innerHTML = 'SE CONNECTER'; btn.disabled = false; return;
+  try {
+    const token = await getRecaptchaToken('login');
+    if (!token) {
+      showAlert('login-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
+      return;
+    }
+    btn.innerHTML = '<span class="spinner"></span>Connexion...';
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+    if (error) {
+      showAlert('login-alert', '❌ Email ou mot de passe incorrect', 'error');
+      return;
+    }
+    localStorage.setItem('scorovia_user', JSON.stringify({ id: data.user.id }));
+    showSuccess('Connexion réussie ! Redirection...');
+  } catch (e) {
+    console.error('[login] doLogin:', e);
+    showAlert('login-alert', '❌ Erreur de connexion. Veuillez réessayer.', 'error');
+  } finally {
+    if (!document.getElementById('success-state').classList.contains('show')) {
+      btn.innerHTML = 'SE CONNECTER'; btn.disabled = false;
+    }
   }
-  btn.innerHTML = '<span class="spinner"></span>Connexion...';
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
-  if (error) {
-    showAlert('login-alert', '❌ Email ou mot de passe incorrect', 'error');
-    btn.innerHTML = 'SE CONNECTER'; btn.disabled = false; return;
-  }
-  // Ne stocker que l'id — les données de profil se récupèrent via Supabase
-  localStorage.setItem('scorovia_user', JSON.stringify({ id: data.user.id }));
-  showSuccess('Connexion réussie ! Redirection...');
 }
 
 async function doSignup() {
@@ -741,50 +760,46 @@ async function doSignup() {
   btn.innerHTML = '<span class="spinner"></span>Vérification robot...';
   btn.disabled = true;
 
-  const token = await getRecaptchaToken('signup');
-  if (!token) {
-    showAlert('signup-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
-    btn.innerHTML = 'CRÉER MON COMPTE GRATUIT'; btn.disabled = false; return;
-  }
+  try {
+    const token = await getRecaptchaToken('signup');
+    if (!token) {
+      showAlert('signup-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error');
+      return;
+    }
 
-  btn.innerHTML = '<span class="spinner"></span>Création du compte...';
+    btn.innerHTML = '<span class="spinner"></span>Création du compte...';
 
-  const { data, error } = await sb.auth.signUp({ email, password: pwd });
-  if (error) {
-    showAlert('signup-alert', '❌ ' + (error.message === 'User already registered' ? 'Cet email est déjà utilisé' : error.message), 'error');
-    btn.innerHTML = 'CRÉER MON COMPTE GRATUIT'; btn.disabled = false; return;
-  }
+    const { data, error } = await sb.auth.signUp({ email, password: pwd });
+    if (error) {
+      showAlert('signup-alert', '❌ ' + (error.message === 'User already registered' ? 'Cet email est déjà utilisé' : error.message), 'error');
+      return;
+    }
 
-  if (data.user) {
-    // Points de base
-    let totalPoints = 20;
-    let promoBonus = 0;
-    let promoValid = false;
-    let promoData = null;
+    if (data.user) {
+      let totalPoints = 20;
+      let promoBonus = 0;
+      let promoValid = false;
+      let promoData = null;
 
-    // ─── Vérification du code promo ───────────────────────────────────
-    if (promoCode) {
-      const { data: promo, error: promoErr } = await sb
-        .from('promo_codes')
-        .select('id, points_bonus, uses, active, max_uses')
-        .eq('code', promoCode)
-        .eq('active', true)
-        .single();
+      if (promoCode) {
+        const { data: promo, error: promoErr } = await sb
+          .from('promo_codes')
+          .select('id, points_bonus, uses, active, max_uses')
+          .eq('code', promoCode)
+          .eq('active', true)
+          .single();
 
-      if (!promoErr && promo) {
-        const underLimit = !promo.max_uses || (promo.uses || 0) < promo.max_uses;
-        if (underLimit) {
-          promoBonus = promo.points_bonus;
-          totalPoints += promoBonus;
-          promoValid = true;
-          promoData = promo;
+        if (!promoErr && promo) {
+          const underLimit = !promo.max_uses || (promo.uses || 0) < promo.max_uses;
+          if (underLimit) {
+            promoBonus = promo.points_bonus;
+            totalPoints += promoBonus;
+            promoValid = true;
+            promoData = promo;
+          }
         }
       }
-    }
-    // ─────────────────────────────────────────────────────────────────
 
-    try {
-      // Création du profil
       await sb.from('users').insert({
         id: data.user.id,
         email: email,
@@ -795,14 +810,12 @@ async function doSignup() {
         points: totalPoints
       });
 
-      // Historique points de bienvenue
       await sb.from('points_history').insert({
         user_id: data.user.id,
         action: 'Bonus inscription',
         points: 20
       });
 
-      // ─── Historique + compteur si code promo valide ───────────────────
       if (promoValid && promoData) {
         await sb.from('points_history').insert({
           user_id: data.user.id,
@@ -814,23 +827,21 @@ async function doSignup() {
           .update({ uses: (promoData.uses || 0) + 1 })
           .eq('id', promoData.id);
       }
-      // ─────────────────────────────────────────────────────────────────
 
-      // ─── Crédite le parrain si parrainage ───────────────────────────
       await handleReferral(data.user.id);
-      // ────────────────────────────────────────────────────────────────
-    } catch (e) {
-      console.error('[login] doSignup profile creation:', e);
-      showAlert('signup-alert', '❌ Erreur lors de la création du profil. Réessayez.', 'error');
-      btn.innerHTML = 'CRÉER MON COMPTE GRATUIT'; btn.disabled = false;
-      return;
+
+      localStorage.setItem('scorovia_user', JSON.stringify({ id: data.user.id }));
+
+      const bonusMsg = promoValid ? ` + ${promoBonus} pts code promo 🎁` : '';
+      showSuccess(`Bienvenue ${prenom} ! Votre compte est créé avec ${totalPoints} points de bienvenue${bonusMsg} 🎉`);
     }
-
-    // Ne stocker que l'id — les données de profil se récupèrent via Supabase
-    localStorage.setItem('scorovia_user', JSON.stringify({ id: data.user.id }));
-
-    const bonusMsg = promoValid ? ` + ${promoBonus} pts code promo 🎁` : '';
-    showSuccess(`Bienvenue ${prenom} ! Votre compte est créé avec ${totalPoints} points de bienvenue${bonusMsg} 🎉`);
+  } catch (e) {
+    console.error('[login] doSignup:', e);
+    showAlert('signup-alert', '❌ Erreur lors de la création du compte. Réessayez.', 'error');
+  } finally {
+    if (!document.getElementById('success-state').classList.contains('show')) {
+      btn.innerHTML = 'CRÉER MON COMPTE GRATUIT'; btn.disabled = false;
+    }
   }
 }
 
@@ -875,13 +886,18 @@ async function handleReferral(newUserId) {
 async function doForgot() {
   const email = document.getElementById('forgot-email').value.trim();
   if (!email) { showAlert('forgot-alert', '⚠️ Entrez votre adresse email', 'error'); return; }
-  const token = await getRecaptchaToken('forgot_password');
-  if (!token) { showAlert('forgot-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error'); return; }
-  const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/login.html'
-  });
-  if (error) { showAlert('forgot-alert', '❌ Erreur : ' + error.message, 'error'); return; }
-  showAlert('forgot-alert', '✅ Lien envoyé ! Vérifiez votre boîte mail.', 'success');
+  try {
+    const token = await getRecaptchaToken('forgot_password');
+    if (!token) { showAlert('forgot-alert', '⚠️ Vérification anti-robot échouée. Réessayez.', 'error'); return; }
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
+    });
+    if (error) { showAlert('forgot-alert', '❌ Erreur : ' + error.message, 'error'); return; }
+    showAlert('forgot-alert', '✅ Lien envoyé ! Vérifiez votre boîte mail.', 'success');
+  } catch (e) {
+    console.error('[login] doForgot:', e);
+    showAlert('forgot-alert', '❌ Erreur. Veuillez réessayer.', 'error');
+  }
 }
 
 function showSuccess(msg) {

@@ -1207,10 +1207,16 @@
 
   // ─── AUTH ─────────────────────────────────────────────────
   async function loginWithGoogle() {
-    await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.href }
-    });
+    try {
+      await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.href }
+      });
+    } catch (e) {
+      console.error('[admin] loginWithGoogle:', e);
+      document.getElementById('auth-error').textContent = 'Erreur de connexion. Réessayez.';
+      document.getElementById('auth-error').style.display = 'block';
+    }
   }
 
   async function logout() {
@@ -1337,50 +1343,55 @@
     const tbody = document.getElementById('users-tbody');
     tbody.innerHTML = '<tr><td colspan="8" class="loader">Chargement...</td></tr>';
 
-    const { data: users, error: usersError } = await sb.from('users')
-      .select('id, email, prenom, points, is_premium, promo_code, avatar_url, created_at, ville, genre')
-      .order('created_at', { ascending: false })
-      .limit(500);
-
-    if (usersError) {
-      console.error('loadUsers error:', usersError);
-      tbody.innerHTML = `<tr><td colspan="8" class="loader" style="color:var(--red)">Erreur: ${usersError.message}</td></tr>`;
-      return;
-    }
-
-    if (!users || users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="10" class="loader">Aucun utilisateur trouvé</td></tr>';
-      allUsers = [];
-      filterUsers();
-      return;
-    }
-
-    let photoMap = {}, voteMap = {}, votesRecusMap = {};
     try {
-      const [{ data: photoCounts }, { data: votesDonnes }, { data: votesRecus }] = await Promise.all([
-        sb.from('photos').select('user_id').eq('active', true),
-        sb.from('votes').select('voter_id'),
-        sb.from('votes').select('photo_id, photos!inner(user_id)')
-      ]);
-      (photoCounts || []).forEach(p => { photoMap[p.user_id] = (photoMap[p.user_id] || 0) + 1; });
-      (votesDonnes || []).forEach(v => { voteMap[v.voter_id] = (voteMap[v.voter_id] || 0) + 1; });
-      (votesRecus || []).forEach(v => {
-        const uid = v.photos?.user_id;
-        if (uid) votesRecusMap[uid] = (votesRecusMap[uid] || 0) + 1;
-      });
+      const { data: users, error: usersError } = await sb.from('users')
+        .select('id, email, prenom, points, is_premium, promo_code, avatar_url, created_at, ville, genre')
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      if (usersError) {
+        console.error('loadUsers error:', usersError);
+        tbody.innerHTML = `<tr><td colspan="8" class="loader" style="color:var(--red)">Erreur: ${usersError.message}</td></tr>`;
+        return;
+      }
+
+      if (!users || users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="loader">Aucun utilisateur trouvé</td></tr>';
+        allUsers = [];
+        filterUsers();
+        return;
+      }
+
+      let photoMap = {}, voteMap = {}, votesRecusMap = {};
+      try {
+        const [{ data: photoCounts }, { data: votesDonnes }, { data: votesRecus }] = await Promise.all([
+          sb.from('photos').select('user_id').eq('active', true),
+          sb.from('votes').select('voter_id'),
+          sb.from('votes').select('photo_id, photos!inner(user_id)')
+        ]);
+        (photoCounts || []).forEach(p => { photoMap[p.user_id] = (photoMap[p.user_id] || 0) + 1; });
+        (votesDonnes || []).forEach(v => { voteMap[v.voter_id] = (voteMap[v.voter_id] || 0) + 1; });
+        (votesRecus || []).forEach(v => {
+          const uid = v.photos?.user_id;
+          if (uid) votesRecusMap[uid] = (votesRecusMap[uid] || 0) + 1;
+        });
+      } catch (e) {
+        console.warn('[admin] loadUsers counts:', e);
+      }
+
+      allUsers = users.map(u => ({
+        ...u,
+        is_banned: false,
+        photo_count: photoMap[u.id] || 0,
+        vote_count: voteMap[u.id] || 0,
+        votes_recus: votesRecusMap[u.id] || 0
+      }));
+
+      filterUsers();
     } catch (e) {
-      console.warn('[admin] loadUsers counts:', e);
+      console.error('[admin] loadUsers:', e);
+      tbody.innerHTML = '<tr><td colspan="8" class="loader" style="color:var(--red)">Erreur de chargement</td></tr>';
     }
-
-    allUsers = users.map(u => ({
-      ...u,
-      is_banned: false,
-      photo_count: photoMap[u.id] || 0,
-      vote_count: voteMap[u.id] || 0,
-      votes_recus: votesRecusMap[u.id] || 0
-    }));
-
-    filterUsers();
   }
 
   function filterUsers() {
