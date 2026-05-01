@@ -17,6 +17,7 @@
 </script>
 <title>SCOROVIA — Tableau de bord</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
 <script src="premium.js"></script>
 <script src="points-config.js"></script>
 <style>
@@ -330,15 +331,6 @@ const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userVotes=[];
 
-function escapeHtml(str){
-  if(str==null)return'';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-function safeUrl(url){
-  if(!url)return null;
-  try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}
-}
-
 // ── SON DE NOTIFICATION ───────────────────────────────────────────
 function playNotifSound() {
   try {
@@ -497,9 +489,8 @@ function renderVotersList(){
   }).join('')+`<div style="text-align:center;padding:8px 0 2px;"><a href="mesnotes.html" style="font-size:12px;color:var(--gold2);text-decoration:none;">Voir tous les votants dans Mes Notes →</a></div>`;
 }
 
-function timeAgo(dateStr){const diff=Math.floor((Date.now()-new Date(dateStr))/1000);if(diff<60)return 'Il y a quelques secondes';if(diff<3600)return `Il y a ${Math.floor(diff/60)} min`;if(diff<86400)return `Il y a ${Math.floor(diff/3600)}h`;return `Il y a ${Math.floor(diff/86400)} jour${Math.floor(diff/86400)>1?'s':''}`;}
-
 async function doLogout(){
+  if(notifInterval) clearInterval(notifInterval);
   try{await sb.auth.signOut();}catch(e){console.error('[dashboard] doLogout:',e);}
   localStorage.removeItem('scorovia_user');
   window.location.href='login.html';
@@ -517,13 +508,13 @@ function copyInvite(){
   }).catch(()=>{showToast('🔗 Lien : '+link,'gold');});
 }
 
-function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 
 // ── NOTIFICATIONS MESSAGES ────────────────────────────────────────
 // knownMessageIds = IDs déjà connus AU DÉMARRAGE (ne déclenchent pas de notif)
 // Seuls les IDs qui apparaissent APRÈS le démarrage déclenchent son + notif
 let knownMessageIds = new Set();
+let notifInterval = null;
 
 async function initNotifications(){
   if(!('Notification'in window))return;
@@ -551,7 +542,7 @@ async function initNotifications(){
   }
 
   // Poll toutes les 30s pour détecter les NOUVEAUX messages
-  setInterval(checkNewMessages, 30000);
+  notifInterval = setInterval(checkNewMessages, 30000);
 }
 
 async function checkNewMessages(){
@@ -597,8 +588,16 @@ async function checkNewMessages(){
 }
 
 function updateMessageBadge(count){
-  const badge = document.querySelector('.mobile-bottom-nav li:nth-child(4) .mnav-badge');
-  if(badge) badge.style.display = count > 0 ? 'block' : 'none';
+  const msgLink = document.querySelector('.mobile-bottom-nav a[href="messages.html"]');
+  if(!msgLink) return;
+  const li = msgLink.parentElement;
+  let badge = li.querySelector('.nav-badge');
+  if(count > 0){
+    if(!badge){ badge = document.createElement('span'); badge.className = 'nav-badge'; li.appendChild(badge); }
+    badge.style.display = 'block';
+  } else if(badge){
+    badge.style.display = 'none';
+  }
 }
 // ──────────────────────────────────────────────────────────────────
 
