@@ -483,9 +483,18 @@ async function exportData(){
   showToast('✅ Données exportées !','success');
 }
 
-async function deleteAccount(){
-  if(!confirm('Supprimer définitivement votre compte ? Toutes vos données seront perdues.'))return;
-  if(!confirm('Êtes-vous vraiment sûr ? Cette action est irréversible.'))return;
+function deleteAccount(){
+  document.getElementById('delete-confirm-input').value='';
+  document.getElementById('delete-confirm-btn').disabled=true;
+  document.getElementById('delete-account-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDeleteModal(){
+  document.getElementById('delete-account-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+async function confirmDeleteAccount(){
+  document.getElementById('delete-confirm-btn').disabled=true;
   try{
     await deleteAllPhotos();
     const{error}=await sb.from('users').delete().eq('id',currentUser.id);
@@ -495,6 +504,7 @@ async function deleteAccount(){
   }catch(e){
     console.error('[profil] deleteAccount:',e);
     showToast('❌ Erreur lors de la suppression du compte','error');
+    closeDeleteModal();
   }
 }
 
@@ -536,5 +546,27 @@ init();
     <li class="active"><a href="profil.html"><span class="mnav-icon">👤</span><span class="mnav-label">Profil</span></a></li>
   </ul>
 </nav>
+<div class="modal-overlay" id="delete-account-modal" onclick="if(event.target===this)closeDeleteModal()">
+  <div class="modal-box" style="max-width:400px">
+    <button class="modal-close-btn" onclick="closeDeleteModal()">✕</button>
+    <div class="modal-head">
+      <h3>⚠️ Supprimer le compte</h3>
+      <p>Cette action est irréversible. Toutes vos données, photos et points seront définitivement supprimés.</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:8px">Tapez <strong style="color:var(--text)">SUPPRIMER</strong> pour confirmer</label>
+      <input id="delete-confirm-input" type="text" placeholder="SUPPRIMER" autocomplete="off"
+        style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,77,141,0.3);border-radius:10px;color:var(--text);font-size:14px;padding:11px 14px;outline:none;font-family:'DM Sans',sans-serif"
+        oninput="const btn=document.getElementById('delete-confirm-btn');btn.disabled=this.value!=='SUPPRIMER';btn.style.opacity=btn.disabled?'0.4':'1';" />
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeDeleteModal()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px">Annuler</button>
+      <button id="delete-confirm-btn" onclick="confirmDeleteAccount()" disabled
+        style="flex:1;background:#FF4D8D;border:none;color:#fff;border-radius:10px;padding:11px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.06em;opacity:0.4;transition:opacity 0.2s"
+        onmouseenter="if(!this.disabled)this.style.opacity='1'" onmouseleave="if(!this.disabled)this.style.opacity='0.9'"
+        onfocus="if(this.disabled)this.blur()">SUPPRIMER MON COMPTE</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
