@@ -26,6 +26,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://www.google.com/recaptcha/api.js?render=6Lfe-b8sAAAAAB9-qk0jKy2An9xVvfNUfsIHM3HO"></script>
+<script src="utils.js"></script>
 <script src="premium.js"></script>
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -914,11 +915,6 @@ function showSuccess(msg) {
   setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
 }
 
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + (type || ''); t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
 
 document.addEventListener('keypress', e => {
   if (e.key !== 'Enter') return;
