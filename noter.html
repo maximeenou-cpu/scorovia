@@ -574,8 +574,11 @@ async function doRate() {
   if (currentUser) {
     try {
       await sb.from('votes').insert({ voter_id: currentUser.id, photo_id: photo.id, note });
-      const newVotes = (photo.nb_votes || 0) + 1;
-      const newAvg = ((photo.note_moyenne || 0) * (photo.nb_votes || 0) + note) / newVotes;
+      // Re-fetch stats frais pour éviter d'écraser des votes concurrents
+      const { data: fresh } = await sb.from('photos').select('nb_votes,note_moyenne').eq('id', photo.id).single();
+      const base = fresh || photo;
+      const newVotes = (base.nb_votes || 0) + 1;
+      const newAvg = ((base.note_moyenne || 0) * (base.nb_votes || 0) + note) / newVotes;
       await sb.from('photos').update({ nb_votes: newVotes, note_moyenne: newAvg }).eq('id', photo.id);
       photo.nb_votes = newVotes;
       photo.note_moyenne = newAvg;
