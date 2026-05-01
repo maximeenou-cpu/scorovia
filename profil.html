@@ -262,10 +262,6 @@
 </div>
 
 <script>
-const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
-const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w'; // Clé publique Supabase — sécurité assurée par RLS côté serveur
-const{createClient}=supabase;
-const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userProfile=null,selectedGenre=null;
 async function init(){
   try{

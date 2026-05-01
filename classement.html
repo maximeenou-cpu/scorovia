@@ -213,12 +213,8 @@
 <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
 
 <script>
-const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 // Clé anon publique Supabase — conçue pour être visible côté client.
 // La sécurité repose sur les politiques RLS configurées dans Supabase.
-const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
-const{createClient}=supabase;
-const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let currentUser=null,userProfile=null,allRanked=[],currentFilter='global',unlockedFilters={ville:false,age:false};
 let displayPage=1,currentDisplayList=[];const PAGE_SIZE=50;

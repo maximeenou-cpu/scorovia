@@ -1,7 +1,12 @@
 /* utils.js — SCOROVIA
  * Fonctions utilitaires partagées entre toutes les pages.
- * Charger avant les scripts inline de chaque page.
+ * Charger après supabase-js et avant les scripts inline.
  */
+
+const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function escapeHtml(str) {
   if (str == null) return '';

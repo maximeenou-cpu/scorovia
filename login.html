@@ -531,12 +531,8 @@ body {
 
 <script>
 // SUPABASE INIT
-const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 // Clé anon publique Supabase — conçue pour être visible côté client.
 // La sécurité repose sur les politiques RLS configurées dans Supabase.
-const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── PARRAINAGE : lecture du ?ref= dans l'URL ───
 const urlParams = new URLSearchParams(window.location.search);

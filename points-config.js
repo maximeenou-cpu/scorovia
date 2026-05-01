@@ -12,9 +12,6 @@
  */
 
 const PointsConfig = (() => {
-  const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
-
   // Valeurs par défaut (fallback si Supabase inaccessible)
   let config = {
     inscription:    { label: 'Inscription',               points: 20  },
