@@ -17,6 +17,7 @@
 </script>
 <title>SCOROVIA — Messages</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
 <script src="premium.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
@@ -864,8 +865,6 @@ function handleMsgKey(e){
   }
 }
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
-function escapeHtml(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}}
 function timeAgo(dateStr){
   const diff=Math.floor((Date.now()-new Date(dateStr))/1000);
   if(diff<60)return 'À l\'instant';
@@ -928,7 +927,6 @@ async function doLogout(){
   try{await sb.auth.signOut();}catch(e){console.error('[messages] doLogout:',e);}
   window.location.href='login.html';
 }
-function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 
 function openAvatarModal(avatarUrl,name,note){

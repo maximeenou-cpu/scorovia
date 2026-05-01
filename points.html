@@ -17,6 +17,7 @@
 </script>
 <title>SCOROVIA — Mes Points</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
 <script src="premium.js"></script>
 <script src="points-config.js"></script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8229912245519123" crossorigin="anonymous"></script>
@@ -276,9 +277,6 @@ const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w'; // Clé publique Supabase — sécurité assurée par RLS côté serveur
 const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
-function escapeHtml(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}}
-
 const STRIPE_LINKS={
   100:'https://buy.stripe.com/4gM14maE62mh5ms7Ua4wM00',
   500:'https://buy.stripe.com/9B67sKcMe2mh0285M24wM01',
@@ -464,7 +462,6 @@ function copyInvite(){
 }
 
 async function doLogout(){try{await sb.auth.signOut();}catch(e){console.error('[points] doLogout:',e);}window.location.href='login.html';}
-function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 init();
 </script>

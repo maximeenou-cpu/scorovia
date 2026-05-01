@@ -25,6 +25,7 @@
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8229912245519123" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
 <script src="premium.js"></script>
 <script src="points-config.js"></script>
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -513,24 +514,6 @@ const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-function escapeHtml(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function safeUrl(url) {
-  if (!url) return null;
-  try {
-    const u = new URL(url);
-    return u.protocol === 'https:' ? url : null;
-  } catch { return null; }
-}
 
 const FALLBACK_TICKER = [
   { prenom: 'Marie', ville: 'Paris', note: 8.4, avatar: null },
