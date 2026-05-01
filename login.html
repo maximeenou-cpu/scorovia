@@ -548,7 +548,14 @@ const methodParam = urlParams.get('method');
 if (methodParam === 'google') {
   window.addEventListener('load', () => setTimeout(() => signInWithGoogle(), 300));
 } else if (methodParam === 'email') {
-  window.addEventListener('load', () => switchTab('signup'));
+  const emailParam = urlParams.get('email');
+  window.addEventListener('load', () => {
+    switchTab('signup');
+    if (emailParam) {
+      const el = document.getElementById('signup-email');
+      if (el) el.value = emailParam;
+    }
+  });
 }
 // ────────────────────────────────────────────────────────────
 

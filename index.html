@@ -685,7 +685,7 @@ function doEmailSignup() {
     setTimeout(() => document.getElementById('modal-email').style.outline = '', 1500);
     return;
   }
-  window.location.href = 'login.html';
+  window.location.href = 'login.html?method=email&email=' + encodeURIComponent(v);
 }
 document.getElementById('modal-email').addEventListener('keypress', e => { if (e.key === 'Enter') doEmailSignup(); });
 
