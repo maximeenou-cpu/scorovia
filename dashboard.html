@@ -591,9 +591,9 @@ function updateMessageBadge(count){
   const msgLink = document.querySelector('.mobile-bottom-nav a[href="messages.html"]');
   if(!msgLink) return;
   const li = msgLink.parentElement;
-  let badge = li.querySelector('.nav-badge');
+  let badge = li.querySelector('.mnav-badge');
   if(count > 0){
-    if(!badge){ badge = document.createElement('span'); badge.className = 'nav-badge'; li.appendChild(badge); }
+    if(!badge){ badge = document.createElement('span'); badge.className = 'mnav-badge'; li.appendChild(badge); }
     badge.style.display = 'block';
   } else if(badge){
     badge.style.display = 'none';
