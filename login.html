@@ -26,6 +26,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://www.google.com/recaptcha/api.js?render=6Lfe-b8sAAAAAB9-qk0jKy2An9xVvfNUfsIHM3HO"></script>
+<script src="utils.js"></script>
 <script src="premium.js"></script>
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -530,17 +531,17 @@ body {
 
 <script>
 // SUPABASE INIT
-const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 // Clé anon publique Supabase — conçue pour être visible côté client.
 // La sécurité repose sur les politiques RLS configurées dans Supabase.
-const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── PARRAINAGE : lecture du ?ref= dans l'URL ───
 const urlParams = new URLSearchParams(window.location.search);
 const refCode = urlParams.get('ref');
 if (refCode) localStorage.setItem('scorovia_ref', refCode);
+
+function generateReferralCode() {
+  return Math.random().toString(36).slice(2, 10).toUpperCase();
+}
 // ────────────────────────────────────────────────
 
 // ─── GESTION DU PARAMÈTRE ?method depuis index.html ───────────
@@ -548,7 +549,14 @@ const methodParam = urlParams.get('method');
 if (methodParam === 'google') {
   window.addEventListener('load', () => setTimeout(() => signInWithGoogle(), 300));
 } else if (methodParam === 'email') {
-  window.addEventListener('load', () => switchTab('signup'));
+  const emailParam = urlParams.get('email');
+  window.addEventListener('load', () => {
+    switchTab('signup');
+    if (emailParam) {
+      const el = document.getElementById('signup-email');
+      if (el) el.value = emailParam;
+    }
+  });
 }
 // ────────────────────────────────────────────────────────────
 
@@ -575,7 +583,8 @@ async function ensureProfile(user) {
         id: user.id,
         email: user.email,
         prenom: name,
-        points: 20
+        points: 20,
+        referral_code: generateReferralCode()
       });
       await sb.from('points_history').insert({
         user_id: user.id,
@@ -851,11 +860,10 @@ async function handleReferral(newUserId) {
   if (!ref) return;
 
   try {
-    // Trouve le parrain via les 8 premiers chars de son UUID
     const { data: parrain } = await sb
       .from('users')
       .select('id, points')
-      .ilike('id', ref + '%')
+      .eq('referral_code', ref)
       .single();
 
     // Sécurité : pas de self-parrainage
@@ -907,11 +915,6 @@ function showSuccess(msg) {
   setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
 }
 
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + (type || ''); t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
 
 document.addEventListener('keypress', e => {
   if (e.key !== 'Enter') return;

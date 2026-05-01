@@ -19,34 +19,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="utils.js"></script>
 <script src="premium.js"></script>
+<link rel="stylesheet" href="shared.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--gold:#F5C842;--gold2:#FFE27A;--pink:#FF4D8D;--dark:#07070F;--deep:#0D0D1A;--card:#13131E;--card2:#18182A;--border:rgba(255,255,255,0.07);--text:#F0EEF8;--muted:rgba(240,238,248,0.42);--green:#22D4A0;--red:#FF4D4D}
-html{scroll-behavior:smooth}
-body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex}
-.loading-screen{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:100}
-.loading-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:0.18em;background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.loading-spinner{width:32px;height:32px;border:3px solid rgba(245,200,66,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sidebar{width:220px;flex-shrink:0;background:var(--deep);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;position:fixed;top:0;left:0;bottom:0;z-index:40;transition:transform 0.3s}
-.sidebar-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.15em;background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:32px;padding-left:8px;text-decoration:none;display:block}
-.nav-section{font-size:10px;color:rgba(240,238,248,0.2);text-transform:uppercase;letter-spacing:0.12em;margin:20px 0 8px 8px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:13px;color:var(--muted);cursor:pointer;transition:background 0.2s,color 0.2s;margin-bottom:2px;text-decoration:none}
-.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
-.nav-item.active{background:rgba(245,200,66,0.1);color:var(--gold2)}
-.nav-icon{font-size:16px;width:20px;text-align:center}
-.sidebar-bottom{margin-top:auto;border-top:1px solid var(--border);padding-top:16px}
-.user-mini{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer;transition:background 0.2s;text-decoration:none}
-.user-mini:hover{background:rgba(255,255,255,0.04)}
-.user-av-sm{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:600;overflow:hidden}
-.user-av-sm img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.user-name-sm{font-size:13px;font-weight:500;color:var(--text)}
-.user-pts-sm{font-size:11px;color:var(--gold2)}
 .main{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column}
 .topbar{background:rgba(7,7,15,0.8);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30}
 .topbar-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.08em}
-.pts-pill{display:flex;align-items:center;gap:6px;background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.2);padding:6px 14px;border-radius:20px;font-size:13px;color:var(--gold2);font-weight:500;text-decoration:none}
 .content{padding:32px;max-width:700px}
 .profile-hero{background:linear-gradient(135deg,rgba(245,200,66,0.08),rgba(255,77,141,0.06));border:1px solid rgba(245,200,66,0.15);border-radius:24px;padding:32px;display:flex;align-items:center;gap:24px;margin-bottom:28px;flex-wrap:wrap}
 .profile-av-wrap{position:relative;flex-shrink:0}
@@ -114,11 +93,6 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 .modal-cta{margin-top:16px;padding:16px;background:linear-gradient(135deg,rgba(245,200,66,0.08),rgba(255,77,141,0.06));border:1px solid rgba(245,200,66,0.2);border-radius:14px;text-align:center}
 .modal-cta p{font-size:12px;color:var(--muted);margin-bottom:10px}
 .modal-cta-btn{background:linear-gradient(135deg,var(--gold),#E8A020);border:none;border-radius:10px;padding:10px 24px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.08em;color:#000;cursor:pointer}
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;color:var(--text);z-index:400;transition:transform 0.3s ease;white-space:nowrap}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.success{border-color:rgba(34,212,160,0.3)}
-.toast.error{border-color:rgba(255,77,77,0.3)}
-.menu-btn{display:none;position:fixed;bottom:20px;right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8A020);border:none;font-size:22px;cursor:pointer;z-index:60;box-shadow:0 4px 20px rgba(245,200,66,0.3);align-items:center;justify-content:center}
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0)}
@@ -130,16 +104,6 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
   .topbar{padding:14px 16px}
   .field-row{flex-direction:column;gap:0}
 }
-.mobile-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(13,13,26,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.08);z-index:9999;padding:6px 0 max(6px,env(safe-area-inset-bottom))}
-.mobile-bottom-nav ul{display:flex;align-items:stretch;justify-content:space-around;list-style:none;margin:0;padding:0}
-.mobile-bottom-nav li{flex:1}
-.mobile-bottom-nav li a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;padding:6px 4px;border-radius:10px;transition:background 0.2s;position:relative}
-.mobile-bottom-nav li a:active{background:rgba(255,255,255,0.08)}
-.mobile-bottom-nav .mnav-icon{font-size:22px;line-height:1}
-.mobile-bottom-nav .mnav-label{font-size:10px;font-family:'DM Sans',sans-serif;color:rgba(240,238,248,0.4);letter-spacing:0.01em}
-.mobile-bottom-nav li.active .mnav-label{color:#FFE27A}
-.mobile-bottom-nav li.active .mnav-icon{filter:drop-shadow(0 0 6px rgba(245,200,66,0.5))}
-.mobile-bottom-nav .mnav-badge{position:absolute;top:4px;right:calc(50% - 16px);width:8px;height:8px;border-radius:50%;background:#FF4D8D;border:2px solid rgba(13,13,26,0.97)}
 @media(max-width:768px){
   .mobile-bottom-nav{display:block}
   .sidebar{display:none !important}
@@ -298,10 +262,6 @@ body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;m
 </div>
 
 <script>
-const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
-const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w'; // Clé publique Supabase — sécurité assurée par RLS côté serveur
-const{createClient}=supabase;
-const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userProfile=null,selectedGenre=null;
 async function init(){
   try{
@@ -483,9 +443,18 @@ async function exportData(){
   showToast('✅ Données exportées !','success');
 }
 
-async function deleteAccount(){
-  if(!confirm('Supprimer définitivement votre compte ? Toutes vos données seront perdues.'))return;
-  if(!confirm('Êtes-vous vraiment sûr ? Cette action est irréversible.'))return;
+function deleteAccount(){
+  document.getElementById('delete-confirm-input').value='';
+  document.getElementById('delete-confirm-btn').disabled=true;
+  document.getElementById('delete-account-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDeleteModal(){
+  document.getElementById('delete-account-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+async function confirmDeleteAccount(){
+  document.getElementById('delete-confirm-btn').disabled=true;
   try{
     await deleteAllPhotos();
     const{error}=await sb.from('users').delete().eq('id',currentUser.id);
@@ -495,6 +464,7 @@ async function deleteAccount(){
   }catch(e){
     console.error('[profil] deleteAccount:',e);
     showToast('❌ Erreur lors de la suppression du compte','error');
+    closeDeleteModal();
   }
 }
 
@@ -536,5 +506,27 @@ init();
     <li class="active"><a href="profil.html"><span class="mnav-icon">👤</span><span class="mnav-label">Profil</span></a></li>
   </ul>
 </nav>
+<div class="modal-overlay" id="delete-account-modal" onclick="if(event.target===this)closeDeleteModal()">
+  <div class="modal-box" style="max-width:400px">
+    <button class="modal-close-btn" onclick="closeDeleteModal()">✕</button>
+    <div class="modal-head">
+      <h3>⚠️ Supprimer le compte</h3>
+      <p>Cette action est irréversible. Toutes vos données, photos et points seront définitivement supprimés.</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:8px">Tapez <strong style="color:var(--text)">SUPPRIMER</strong> pour confirmer</label>
+      <input id="delete-confirm-input" type="text" placeholder="SUPPRIMER" autocomplete="off"
+        style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,77,141,0.3);border-radius:10px;color:var(--text);font-size:14px;padding:11px 14px;outline:none;font-family:'DM Sans',sans-serif"
+        oninput="const btn=document.getElementById('delete-confirm-btn');btn.disabled=this.value!=='SUPPRIMER';btn.style.opacity=btn.disabled?'0.4':'1';" />
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeDeleteModal()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px">Annuler</button>
+      <button id="delete-confirm-btn" onclick="confirmDeleteAccount()" disabled
+        style="flex:1;background:#FF4D8D;border:none;color:#fff;border-radius:10px;padding:11px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.06em;opacity:0.4;transition:opacity 0.2s"
+        onmouseenter="if(!this.disabled)this.style.opacity='1'" onmouseleave="if(!this.disabled)this.style.opacity='0.9'"
+        onfocus="if(this.disabled)this.blur()">SUPPRIMER MON COMPTE</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

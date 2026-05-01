@@ -19,46 +19,26 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="utils.js"></script>
   <script src="premium.js"></script>
+<link rel="stylesheet" href="shared.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
   --gold: #F5C842; --gold2: #FFE27A; --pink: #FF4D8D;
   --dark: #07070F; --deep: #0D0D1A; --card: #13131E; --card2: #18182A;
   --border: rgba(255,255,255,0.07); --text: #F0EEF8;
   --muted: rgba(240,238,248,0.42); --green: #22D4A0;
 }
 
-html { scroll-behavior: smooth; }
-body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; }
 
-.loading-screen { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 100; }
-.loading-logo { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.18em; background: linear-gradient(135deg, var(--gold), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.loading-spinner { width: 32px; height: 32px; border: 3px solid rgba(245,200,66,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-.sidebar { width: 220px; flex-shrink: 0; background: var(--deep); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40; transition: transform 0.3s; }
-.sidebar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.15em; background: linear-gradient(135deg, var(--gold), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px; padding-left: 8px; text-decoration: none; display: block; }
-.nav-section { font-size: 10px; color: rgba(240,238,248,0.2); text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 8px 8px; }
-.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: var(--muted); cursor: pointer; transition: background 0.2s, color 0.2s; margin-bottom: 2px; text-decoration: none; }
-.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
-.nav-item.active { background: rgba(245,200,66,0.1); color: var(--gold2); }
-.nav-icon { font-size: 16px; width: 20px; text-align: center; }
-.sidebar-bottom { margin-top: auto; border-top: 1px solid var(--border); padding-top: 16px; }
-.user-mini { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; transition: background 0.2s; text-decoration: none; }
-.user-mini:hover { background: rgba(255,255,255,0.04); }
-.user-av-sm { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--pink)); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-.user-name-sm { font-size: 13px; font-weight: 500; color: var(--text); }
-.user-pts-sm { font-size: 11px; color: var(--gold2); }
 
 .main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
 
 .topbar { background: rgba(7,7,15,0.8); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 30; }
 .topbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.08em; }
 .topbar-right { display: flex; align-items: center; gap: 12px; }
-.pts-pill { display: flex; align-items: center; gap: 6px; background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2); padding: 6px 14px; border-radius: 20px; font-size: 13px; color: var(--gold2); font-weight: 500; }
 
 .content { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 32px; gap: 28px; }
 
@@ -231,12 +211,8 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .btn-continue { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .btn-continue:hover { color: var(--text); }
 
-.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
-.toast.show { transform: translateX(-50%) translateY(0); }
 .toast.gold { border-color: rgba(245,200,66,0.3); }
-.toast.success { border-color: rgba(34,212,160,0.3); }
 
-.menu-btn { display: none; position: fixed; bottom: 20px; right: 20px; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #E8A020); border: none; font-size: 22px; cursor: pointer; z-index: 60; box-shadow: 0 4px 20px rgba(245,200,66,0.3); align-items: center; justify-content: center; }
 
 @media (max-width: 900px) { .right-panel { display: none; } .content { justify-content: center; } }
 @media (max-width: 768px) {
@@ -248,7 +224,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   .stars-grid { gap: 4px; } .star-btn { width: 32px; height: 32px; font-size: 12px; }
 }
 
-.mobile-bottom-nav {
   display: none;
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -259,15 +234,6 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
   z-index: 9999;
   padding: 6px 0 max(6px, env(safe-area-inset-bottom));
 }
-.mobile-bottom-nav ul { display: flex; align-items: stretch; justify-content: space-around; list-style: none; margin: 0; padding: 0; }
-.mobile-bottom-nav li { flex: 1; }
-.mobile-bottom-nav li a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; padding: 6px 4px; border-radius: 10px; transition: background 0.2s; position: relative; }
-.mobile-bottom-nav li a:active { background: rgba(255,255,255,0.08); }
-.mobile-bottom-nav .mnav-icon { font-size: 22px; line-height: 1; }
-.mobile-bottom-nav .mnav-label { font-size: 10px; font-family: 'DM Sans', sans-serif; color: rgba(240,238,248,0.4); letter-spacing: 0.01em; }
-.mobile-bottom-nav li.active .mnav-label { color: #FFE27A; }
-.mobile-bottom-nav li.active .mnav-icon { filter: drop-shadow(0 0 6px rgba(245,200,66,0.5)); }
-.mobile-bottom-nav .mnav-badge { position: absolute; top: 4px; right: calc(50% - 16px); width: 8px; height: 8px; border-radius: 50%; background: #FF4D8D; border: 2px solid rgba(13,13,26,0.97); }
 @media (max-width: 768px) {
   .mobile-bottom-nav { display: block; }
   .sidebar { display: none !important; }
@@ -428,12 +394,8 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
 
 <script>
-const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 // Clé anon publique Supabase — conçue pour être visible côté client.
 // La sécurité repose sur les politiques RLS configurées dans Supabase.
-const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 let userProfile = null;
@@ -454,7 +416,10 @@ async function init() {
       const { data: profile } = await sb.from('users').select('*').eq('id', currentUser.id).single();
       userProfile = profile;
       if (profile) {
-        document.getElementById('user-avatar').textContent = profile.prenom?.charAt(0).toUpperCase() || '?';
+        const avEl = document.getElementById('user-avatar');
+        const av = safeUrl(profile.avatar_url);
+        if (av) { avEl.innerHTML = `<img src="${av}" style="width:100%;height:100%;object-fit:cover;" />`; }
+        else { avEl.textContent = profile.prenom?.charAt(0).toUpperCase() || '?'; }
         document.getElementById('user-name').textContent = profile.prenom || 'Membre';
         document.getElementById('user-pts').textContent = profile.points || 0;
         document.getElementById('pts-display').textContent = profile.points || 0;
@@ -571,8 +536,11 @@ async function doRate() {
   if (currentUser) {
     try {
       await sb.from('votes').insert({ voter_id: currentUser.id, photo_id: photo.id, note });
-      const newVotes = (photo.nb_votes || 0) + 1;
-      const newAvg = ((photo.note_moyenne || 0) * (photo.nb_votes || 0) + note) / newVotes;
+      // Re-fetch stats frais pour éviter d'écraser des votes concurrents
+      const { data: fresh } = await sb.from('photos').select('nb_votes,note_moyenne').eq('id', photo.id).single();
+      const base = fresh || photo;
+      const newVotes = (base.nb_votes || 0) + 1;
+      const newAvg = ((base.note_moyenne || 0) * (base.nb_votes || 0) + note) / newVotes;
       await sb.from('photos').update({ nb_votes: newVotes, note_moyenne: newAvg }).eq('id', photo.id);
       photo.nb_votes = newVotes;
       photo.note_moyenne = newAvg;

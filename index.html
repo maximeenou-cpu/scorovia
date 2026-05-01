@@ -508,12 +508,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 40px;display:fle
 </div>
 
 <script>
-const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 // Clé anon publique Supabase — conçue pour être visible côté client.
 // La sécurité repose sur les politiques RLS configurées dans Supabase.
-const SUPABASE_KEY = 'sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const FALLBACK_TICKER = [
   { prenom: 'Marie', ville: 'Paris', note: 8.4, avatar: null },
@@ -685,7 +681,7 @@ function doEmailSignup() {
     setTimeout(() => document.getElementById('modal-email').style.outline = '', 1500);
     return;
   }
-  window.location.href = 'login.html';
+  window.location.href = 'login.html?method=email&email=' + encodeURIComponent(v);
 }
 document.getElementById('modal-email').addEventListener('keypress', e => { if (e.key === 'Enter') doEmailSignup(); });
 
