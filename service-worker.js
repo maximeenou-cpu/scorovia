@@ -1,4 +1,4 @@
-const CACHE_NAME = 'scorovia-v2';
+const CACHE_NAME = 'scorovia-v3';
 
 const STATIC_ASSETS = [
   '/',
@@ -12,7 +12,9 @@ const STATIC_ASSETS = [
   '/profil.html',
   '/points.html',
   '/contact.html',
+  '/utils.js',
   '/premium.js',
+  '/points-config.js',
   '/manifest.json',
   '/favicon.ico',
   '/favicon-32x32.png',
