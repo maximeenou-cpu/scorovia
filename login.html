@@ -542,6 +542,10 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 const urlParams = new URLSearchParams(window.location.search);
 const refCode = urlParams.get('ref');
 if (refCode) localStorage.setItem('scorovia_ref', refCode);
+
+function generateReferralCode() {
+  return Math.random().toString(36).slice(2, 10).toUpperCase();
+}
 // ────────────────────────────────────────────────
 
 // ─── GESTION DU PARAMÈTRE ?method depuis index.html ───────────
@@ -583,7 +587,8 @@ async function ensureProfile(user) {
         id: user.id,
         email: user.email,
         prenom: name,
-        points: 20
+        points: 20,
+        referral_code: generateReferralCode()
       });
       await sb.from('points_history').insert({
         user_id: user.id,
@@ -859,11 +864,10 @@ async function handleReferral(newUserId) {
   if (!ref) return;
 
   try {
-    // Trouve le parrain via les 8 premiers chars de son UUID
     const { data: parrain } = await sb
       .from('users')
       .select('id, points')
-      .ilike('id', ref + '%')
+      .eq('referral_code', ref)
       .single();
 
     // Sécurité : pas de self-parrainage

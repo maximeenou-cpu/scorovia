@@ -329,7 +329,7 @@ const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
 const SUPABASE_KEY='sb_publishable_oVYZTlF0zB2RgLVWXXvkUg_sn7U6b9w';
 const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
-let currentUser=null,userVotes=[];
+let currentUser=null,userVotes=[],referralCode='';
 
 // ── SON DE NOTIFICATION ───────────────────────────────────────────
 function playNotifSound() {
@@ -438,7 +438,8 @@ async function init(){
     if(rang){document.getElementById('stat-rang').textContent='#'+rang;document.getElementById('stat-rang-sub').innerHTML=`sur ${totalMembers||'?'} membres · <span style="color:var(--gold2);font-size:10px;">Voir le classement →</span>`;}
     else{document.getElementById('stat-rang').textContent='—';}
 
-    const refLink=`https://scorovia.com/login.html?ref=${currentUser.id.slice(0,8)}`;
+    referralCode=profile.referral_code||currentUser.id.slice(0,8);
+    const refLink=`https://scorovia.com/login.html?ref=${referralCode}`;
     const refInput=document.getElementById('referral-link-input');
     if(refInput) refInput.value=refLink;
 
@@ -497,7 +498,7 @@ async function doLogout(){
 }
 
 function copyInvite(){
-  const link=`https://scorovia.com/login.html?ref=${currentUser?.id?.slice(0,8)||'user'}`;
+  const link=`https://scorovia.com/login.html?ref=${referralCode||currentUser?.id?.slice(0,8)||'user'}`;
   navigator.clipboard.writeText(link).then(()=>{
     const btn=document.getElementById('btn-copy-link');
     if(btn){btn.textContent='✅ Copié !';btn.classList.add('copied');setTimeout(()=>{btn.textContent='📋 Copier';btn.classList.remove('copied');},2500);}
