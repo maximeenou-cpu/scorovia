@@ -397,6 +397,9 @@ async function applyPromo(){
       description:'Code : '+code+(promo.influencer_name?' — '+promo.influencer_name:'')
     });
 
+    // 6. Incrémente le compteur d'utilisations du code
+    await sb.from('promo_codes').update({uses:(promo.uses||0)+1}).eq('id',promo.id);
+
     userProfile.points=newPts;
     document.getElementById('pts-display').textContent=newPts;
     document.getElementById('user-pts').textContent=newPts;
