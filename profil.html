@@ -424,15 +424,16 @@ async function saveProfile(){
   }
 }
 
-async function deleteAllPhotos(){
-  if(!confirm('Supprimer toutes vos photos ? Cette action est irréversible.'))return;
+async function deleteAllPhotos(silent=false){
+  if(!silent&&!confirm('Supprimer toutes vos photos ? Cette action est irréversible.'))return;
   try{
     const{data:photos}=await sb.from('photos').select('id,url').eq('user_id',currentUser.id);
     if(photos){for(const photo of photos){if(photo.url){const path=photo.url.split('/photos/')[1];if(path)await sb.storage.from('photos').remove([path]);}await sb.from('photos').delete().eq('id',photo.id);}}
-    await loadStats();showToast('🗑️ Toutes vos photos ont été supprimées','success');
+    if(!silent){await loadStats();showToast('🗑️ Toutes vos photos ont été supprimées','success');}
   }catch(e){
     console.error('[profil] deleteAllPhotos:',e);
-    showToast('❌ Erreur lors de la suppression','error');
+    if(!silent)showToast('❌ Erreur lors de la suppression','error');
+    throw e;
   }
 }
 
@@ -456,7 +457,10 @@ function closeDeleteModal(){
 async function confirmDeleteAccount(){
   document.getElementById('delete-confirm-btn').disabled=true;
   try{
-    await deleteAllPhotos();
+    await deleteAllPhotos(true);
+    await sb.from('votes').delete().eq('voter_id',currentUser.id);
+    await sb.from('points_history').delete().eq('user_id',currentUser.id);
+    await sb.from('messages').delete().or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
     const{error}=await sb.from('users').delete().eq('id',currentUser.id);
     if(error)throw error;
     await sb.auth.signOut();
