@@ -10,880 +10,141 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root {
-      --bg: #080808;
-      --bg2: #111111;
-      --bg3: #1a1a1a;
-      --border: #2a2a2a;
-      --gold: #f5c842;
-      --gold2: #e0a800;
-      --text: #f0f0f0;
-      --muted: #666;
-      --green: #3ddc84;
-      --red: #ff4d4d;
-      --blue: #4d9fff;
-      --purple: #a78bfa;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'DM Mono', monospace;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    /* AUTH SCREEN */
-    #auth-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: radial-gradient(ellipse at center, #1a1200 0%, #080808 70%);
-    }
-
-    .auth-box {
-      text-align: center;
-      padding: 60px 40px;
-      border: 1px solid var(--border);
-      background: var(--bg2);
-      max-width: 400px;
-      width: 90%;
-    }
-
-    .auth-box .logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--gold);
-      letter-spacing: 4px;
-      margin-bottom: 8px;
-    }
-
-    .auth-box .subtitle {
-      color: var(--muted);
-      font-size: 0.75rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 40px;
-    }
-
-    .auth-box button {
-      background: var(--gold);
-      color: #000;
-      border: none;
-      padding: 14px 32px;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 2px;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.2s;
-    }
-
-    .auth-box button:hover { background: var(--gold2); }
-
-    .auth-error {
-      margin-top: 16px;
-      color: var(--red);
-      font-size: 0.75rem;
-      display: none;
-    }
-
-    /* MAIN LAYOUT */
-    #admin-app { display: none; }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 32px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg2);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .header-logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 1.2rem;
-      color: var(--gold);
-      letter-spacing: 3px;
-    }
-
-    .header-badge {
-      background: var(--gold);
-      color: #000;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 3px 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .admin-email { color: var(--muted); font-size: 0.75rem; }
-
-    .btn-logout {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 6px 14px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-logout:hover { border-color: var(--red); color: var(--red); }
-
-    /* NAV TABS */
-    .nav-tabs {
-      display: flex;
-      gap: 0;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg2);
-      padding: 0 32px;
-      overflow-x: auto;
-    }
-
-    .nav-tab {
-      padding: 16px 24px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--muted);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      white-space: nowrap;
-      transition: all 0.2s;
-      background: none;
-      border-left: none;
-      border-right: none;
-      border-top: none;
-    }
-
-    .nav-tab:hover { color: var(--text); }
-    .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-
-    /* MAIN CONTENT */
-    main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 32px;
-    }
-
-    .section { display: none; }
-    .section.active { display: block; }
-
-    /* STATS GRID */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 40px;
-    }
-
-    .stat-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-      animation: fadeIn 0.4s ease forwards;
-      opacity: 0;
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--gold);
-    }
-
-    .stat-card.green::before { background: var(--green); }
-    .stat-card.blue::before { background: var(--blue); }
-    .stat-card.red::before { background: var(--red); }
-    .stat-card.purple::before { background: var(--purple); }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .stat-card:nth-child(1) { animation-delay: 0.05s; }
-    .stat-card:nth-child(2) { animation-delay: 0.1s; }
-    .stat-card:nth-child(3) { animation-delay: 0.15s; }
-    .stat-card:nth-child(4) { animation-delay: 0.2s; }
-    .stat-card:nth-child(5) { animation-delay: 0.25s; }
-    .stat-card:nth-child(6) { animation-delay: 0.3s; }
-    .stat-card:nth-child(7) { animation-delay: 0.35s; }
-    .stat-card:nth-child(8) { animation-delay: 0.4s; }
-    .stat-card:nth-child(9) { animation-delay: 0.45s; }
-
-    .stat-label {
-      font-size: 0.65rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-
-    .stat-value {
-      font-family: 'Syne', sans-serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1;
-    }
-
-    .stat-sub {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-
-    /* SECTION TITLES */
-    .section-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 20px;
-      margin-top: 40px;
-    }
-
-    .section-title:first-child { margin-top: 0; }
-
-    /* TABLE */
-    .table-wrap {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-    }
-
-    th {
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 0.65rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      background: var(--bg3);
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      color: var(--text);
-      vertical-align: middle;
-    }
-
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--bg3); }
-
-    /* POINTS CONFIG */
-    .config-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
-
-    .config-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .config-label { font-size: 0.8rem; color: var(--text); }
-
-    .config-input-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .config-input {
-      width: 80px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 12px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
-    .config-input:focus { outline: none; border-color: var(--gold); }
-
-    .btn-save-config {
-      background: var(--gold);
-      color: #000;
-      border: none;
-      padding: 8px 16px;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 0.7rem;
-      letter-spacing: 1px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-save-config:hover { background: var(--gold2); }
-
-    /* PROMO CODES */
-    .promo-form {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      padding: 24px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr auto;
-      gap: 12px;
-      align-items: end;
-      margin-bottom: 24px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.65rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .form-group input, .form-group select {
-      width: 100%;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 14px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.85rem;
-    }
-
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--gold); }
-
-    .btn-primary {
-      background: var(--gold);
-      color: #000;
-      border: none;
-      padding: 10px 24px;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 0.8rem;
-      letter-spacing: 2px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s;
-      height: 40px;
-    }
-
-    .btn-primary:hover { background: var(--gold2); }
-
-    .btn-danger {
-      background: none;
-      border: 1px solid var(--red);
-      color: var(--red);
-      padding: 5px 12px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-danger:hover { background: rgba(255,77,77,0.1); }
-
-    .btn-green {
-      background: none;
-      border: 1px solid var(--green);
-      color: var(--green);
-      padding: 5px 12px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-green:hover { background: rgba(61,220,132,0.1); }
-
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .badge-active { background: rgba(61,220,132,0.15); color: var(--green); }
-    .badge-inactive { background: rgba(255,77,77,0.15); color: var(--red); }
-    .badge-premium { background: rgba(245,200,66,0.15); color: var(--gold); }
-    .badge-banned { background: rgba(255,77,77,0.25); color: var(--red); border: 1px solid var(--red); }
-
-    .btn-toggle {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 4px 12px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-toggle:hover { border-color: var(--gold); color: var(--gold); }
-
-    /* TOAST */
-    .toast {
-      position: fixed;
-      bottom: 32px;
-      right: 32px;
-      background: var(--bg2);
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      padding: 14px 24px;
-      font-size: 0.8rem;
-      letter-spacing: 1px;
-      z-index: 9999;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all 0.3s;
-    }
-
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.error { border-color: var(--red); color: var(--red); }
-
-    /* LOADER */
-    .loader {
-      color: var(--muted);
-      font-size: 0.8rem;
-      padding: 40px;
-      text-align: center;
-      letter-spacing: 2px;
-    }
-
-    /* AVATAR */
-    .avatar-circle {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      color: var(--muted);
-      vertical-align: middle;
-      margin-right: 8px;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-
-    /* USER DETAIL MODAL */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 500;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      width: 90%;
-      max-width: 760px;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .modal-header {
-      padding: 24px 28px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      background: var(--bg2);
-      z-index: 10;
-    }
-
-    .modal-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    .modal-close {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .modal-close:hover { border-color: var(--red); color: var(--red); }
-
-    .modal-body { padding: 28px; }
-
-    .modal-section {
-      margin-bottom: 28px;
-    }
-
-    .modal-section-title {
-      font-size: 0.65rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .info-row {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .info-key {
-      font-size: 0.65rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .info-val {
-      font-size: 0.85rem;
-      color: var(--text);
-    }
-
-    .points-edit-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .points-edit-input {
-      width: 100px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 12px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
-    .points-edit-input:focus { outline: none; border-color: var(--gold); }
-
-    /* PHOTOS GRID */
-    .photos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 12px;
-    }
-
-    .photo-thumb {
-      position: relative;
-      aspect-ratio: 1;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
-
-    .photo-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .photo-thumb-info {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.75);
-      padding: 4px 8px;
-      font-size: 0.65rem;
-      color: var(--text);
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .photo-thumb-badge {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      font-size: 0.6rem;
-      padding: 2px 6px;
-    }
-
-    /* MESSAGES VIEW */
-    .messages-thread {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      max-height: 360px;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .message-bubble {
-      max-width: 70%;
-      padding: 10px 14px;
-      font-size: 0.8rem;
-      line-height: 1.5;
-    }
-
-    .message-bubble.sent {
-      align-self: flex-end;
-      background: rgba(245,200,66,0.1);
-      border: 1px solid rgba(245,200,66,0.2);
-    }
-
-    .message-bubble.received {
-      align-self: flex-start;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-    }
-
-    .message-meta {
-      font-size: 0.65rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    /* SEARCH BAR */
-    .search-bar {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 14px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.85rem;
-    }
-
-    .search-bar:focus { outline: none; border-color: var(--gold); }
-
-    /* FILTER ROW */
-    .filter-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .filter-select {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 12px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
-      cursor: pointer;
-    }
-
-    .filter-select:focus { outline: none; border-color: var(--gold); }
-
-    /* PHOTO MOD SECTION */
-    .photo-mod-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-    }
-
-    .photo-mod-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
-
-    .photo-mod-card img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      display: block;
-    }
-
-    .photo-mod-card-body {
-      padding: 12px;
-    }
-
-    .photo-mod-meta {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-bottom: 10px;
-      line-height: 1.6;
-    }
-
-    .photo-mod-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    /* CONV LIST */
-    .conv-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .conv-item:hover { background: var(--bg3); }
-    .conv-item:last-child { border-bottom: none; }
-
-    .conv-names {
-      flex: 1;
-      font-size: 0.85rem;
-    }
-
-    .conv-preview {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 300px;
-    }
-
-    .conv-count {
-      font-size: 0.7rem;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .unread-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--gold);
-      flex-shrink: 0;
-    }
-
-    /* PAGINATION */
-    .pagination {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 16px;
-      justify-content: center;
-    }
-
-    .page-btn {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 6px 14px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .page-btn:hover, .page-btn.active { border-color: var(--gold); color: var(--gold); }
-    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* STRIPE SECTION */
-    .stripe-info {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      padding: 20px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .stripe-icon {
-      font-size: 1.5rem;
-    }
-
-    .stripe-text {
-      font-size: 0.8rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .stripe-link {
-      color: var(--blue);
-      text-decoration: none;
-      font-size: 0.8rem;
-      transition: color 0.2s;
-    }
-
-    .stripe-link:hover { color: var(--text); }
-
-    @media (max-width: 768px) {
-      main { padding: 16px; }
-      header { padding: 16px; }
-      .promo-form { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .info-grid { grid-template-columns: 1fr; }
-      .filter-row { flex-direction: column; align-items: stretch; }
-    }
+    :root{--bg:#080808;--bg2:#111111;--bg3:#1a1a1a;--border:#2a2a2a;--gold:#f5c842;--gold2:#e0a800;--text:#f0f0f0;--muted:#666;--green:#3ddc84;--red:#ff4d4d;--blue:#4d9fff;--purple:#a78bfa}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh}
+    #auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at center,#1a1200 0%,#080808 70%)}
+    .auth-box{text-align:center;padding:60px 40px;border:1px solid var(--border);background:var(--bg2);max-width:400px;width:90%}
+    .auth-box .logo{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--gold);letter-spacing:4px;margin-bottom:8px}
+    .auth-box .subtitle{color:var(--muted);font-size:.75rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:40px}
+    .auth-box button{background:var(--gold);color:#000;border:none;padding:14px 32px;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:2px;cursor:pointer;width:100%;transition:background .2s}
+    .auth-box button:hover{background:var(--gold2)}
+    .auth-error{margin-top:16px;color:var(--red);font-size:.75rem;display:none}
+    #admin-app{display:none}
+    header{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100}
+    .header-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--gold);letter-spacing:3px}
+    .header-badge{background:var(--gold);color:#000;font-size:.65rem;font-weight:700;padding:3px 10px;letter-spacing:2px;text-transform:uppercase}
+    .header-right{display:flex;align-items:center;gap:16px}
+    .admin-email{color:var(--muted);font-size:.75rem}
+    .btn-logout{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;font-family:'DM Mono',monospace;font-size:.75rem;cursor:pointer;transition:all .2s}
+    .btn-logout:hover{border-color:var(--red);color:var(--red)}
+    .nav-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);padding:0 32px;overflow-x:auto}
+    .nav-tab{padding:16px 24px;font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none}
+    .nav-tab:hover{color:var(--text)}
+    .nav-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+    main{max-width:1400px;margin:0 auto;padding:32px}
+    .section{display:none}
+    .section.active{display:block}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:40px}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);padding:24px;position:relative;overflow:hidden;animation:fadeIn .4s ease forwards;opacity:0}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+    .stat-card.green::before{background:var(--green)}
+    .stat-card.blue::before{background:var(--blue)}
+    .stat-card.red::before{background:var(--red)}
+    .stat-card.purple::before{background:var(--purple)}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.1s}.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.2s}.stat-card:nth-child(5){animation-delay:.25s}.stat-card:nth-child(6){animation-delay:.3s}.stat-card:nth-child(7){animation-delay:.35s}
+    .stat-label{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+    .stat-value{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;color:var(--text);line-height:1}
+    .stat-sub{font-size:.7rem;color:var(--muted);margin-top:8px}
+    .section-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;margin-top:40px}
+    .section-title:first-child{margin-top:0}
+    .table-wrap{background:var(--bg2);border:1px solid var(--border);overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:.8rem}
+    th{text-align:left;padding:12px 16px;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap}
+    td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--bg3)}
+    .config-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .config-card{background:var(--bg2);border:1px solid var(--border);padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .config-label{font-size:.8rem;color:var(--text)}
+    .config-input-wrap{display:flex;align-items:center;gap:8px}
+    .config-input{width:80px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-family:'DM Mono',monospace;font-size:.9rem;text-align:center}
+    .config-input:focus{outline:none;border-color:var(--gold)}
+    .btn-save-config{background:var(--gold);color:#000;border:none;padding:8px 16px;font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1px;cursor:pointer;transition:background .2s}
+    .btn-save-config:hover{background:var(--gold2)}
+    .promo-form{background:var(--bg2);border:1px solid var(--border);padding:24px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:24px}
+    .form-group label{display:block;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+    .form-group input,.form-group select{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:'DM Mono',monospace;font-size:.85rem}
+    .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--gold)}
+    .btn-primary{background:var(--gold);color:#000;border:none;padding:10px 24px;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:2px;cursor:pointer;white-space:nowrap;transition:background .2s;height:40px}
+    .btn-primary:hover{background:var(--gold2)}
+    .btn-danger{background:none;border:1px solid var(--red);color:var(--red);padding:5px 12px;font-family:'DM Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .2s}
+    .btn-danger:hover{background:rgba(255,77,77,.1)}
+    .btn-green{background:none;border:1px solid var(--green);color:var(--green);padding:5px 12px;font-family:'DM Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .2s}
+    .btn-green:hover{background:rgba(61,220,132,.1)}
+    .badge{display:inline-block;padding:3px 10px;font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+    .badge-active{background:rgba(61,220,132,.15);color:var(--green)}
+    .badge-inactive{background:rgba(255,77,77,.15);color:var(--red)}
+    .badge-premium{background:rgba(245,200,66,.15);color:var(--gold)}
+    .badge-banned{background:rgba(255,77,77,.25);color:var(--red);border:1px solid var(--red)}
+    .btn-toggle{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;font-family:'DM Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .2s}
+    .btn-toggle:hover{border-color:var(--gold);color:var(--gold)}
+    .toast{position:fixed;bottom:32px;right:32px;background:var(--bg2);border:1px solid var(--gold);color:var(--gold);padding:14px 24px;font-size:.8rem;letter-spacing:1px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.error{border-color:var(--red);color:var(--red)}
+    .loader{color:var(--muted);font-size:.8rem;padding:40px;text-align:center;letter-spacing:2px}
+    .avatar-circle{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted);vertical-align:middle;margin-right:8px;overflow:hidden;flex-shrink:0}
+    .avatar-circle img{width:100%;height:100%;object-fit:cover}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:760px;max-height:90vh;overflow-y:auto;position:relative}
+    .modal-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:10}
+    .modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;letter-spacing:2px;text-transform:uppercase}
+    .modal-close{background:none;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .modal-close:hover{border-color:var(--red);color:var(--red)}
+    .modal-body{padding:28px}
+    .modal-section{margin-bottom:28px}
+    .modal-section-title{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .info-row{display:flex;flex-direction:column;gap:4px}
+    .info-key{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+    .info-val{font-size:.85rem;color:var(--text)}
+    .points-edit-row{display:flex;align-items:center;gap:12px;margin-top:8px}
+    .points-edit-input{width:100px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-family:'DM Mono',monospace;font-size:.9rem;text-align:center}
+    .points-edit-input:focus{outline:none;border-color:var(--gold)}
+    .photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+    .photo-thumb{position:relative;aspect-ratio:1;background:var(--bg3);border:1px solid var(--border);overflow:hidden}
+    .photo-thumb img{width:100%;height:100%;object-fit:cover}
+    .photo-thumb-info{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);padding:4px 8px;font-size:.65rem;color:var(--text);display:flex;justify-content:space-between}
+    .photo-thumb-badge{position:absolute;top:4px;right:4px;font-size:.6rem;padding:2px 6px}
+    .messages-thread{background:var(--bg3);border:1px solid var(--border);max-height:360px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+    .message-bubble{max-width:70%;padding:10px 14px;font-size:.8rem;line-height:1.5}
+    .message-bubble.sent{align-self:flex-end;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.2)}
+    .message-bubble.received{align-self:flex-start;background:var(--bg2);border:1px solid var(--border)}
+    .message-meta{font-size:.65rem;color:var(--muted);margin-top:4px}
+    .search-bar{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:'DM Mono',monospace;font-size:.85rem}
+    .search-bar:focus{outline:none;border-color:var(--gold)}
+    .filter-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+    .filter-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-family:'DM Mono',monospace;font-size:.75rem;cursor:pointer}
+    .filter-select:focus{outline:none;border-color:var(--gold)}
+    .photo-mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+    .photo-mod-card{background:var(--bg2);border:1px solid var(--border);overflow:hidden}
+    .photo-mod-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+    .photo-mod-card-body{padding:12px}
+    .photo-mod-meta{font-size:.7rem;color:var(--muted);margin-bottom:10px;line-height:1.6}
+    .photo-mod-actions{display:flex;gap:8px}
+    .conv-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+    .conv-item:hover{background:var(--bg3)}
+    .conv-item:last-child{border-bottom:none}
+    .conv-names{flex:1;font-size:.85rem}
+    .conv-preview{font-size:.72rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
+    .conv-count{font-size:.7rem;color:var(--muted);white-space:nowrap}
+    .unread-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
+    .pagination{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:center}
+    .page-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;font-family:'DM Mono',monospace;font-size:.75rem;cursor:pointer;transition:all .2s}
+    .page-btn:hover,.page-btn.active{border-color:var(--gold);color:var(--gold)}
+    .page-btn:disabled{opacity:.3;cursor:not-allowed}
+    .stripe-info{background:var(--bg2);border:1px solid var(--border);padding:20px;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+    .stripe-icon{font-size:1.5rem}
+    .stripe-text{font-size:.8rem;color:var(--muted);line-height:1.6}
+    .stripe-link{color:var(--blue);text-decoration:none;font-size:.8rem;transition:color .2s}
+    .stripe-link:hover{color:var(--text)}
+    @media(max-width:768px){main{padding:16px}header{padding:16px}.promo-form{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr)}.info-grid{grid-template-columns:1fr}.filter-row{flex-direction:column;align-items:stretch}}
   </style>
 </head>
 <body>
 
-<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-box">
     <div class="logo">SCOROVIA</div>
@@ -893,7 +154,6 @@
   </div>
 </div>
 
-<!-- ADMIN APP -->
 <div id="admin-app">
   <header>
     <div style="display:flex;align-items:center;gap:16px">
@@ -907,174 +167,100 @@
   </header>
 
   <nav class="nav-tabs">
-    <button class="nav-tab active" onclick="showSection('stats', this)">Statistiques</button>
-    <button class="nav-tab" onclick="showSection('users', this)">Utilisateurs</button>
-    <button class="nav-tab" onclick="showSection('photos', this)">Photos</button>
-    <button class="nav-tab" onclick="showSection('messages', this)">Messages</button>
-    <button class="nav-tab" onclick="showSection('premium', this)">Premium</button>
-    <button class="nav-tab" onclick="showSection('points', this)">Points</button>
-    <button class="nav-tab" onclick="showSection('promos', this)">Codes Promo</button>
-    <button class="nav-tab" onclick="showSection('reports', this)">Reports</button>
+    <button class="nav-tab active" onclick="showSection('stats',this)">Statistiques</button>
+    <button class="nav-tab" onclick="showSection('users',this)">Utilisateurs</button>
+    <button class="nav-tab" onclick="showSection('photos',this)">Photos</button>
+    <button class="nav-tab" onclick="showSection('messages',this)">Messages</button>
+    <button class="nav-tab" onclick="showSection('premium',this)">Premium</button>
+    <button class="nav-tab" onclick="showSection('points',this)">Points</button>
+    <button class="nav-tab" onclick="showSection('promos',this)">Codes Promo</button>
+    <button class="nav-tab" onclick="showSection('reports',this)">Reports</button>
   </nav>
 
   <main>
 
-    <!-- ══════════════════════════════════════════════
-         STATS
-    ══════════════════════════════════════════════ -->
+    <!-- STATS -->
     <div class="section active" id="section-stats">
-      <div class="stats-grid" id="stats-grid">
-        <div class="loader">Chargement...</div>
-      </div>
-
+      <div class="stats-grid" id="stats-grid"><div class="loader">Chargement...</div></div>
       <div class="section-title">Inscrits récents</div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Utilisateur</th>
-              <th>Email</th>
-              <th>Ville</th>
-              <th>Points</th>
-              <th>Premium</th>
-              <th>Code promo</th>
-              <th>Inscrit le</th>
-            </tr>
-          </thead>
-          <tbody id="recent-users-tbody">
-            <tr><td colspan="7" class="loader">Chargement...</td></tr>
-          </tbody>
+          <thead><tr><th>Utilisateur</th><th>Email</th><th>Ville</th><th>Points</th><th>Premium</th><th>Code promo</th><th>Inscrit le</th></tr></thead>
+          <tbody id="recent-users-tbody"><tr><td colspan="7" class="loader">Chargement...</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         USERS
-    ══════════════════════════════════════════════ -->
+    <!-- USERS -->
     <div class="section" id="section-users">
       <div class="section-title">Tous les utilisateurs</div>
       <div class="filter-row">
-        <input id="search-user" type="text" class="search-bar" placeholder="Rechercher par prénom ou email..."
-          style="flex:1" oninput="filterUsers()">
+        <input id="search-user" type="text" class="search-bar" placeholder="Rechercher par prénom ou email..." style="flex:1" oninput="filterUsers()">
         <select class="filter-select" id="filter-premium" onchange="filterUsers()">
-          <option value="">Tous</option>
-          <option value="premium">Premium uniquement</option>
-          <option value="free">Gratuit uniquement</option>
-          <option value="banned">Bannis</option>
+          <option value="">Tous</option><option value="premium">Premium uniquement</option><option value="free">Gratuit uniquement</option><option value="banned">Bannis</option>
         </select>
         <select class="filter-select" id="filter-sort" onchange="filterUsers()">
-          <option value="created_at">Plus récents</option>
-          <option value="points_desc">Points ↓</option>
-          <option value="points_asc">Points ↑</option>
+          <option value="created_at">Plus récents</option><option value="points_desc">Points ↓</option><option value="points_asc">Points ↑</option>
         </select>
       </div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Utilisateur</th>
-              <th>Email</th>
-              <th>Ville</th>
-              <th>Sexe</th>
-              <th>Points</th>
-              <th>Statut</th>
-              <th>Photos</th>
-              <th>Votes donnés</th>
-              <th>Votes reçus</th>
-              <th>Inscrit le</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="users-tbody">
-            <tr><td colspan="8" class="loader">Chargement...</td></tr>
-          </tbody>
+          <thead><tr><th>Utilisateur</th><th>Email</th><th>Ville</th><th>Sexe</th><th>Points</th><th>Statut</th><th>Photos</th><th>Votes donnés</th><th>Votes reçus</th><th>Inscrit le</th><th>Action</th></tr></thead>
+          <tbody id="users-tbody"><tr><td colspan="11" class="loader">Chargement...</td></tr></tbody>
         </table>
       </div>
       <div class="pagination" id="users-pagination"></div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         PHOTOS
-    ══════════════════════════════════════════════ -->
+    <!-- PHOTOS -->
     <div class="section" id="section-photos">
       <div class="section-title">Modération des photos</div>
       <div class="filter-row">
         <select class="filter-select" id="filter-photos" onchange="loadPhotos()">
-          <option value="all">Toutes les photos</option>
-          <option value="active">Actives uniquement</option>
-          <option value="inactive">Désactivées</option>
+          <option value="all">Toutes les photos</option><option value="active">Actives uniquement</option><option value="inactive">Désactivées</option>
         </select>
-        <span style="color:var(--muted);font-size:0.75rem" id="photo-count-label"></span>
+        <span style="color:var(--muted);font-size:.75rem" id="photo-count-label"></span>
       </div>
-      <div class="photo-mod-grid" id="photos-mod-grid">
-        <div class="loader">Chargement...</div>
-      </div>
+      <div class="photo-mod-grid" id="photos-mod-grid"><div class="loader">Chargement...</div></div>
       <div class="pagination" id="photos-pagination"></div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         MESSAGES
-    ══════════════════════════════════════════════ -->
+    <!-- MESSAGES -->
     <div class="section" id="section-messages">
       <div class="section-title">Conversations</div>
       <div class="filter-row">
-        <input type="text" class="search-bar" id="search-conv" placeholder="Rechercher une conversation..."
-          style="flex:1" oninput="filterConversations()">
+        <input type="text" class="search-bar" id="search-conv" placeholder="Rechercher une conversation..." style="flex:1" oninput="filterConversations()">
         <select class="filter-select" id="filter-conv" onchange="filterConversations()">
-          <option value="all">Toutes</option>
-          <option value="unread">Non lues</option>
+          <option value="all">Toutes</option><option value="unread">Non lues</option>
         </select>
       </div>
-      <div class="table-wrap" id="conv-list-wrap">
-        <div class="loader">Chargement...</div>
-      </div>
+      <div class="table-wrap" id="conv-list-wrap"><div class="loader">Chargement...</div></div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         PREMIUM / STRIPE
-    ══════════════════════════════════════════════ -->
+    <!-- PREMIUM -->
     <div class="section" id="section-premium">
       <div class="section-title">Abonnés Premium</div>
-
       <div class="stripe-info">
         <span class="stripe-icon">💳</span>
         <div>
-          <div class="stripe-text">Les données de paiement sont gérées directement par Stripe. Pour voir toutes les transactions, remboursements et abonnements :</div>
-          <a class="stripe-link" href="https://dashboard.stripe.com/customers" target="_blank">→ Ouvrir le dashboard Stripe</a>
-          &nbsp;&nbsp;
+          <div class="stripe-text">Les données de paiement sont gérées directement par Stripe.</div>
+          <a class="stripe-link" href="https://dashboard.stripe.com/customers" target="_blank">→ Dashboard Stripe</a> &nbsp;
           <a class="stripe-link" href="https://dashboard.stripe.com/subscriptions" target="_blank">→ Abonnements actifs</a>
         </div>
       </div>
-
-      <div class="stats-grid" id="premium-stats-grid" style="margin-bottom:32px">
-        <div class="loader">Chargement...</div>
-      </div>
-
+      <div class="stats-grid" id="premium-stats-grid" style="margin-bottom:32px"><div class="loader">Chargement...</div></div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Utilisateur</th>
-              <th>Email</th>
-              <th>Premium depuis</th>
-              <th>Points</th>
-              <th>Ville</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="premium-tbody">
-            <tr><td colspan="6" class="loader">Chargement...</td></tr>
-          </tbody>
+          <thead><tr><th>Utilisateur</th><th>Email</th><th>Premium depuis</th><th>Points</th><th>Ville</th><th>Action</th></tr></thead>
+          <tbody id="premium-tbody"><tr><td colspan="6" class="loader">Chargement...</td></tr></tbody>
         </table>
       </div>
-
       <div class="section-title" style="margin-top:48px">Achats de points ponctuels</div>
       <div class="stripe-info">
         <span class="stripe-icon">⚡</span>
         <div>
-          <div class="stripe-text">Les achats ponctuels de points sont gérés via les Payment Links Stripe. Consultez directement Stripe pour voir les transactions :</div>
-          <a class="stripe-link" href="https://dashboard.stripe.com/payment-links" target="_blank">→ Voir les Payment Links</a>
-          &nbsp;&nbsp;
+          <div class="stripe-text">Les achats ponctuels sont gérés via les Payment Links Stripe.</div>
+          <a class="stripe-link" href="https://dashboard.stripe.com/payment-links" target="_blank">→ Payment Links</a> &nbsp;
           <a class="stripe-link" href="https://dashboard.stripe.com/payments" target="_blank">→ Toutes les transactions</a>
         </div>
       </div>
@@ -1083,16 +269,13 @@
     <!-- POINTS CONFIG -->
     <div class="section" id="section-points">
       <div class="section-title">Configuration des points</div>
-      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:24px;">Modifiez les valeurs et cliquez sur OK pour chaque ligne.</p>
-      <div class="config-grid" id="config-grid">
-        <div class="loader">Chargement...</div>
-      </div>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:24px">Modifiez les valeurs et cliquez sur OK pour chaque ligne.</p>
+      <div class="config-grid" id="config-grid"><div class="loader">Chargement...</div></div>
     </div>
 
     <!-- PROMO CODES -->
     <div class="section" id="section-promos">
       <div class="section-title">Créer un code promo</div>
-
       <div class="promo-form">
         <div class="form-group">
           <label>Code (ex: LENA50)</label>
@@ -1110,18 +293,11 @@
       </div>
 
       <div class="section-title">Codes actifs</div>
+      <div id="promo-stats" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap"></div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Code</th>
-              <th>Influenceur</th>
-              <th>Points bonus</th>
-              <th>Utilisations</th>
-              <th>Statut</th>
-              <th>Créé le</th>
-              <th>Action</th>
-            </tr>
+            <tr><th>Code</th><th>Influenceur</th><th>Points bonus</th><th>Utilisations</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr>
           </thead>
           <tbody id="promos-tbody">
             <tr><td colspan="7" class="loader">Chargement...</td></tr>
@@ -1135,18 +311,8 @@
       <div class="section-title">Signalements en attente</div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Photo</th>
-              <th>Signalé par</th>
-              <th>Raison</th>
-              <th>Signalé le</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="reports-tbody">
-            <tr><td colspan="5" class="loader">Chargement...</td></tr>
-          </tbody>
+          <thead><tr><th>Photo</th><th>Signalé par</th><th>Raison</th><th>Signalé le</th><th>Action</th></tr></thead>
+          <tbody id="reports-tbody"><tr><td colspan="5" class="loader">Chargement...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1154,18 +320,14 @@
   </main>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     MODAL UTILISATEUR
-══════════════════════════════════════════════ -->
+<!-- MODAL UTILISATEUR -->
 <div class="modal-overlay" id="user-modal">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="modal-user-title">Détails utilisateur</div>
       <button class="modal-close" onclick="closeUserModal()">✕</button>
     </div>
-    <div class="modal-body" id="modal-user-body">
-      <div class="loader">Chargement...</div>
-    </div>
+    <div class="modal-body" id="modal-user-body"><div class="loader">Chargement...</div></div>
   </div>
 </div>
 
@@ -1176,966 +338,515 @@
       <div class="modal-title" id="conv-modal-title">Conversation</div>
       <button class="modal-close" onclick="closeConvModal()">✕</button>
     </div>
-    <div class="modal-body" id="conv-modal-body">
-      <div class="loader">Chargement...</div>
-    </div>
+    <div class="modal-body" id="conv-modal-body"><div class="loader">Chargement...</div></div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-  // ─── CONFIG ───────────────────────────────────────────────
-  const SUPABASE_URL = 'https://rsdlcqsmuvaqkohjqsjs.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZGxjcXNtdXZhcWtvaGpxc2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDU4MzYsImV4cCI6MjA5MjE4MTgzNn0._1oxero_MGI2zEq07RUcmjq5Ifmf-uEcg_rVv9AXips'; // Clé publique Supabase — sécurité assurée par RLS côté serveur
-  const ADMIN_EMAIL = 'maxime.enou@gmail.com';
-  const PAGE_SIZE = 20;
+  const SUPABASE_URL='https://rsdlcqsmuvaqkohjqsjs.supabase.co';
+  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZGxjcXNtdXZhcWtvaGpxc2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDU4MzYsImV4cCI6MjA5MjE4MTgzNn0._1oxero_MGI2zEq07RUcmjq5Ifmf-uEcg_rVv9AXips';
+  const ADMIN_EMAIL='maxime.enou@gmail.com';
+  const PAGE_SIZE=20;
+  const {createClient}=supabase;
+  const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  let allUsers = [];
-  let filteredUsers = [];
-  let usersPage = 0;
-
-  let allPhotos = [];
-  let photosPage = 0;
-
-  let allConversations = [];
-  let filteredConversations = [];
+  let allUsers=[],filteredUsers=[],usersPage=0;
+  let allPhotos=[],photosPage=0;
+  let allConversations=[],filteredConversations=[];
 
   // ─── AUTH ─────────────────────────────────────────────────
-  async function loginWithGoogle() {
-    try {
-      await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.href }
-      });
-    } catch (e) {
-      console.error('[admin] loginWithGoogle:', e);
-      document.getElementById('auth-error').textContent = 'Erreur de connexion. Réessayez.';
-      document.getElementById('auth-error').style.display = 'block';
-    }
+  async function loginWithGoogle(){
+    try{await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});}
+    catch(e){document.getElementById('auth-error').textContent='Erreur de connexion.';document.getElementById('auth-error').style.display='block';}
   }
-
-  async function logout() {
-    try { await sb.auth.signOut(); } catch (e) { console.error('[admin] logout:', e); }
-    location.reload();
-  }
-
-  async function checkAuth() {
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) return;
-
-      const email = session.user.email;
-      if (email !== ADMIN_EMAIL) {
-        document.getElementById('auth-error').style.display = 'block';
-        await sb.auth.signOut();
-        return;
-      }
-
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('admin-app').style.display = 'block';
-      document.getElementById('admin-email').textContent = email;
+  async function logout(){try{await sb.auth.signOut();}catch(e){}location.reload();}
+  async function checkAuth(){
+    try{
+      const{data:{session}}=await sb.auth.getSession();
+      if(!session)return;
+      const email=session.user.email;
+      if(email!==ADMIN_EMAIL){document.getElementById('auth-error').style.display='block';await sb.auth.signOut();return;}
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('admin-app').style.display='block';
+      document.getElementById('admin-email').textContent=email;
       loadStats();
-    } catch (e) {
-      console.error('[admin] checkAuth:', e);
-    }
+    }catch(e){console.error('[admin] checkAuth:',e);}
   }
 
   // ─── NAVIGATION ───────────────────────────────────────────
-  function showSection(name, btn) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('section-' + name).classList.add('active');
+  function showSection(name,btn){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('section-'+name).classList.add('active');
     btn.classList.add('active');
-
-    if (name === 'users') loadUsers();
-    if (name === 'photos') loadPhotos();
-    if (name === 'messages') loadConversations();
-    if (name === 'premium') loadPremium();
-    if (name === 'points') loadPointsConfig();
-    if (name === 'promos') loadPromoCodes();
-    if (name === 'reports') loadReports();
+    if(name==='users')loadUsers();
+    if(name==='photos')loadPhotos();
+    if(name==='messages')loadConversations();
+    if(name==='premium')loadPremium();
+    if(name==='points')loadPointsConfig();
+    if(name==='promos')loadPromoCodes();
+    if(name==='reports')loadReports();
   }
 
   // ─── STATS ────────────────────────────────────────────────
-  async function loadStats() {
-    try {
-      const [
-        { count: totalUsers },
-        { count: totalVotes },
-        { count: totalPhotos },
-        { count: totalMessages },
-        { count: totalReports },
-        { count: premiumUsers },
-        { data: pointsData },
-        { data: recentUsers }
-      ] = await Promise.all([
-        sb.from('users').select('*', { count: 'exact', head: true }),
-        sb.from('votes').select('*', { count: 'exact', head: true }),
-        sb.from('photos').select('*', { count: 'exact', head: true }).eq('active', true),
-        sb.from('messages').select('*', { count: 'exact', head: true }),
-        sb.from('reports').select('*', { count: 'exact', head: true }),
-        sb.from('users').select('*', { count: 'exact', head: true }).eq('is_premium', true),
+  async function loadStats(){
+    try{
+      const[
+        {count:totalUsers},{count:totalVotes},{count:totalPhotos},{count:totalMessages},
+        {count:totalReports},{count:premiumUsers},{data:pointsData},{data:recentUsers}
+      ]=await Promise.all([
+        sb.from('users').select('*',{count:'exact',head:true}),
+        sb.from('votes').select('*',{count:'exact',head:true}),
+        sb.from('photos').select('*',{count:'exact',head:true}).eq('active',true),
+        sb.from('messages').select('*',{count:'exact',head:true}),
+        sb.from('reports').select('*',{count:'exact',head:true}),
+        sb.from('users').select('*',{count:'exact',head:true}).eq('is_premium',true),
         sb.from('points_history').select('points'),
-        sb.from('users')
-          .select('id, email, prenom, ville, points, is_premium, promo_code, created_at, avatar_url')
-          .order('created_at', { ascending: false })
-          .limit(10)
+        sb.from('users').select('id,email,prenom,ville,points,is_premium,promo_code,created_at,avatar_url').order('created_at',{ascending:false}).limit(10)
       ]);
-
-      const totalPoints = pointsData ? pointsData.reduce((s, r) => s + (r.points > 0 ? r.points : 0), 0) : 0;
-
-      document.getElementById('stats-grid').innerHTML = `
-        ${statCard('Inscrits', totalUsers ?? 0, '', '')}
-        ${statCard('Votes', totalVotes ?? 0, '', 'green')}
-        ${statCard('Photos actives', totalPhotos ?? 0, '', 'blue')}
-        ${statCard('Messages', totalMessages ?? 0, '', '')}
-        ${statCard('Premium', premiumUsers ?? 0, 'abonnés actifs', '')}
-        ${statCard('Points distribués', (totalPoints).toLocaleString('fr'), 'total cumulé', 'green')}
-        ${statCard('Signalements', totalReports ?? 0, 'en attente', 'red')}
-      `;
-
-      const tbody = document.getElementById('recent-users-tbody');
-      if (!recentUsers || recentUsers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun utilisateur</td></tr>';
-        return;
-      }
-      tbody.innerHTML = recentUsers.map(u => {
-        const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—'); const pc=escapeHtml(u.promo_code||'');
-        return `
-        <tr>
-          <td>
-            <div style="display:flex;align-items:center">
-              <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
-              ${pr}
-            </div>
-          </td>
-          <td style="color:var(--muted);font-size:0.75rem">${em}</td>
-          <td>${vi}</td>
-          <td>${u.points ?? 0} pts</td>
-          <td>${u.is_premium ? '<span class="badge badge-premium">Premium</span>' : '—'}</td>
-          <td>${pc ? `<code style="color:var(--gold)">${pc}</code>` : '—'}</td>
-          <td>${formatDate(u.created_at)}</td>
-        </tr>
-      `;}).join('');
-    } catch (e) {
-      console.error('[admin] loadStats:', e);
-      document.getElementById('stats-grid').innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
-    }
+      const totalPoints=pointsData?pointsData.reduce((s,r)=>s+(r.points>0?r.points:0),0):0;
+      document.getElementById('stats-grid').innerHTML=
+        statCard('Inscrits',totalUsers??0,'','')+statCard('Votes',totalVotes??0,'','green')+
+        statCard('Photos actives',totalPhotos??0,'','blue')+statCard('Messages',totalMessages??0,'','')+
+        statCard('Premium',premiumUsers??0,'abonnés actifs','')+statCard('Points distribués',totalPoints.toLocaleString('fr'),'total cumulé','green')+
+        statCard('Signalements',totalReports??0,'en attente','red');
+      const tbody=document.getElementById('recent-users-tbody');
+      if(!recentUsers||!recentUsers.length){tbody.innerHTML='<tr><td colspan="7" class="loader">Aucun utilisateur</td></tr>';return;}
+      tbody.innerHTML=recentUsers.map(u=>{
+        const av=safeUrl(u.avatar_url);const pr=esc(u.prenom||'—');const em=esc(u.email||'—');const vi=esc(u.ville||'—');const pc=esc(u.promo_code||'');
+        return`<tr><td><div style="display:flex;align-items:center"><span class="avatar-circle">${av?`<img src="${av}">`:'👤'}</span>${pr}</div></td><td style="color:var(--muted);font-size:.75rem">${em}</td><td>${vi}</td><td>${u.points??0} pts</td><td>${u.is_premium?'<span class="badge badge-premium">Premium</span>':'—'}</td><td>${pc?`<code style="color:var(--gold)">${pc}</code>`:'—'}</td><td>${fd(u.created_at)}</td></tr>`;
+      }).join('');
+    }catch(e){console.error('[admin] loadStats:',e);document.getElementById('stats-grid').innerHTML='<div class="loader" style="color:var(--red)">Erreur</div>';}
   }
 
-  function statCard(label, value, sub, color) {
-    return `
-      <div class="stat-card ${color}">
-        <div class="stat-label">${label}</div>
-        <div class="stat-value">${value}</div>
-        ${sub ? `<div class="stat-sub">${sub}</div>` : ''}
-      </div>
-    `;
-  }
+  function statCard(label,value,sub,color){return`<div class="stat-card ${color}"><div class="stat-label">${label}</div><div class="stat-value">${value}</div>${sub?`<div class="stat-sub">${sub}</div>`:''}</div>`;}
 
   // ─── USERS ────────────────────────────────────────────────
-  async function loadUsers() {
-    const tbody = document.getElementById('users-tbody');
-    tbody.innerHTML = '<tr><td colspan="8" class="loader">Chargement...</td></tr>';
-
-    try {
-      const { data: users, error: usersError } = await sb.from('users')
-        .select('id, email, prenom, points, is_premium, promo_code, avatar_url, created_at, ville, genre')
-        .order('created_at', { ascending: false })
-        .limit(500);
-
-      if (usersError) {
-        console.error('loadUsers error:', usersError);
-        tbody.innerHTML = `<tr><td colspan="8" class="loader" style="color:var(--red)">Erreur: ${usersError.message}</td></tr>`;
-        return;
-      }
-
-      if (!users || users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="loader">Aucun utilisateur trouvé</td></tr>';
-        allUsers = [];
-        filterUsers();
-        return;
-      }
-
-      let photoMap = {}, voteMap = {}, votesRecusMap = {};
-      try {
-        const [{ data: photoCounts }, { data: votesDonnes }, { data: votesRecus }] = await Promise.all([
-          sb.from('photos').select('user_id').eq('active', true),
+  async function loadUsers(){
+    const tbody=document.getElementById('users-tbody');
+    tbody.innerHTML='<tr><td colspan="11" class="loader">Chargement...</td></tr>';
+    try{
+      const{data:users,error}=await sb.from('users').select('id,email,prenom,points,is_premium,promo_code,avatar_url,created_at,ville,genre').order('created_at',{ascending:false}).limit(500);
+      if(error)throw error;
+      if(!users||!users.length){allUsers=[];filterUsers();return;}
+      let photoMap={},voteMap={},votesRecusMap={};
+      try{
+        const[{data:pc},{data:vd},{data:vr}]=await Promise.all([
+          sb.from('photos').select('user_id').eq('active',true),
           sb.from('votes').select('voter_id'),
-          sb.from('votes').select('photo_id, photos!inner(user_id)')
+          sb.from('votes').select('photo_id,photos!inner(user_id)')
         ]);
-        (photoCounts || []).forEach(p => { photoMap[p.user_id] = (photoMap[p.user_id] || 0) + 1; });
-        (votesDonnes || []).forEach(v => { voteMap[v.voter_id] = (voteMap[v.voter_id] || 0) + 1; });
-        (votesRecus || []).forEach(v => {
-          const uid = v.photos?.user_id;
-          if (uid) votesRecusMap[uid] = (votesRecusMap[uid] || 0) + 1;
-        });
-      } catch (e) {
-        console.warn('[admin] loadUsers counts:', e);
-      }
-
-      allUsers = users.map(u => ({
-        ...u,
-        is_banned: false,
-        photo_count: photoMap[u.id] || 0,
-        vote_count: voteMap[u.id] || 0,
-        votes_recus: votesRecusMap[u.id] || 0
-      }));
-
+        (pc||[]).forEach(p=>{photoMap[p.user_id]=(photoMap[p.user_id]||0)+1;});
+        (vd||[]).forEach(v=>{voteMap[v.voter_id]=(voteMap[v.voter_id]||0)+1;});
+        (vr||[]).forEach(v=>{const uid=v.photos?.user_id;if(uid)votesRecusMap[uid]=(votesRecusMap[uid]||0)+1;});
+      }catch(e){console.warn('[admin] loadUsers counts:',e);}
+      allUsers=users.map(u=>({...u,is_banned:false,photo_count:photoMap[u.id]||0,vote_count:voteMap[u.id]||0,votes_recus:votesRecusMap[u.id]||0}));
       filterUsers();
-    } catch (e) {
-      console.error('[admin] loadUsers:', e);
-      tbody.innerHTML = '<tr><td colspan="8" class="loader" style="color:var(--red)">Erreur de chargement</td></tr>';
-    }
+    }catch(e){console.error('[admin] loadUsers:',e);tbody.innerHTML=`<tr><td colspan="11" class="loader" style="color:var(--red)">Erreur: ${e.message}</td></tr>`;}
   }
 
-  function filterUsers() {
-    const q = (document.getElementById('search-user').value || '').toLowerCase();
-    const premiumFilter = document.getElementById('filter-premium').value;
-    const sortFilter = document.getElementById('filter-sort').value;
-
-    let result = allUsers.filter(u => {
-      const matchQ = !q || (u.prenom || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
-      const matchPremium =
-        premiumFilter === '' ? true :
-        premiumFilter === 'premium' ? u.is_premium :
-        premiumFilter === 'free' ? !u.is_premium && !u.is_banned :
-        premiumFilter === 'banned' ? u.is_banned : true;
-      return matchQ && matchPremium;
+  function filterUsers(){
+    const q=(document.getElementById('search-user').value||'').toLowerCase();
+    const pf=document.getElementById('filter-premium').value;
+    const sf=document.getElementById('filter-sort').value;
+    let r=allUsers.filter(u=>{
+      const mq=!q||(u.prenom||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q);
+      const mp=pf===''?true:pf==='premium'?u.is_premium:pf==='free'?!u.is_premium&&!u.is_banned:pf==='banned'?u.is_banned:true;
+      return mq&&mp;
     });
-
-    if (sortFilter === 'points_desc') result.sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
-    else if (sortFilter === 'points_asc') result.sort((a, b) => (a.points ?? 0) - (b.points ?? 0));
-
-    filteredUsers = result;
-    usersPage = 0;
-    renderUsersTable();
+    if(sf==='points_desc')r.sort((a,b)=>(b.points??0)-(a.points??0));
+    else if(sf==='points_asc')r.sort((a,b)=>(a.points??0)-(b.points??0));
+    filteredUsers=r;usersPage=0;renderUsersTable();
   }
 
-  function renderUsersTable() {
-    const tbody = document.getElementById('users-tbody');
-    const start = usersPage * PAGE_SIZE;
-    const page = filteredUsers.slice(start, start + PAGE_SIZE);
-
-    if (!page.length) {
-      tbody.innerHTML = '<tr><td colspan="10" class="loader">Aucun résultat</td></tr>';
-      renderUsersPagination();
-      return;
-    }
-
-    tbody.innerHTML = page.map(u => {
-      const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—'); const ge=escapeHtml(u.genre||'—');
-      return `
-      <tr>
-        <td>
-          <div style="display:flex;align-items:center">
-            <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
-            <span>${pr}</span>
-            ${u.is_banned ? '<span class="badge badge-banned" style="margin-left:8px">Banni</span>' : ''}
-          </div>
-        </td>
-        <td style="color:var(--muted);font-size:0.75rem">${em}</td>
-        <td style="color:var(--muted)">${vi}</td>
-        <td style="color:var(--muted)">${ge}</td>
-        <td>
-          <span style="color:var(--gold)">${u.points ?? 0}</span>
-          <span style="color:var(--muted);font-size:0.7rem"> pts</span>
-        </td>
-        <td>${u.is_premium ? '<span class="badge badge-premium">Premium</span>' : '<span style="color:var(--muted);font-size:0.75rem">Free</span>'}</td>
-        <td style="color:var(--muted)">${u.photo_count}</td>
-        <td style="color:var(--muted)">${u.vote_count}</td>
-        <td style="color:var(--muted)">${u.votes_recus}</td>
-        <td style="color:var(--muted);font-size:0.75rem">${formatDate(u.created_at)}</td>
-        <td>
-          <button class="btn-toggle" onclick="openUserModal('${u.id}')">Détails</button>
-        </td>
+  function renderUsersTable(){
+    const tbody=document.getElementById('users-tbody');
+    const page=filteredUsers.slice(usersPage*PAGE_SIZE,(usersPage+1)*PAGE_SIZE);
+    if(!page.length){tbody.innerHTML='<tr><td colspan="11" class="loader">Aucun résultat</td></tr>';renderUsersPagination();return;}
+    tbody.innerHTML=page.map(u=>{
+      const av=safeUrl(u.avatar_url);const pr=esc(u.prenom||'—');const em=esc(u.email||'—');const vi=esc(u.ville||'—');const ge=esc(u.genre||'—');
+      return`<tr>
+        <td><div style="display:flex;align-items:center"><span class="avatar-circle">${av?`<img src="${av}">`:'👤'}</span><span>${pr}</span>${u.is_banned?'<span class="badge badge-banned" style="margin-left:8px">Banni</span>':''}</div></td>
+        <td style="color:var(--muted);font-size:.75rem">${em}</td><td style="color:var(--muted)">${vi}</td><td style="color:var(--muted)">${ge}</td>
+        <td><span style="color:var(--gold)">${u.points??0}</span><span style="color:var(--muted);font-size:.7rem"> pts</span></td>
+        <td>${u.is_premium?'<span class="badge badge-premium">Premium</span>':'<span style="color:var(--muted);font-size:.75rem">Free</span>'}</td>
+        <td style="color:var(--muted)">${u.photo_count}</td><td style="color:var(--muted)">${u.vote_count}</td><td style="color:var(--muted)">${u.votes_recus}</td>
+        <td style="color:var(--muted);font-size:.75rem">${fd(u.created_at)}</td>
+        <td><button class="btn-toggle" onclick="openUserModal('${u.id}')">Détails</button></td>
       </tr>`;
     }).join('');
-
     renderUsersPagination();
   }
 
-  function renderUsersPagination() {
-    const total = Math.ceil(filteredUsers.length / PAGE_SIZE);
-    const pag = document.getElementById('users-pagination');
-    if (total <= 1) { pag.innerHTML = ''; return; }
-
-    let html = `<button class="page-btn" onclick="goUsersPage(${usersPage - 1})" ${usersPage === 0 ? 'disabled' : ''}>← Préc</button>`;
-    html += `<span style="color:var(--muted);font-size:0.75rem">${usersPage + 1} / ${total}</span>`;
-    html += `<button class="page-btn" onclick="goUsersPage(${usersPage + 1})" ${usersPage >= total - 1 ? 'disabled' : ''}>Suiv →</button>`;
-    pag.innerHTML = html;
+  function renderUsersPagination(){
+    const total=Math.ceil(filteredUsers.length/PAGE_SIZE);const pag=document.getElementById('users-pagination');
+    if(total<=1){pag.innerHTML='';return;}
+    pag.innerHTML=`<button class="page-btn" onclick="goUsersPage(${usersPage-1})" ${usersPage===0?'disabled':''}>← Préc</button><span style="color:var(--muted);font-size:.75rem">${usersPage+1} / ${total}</span><button class="page-btn" onclick="goUsersPage(${usersPage+1})" ${usersPage>=total-1?'disabled':''}>Suiv →</button>`;
   }
 
-  function goUsersPage(p) {
-    usersPage = p;
-    renderUsersTable();
-    document.getElementById('section-users').scrollIntoView({ behavior: 'smooth' });
-  }
+  function goUsersPage(p){usersPage=p;renderUsersTable();}
 
   // ─── USER MODAL ───────────────────────────────────────────
-  async function openUserModal(userId) {
+  async function openUserModal(userId){
     document.getElementById('user-modal').classList.add('open');
-    document.getElementById('modal-user-body').innerHTML = '<div class="loader">Chargement...</div>';
-
-    let user, photos, votes, pointsHistory;
-    try {
-      ([
-        { data: user },
-        { data: photos },
-        { data: votes },
-        { data: pointsHistory }
-      ] = await Promise.all([
-        sb.from('users').select('*').eq('id', userId).single(),
-        sb.from('photos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-        sb.from('votes').select('*, photos(user_id, url)').eq('voter_id', userId).order('created_at', { ascending: false }).limit(20),
-        sb.from('points_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
+    document.getElementById('modal-user-body').innerHTML='<div class="loader">Chargement...</div>';
+    let user,photos,votes,pointsHistory;
+    try{
+      ([{data:user},{data:photos},{data:votes},{data:pointsHistory}]=await Promise.all([
+        sb.from('users').select('*').eq('id',userId).single(),
+        sb.from('photos').select('*').eq('user_id',userId).order('created_at',{ascending:false}),
+        sb.from('votes').select('*,photos(user_id,url)').eq('voter_id',userId).order('created_at',{ascending:false}).limit(20),
+        sb.from('points_history').select('*').eq('user_id',userId).order('created_at',{ascending:false}).limit(20)
       ]));
-    } catch (e) {
-      console.error('[admin] openUserModal:', e);
-      document.getElementById('modal-user-body').innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
-      return;
-    }
-
-    if (!user) {
-      document.getElementById('modal-user-body').innerHTML = '<div class="loader">Utilisateur introuvable</div>';
-      return;
-    }
-
-    document.getElementById('modal-user-title').textContent = user.prenom || 'Utilisateur';
-
-    const photosHtml = photos && photos.length ? `
-      <div class="photos-grid">
-        ${photos.map(p => { const pu=safeUrl(p.url); return `
-          <div class="photo-thumb">
-            ${pu ? `<img src="${pu}" alt="photo">` : '<div style="width:100%;height:100%;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.7rem">Pas d\'image</div>'}
-            <div class="photo-thumb-info">
-              <span>★ ${(p.note_moyenne || 0).toFixed(1)}</span>
-              <span>${p.nb_votes || 0} votes</span>
-            </div>
-            <span class="photo-thumb-badge badge ${p.active ? 'badge-active' : 'badge-inactive'}">
-              ${p.active ? 'Active' : 'Off'}
-            </span>
-          </div>
-        `;}).join('')}
-      </div>
-    ` : '<p style="color:var(--muted);font-size:0.8rem">Aucune photo</p>';
-
-    const votesHtml = votes && votes.length ? `
-      <table style="width:100%;font-size:0.75rem">
-        <tr style="color:var(--muted)"><th style="text-align:left;padding:4px 8px">Note donnée</th><th style="text-align:left;padding:4px 8px">Date</th></tr>
-        ${votes.map(v => `
-          <tr>
-            <td style="padding:6px 8px;border-bottom:1px solid var(--border)">
-              <span style="color:var(--gold);font-weight:500">${v.note}/5</span>
-            </td>
-            <td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted)">${formatDate(v.created_at)}</td>
-          </tr>
-        `).join('')}
-      </table>
-    ` : '<p style="color:var(--muted);font-size:0.8rem">Aucun vote</p>';
-
-    const historyHtml = pointsHistory && pointsHistory.length ? `
-      <table style="width:100%;font-size:0.75rem">
-        <tr style="color:var(--muted)">
-          <th style="text-align:left;padding:4px 8px">Action</th>
-          <th style="text-align:left;padding:4px 8px">Points</th>
-          <th style="text-align:left;padding:4px 8px">Date</th>
-        </tr>
-        ${pointsHistory.map(h => `
-          <tr>
-            <td style="padding:6px 8px;border-bottom:1px solid var(--border)">${escapeHtml(h.label || h.action || '—')}</td>
-            <td style="padding:6px 8px;border-bottom:1px solid var(--border);color:${h.points >= 0 ? 'var(--green)' : 'var(--red)'}">
-              ${h.points >= 0 ? '+' : ''}${h.points}
-            </td>
-            <td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted)">${formatDate(h.created_at)}</td>
-          </tr>
-        `).join('')}
-      </table>
-    ` : '<p style="color:var(--muted);font-size:0.8rem">Aucun historique</p>';
-
-    const uAv=safeUrl(user.avatar_url); const uPr=escapeHtml(user.prenom||'—'); const uEm=escapeHtml(user.email||'—'); const uVi=escapeHtml(user.ville||'—'); const uPc=escapeHtml(user.promo_code||'');
-    document.getElementById('modal-user-body').innerHTML = `
-      <!-- INFOS GÉNÉRALES -->
+    }catch(e){document.getElementById('modal-user-body').innerHTML='<div class="loader" style="color:var(--red)">Erreur</div>';return;}
+    if(!user){document.getElementById('modal-user-body').innerHTML='<div class="loader">Introuvable</div>';return;}
+    document.getElementById('modal-user-title').textContent=user.prenom||'Utilisateur';
+    const photosHtml=photos&&photos.length?`<div class="photos-grid">${photos.map(p=>{const pu=safeUrl(p.url);return`<div class="photo-thumb">${pu?`<img src="${pu}" alt="photo">`:'<div style="width:100%;height:100%;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.7rem">Pas d\'image</div>'}<div class="photo-thumb-info"><span>★ ${(p.note_moyenne||0).toFixed(1)}</span><span>${p.nb_votes||0} votes</span></div><span class="photo-thumb-badge badge ${p.active?'badge-active':'badge-inactive'}">${p.active?'Active':'Off'}</span></div>`;}).join('')}</div>`:'<p style="color:var(--muted);font-size:.8rem">Aucune photo</p>';
+    const historyHtml=pointsHistory&&pointsHistory.length?`<table style="width:100%;font-size:.75rem"><tr style="color:var(--muted)"><th style="text-align:left;padding:4px 8px">Action</th><th style="text-align:left;padding:4px 8px">Points</th><th style="text-align:left;padding:4px 8px">Date</th></tr>${pointsHistory.map(h=>`<tr><td style="padding:6px 8px;border-bottom:1px solid var(--border)">${esc(h.label||h.action||'—')}</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);color:${h.points>=0?'var(--green)':'var(--red)'}">${h.points>=0?'+':''}${h.points}</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted)">${fd(h.created_at)}</td></tr>`).join('')}</table>`:'<p style="color:var(--muted);font-size:.8rem">Aucun historique</p>';
+    const uAv=safeUrl(user.avatar_url);const uPr=esc(user.prenom||'—');const uEm=esc(user.email||'—');const uVi=esc(user.ville||'—');const uPc=esc(user.promo_code||'');
+    document.getElementById('modal-user-body').innerHTML=`
       <div class="modal-section">
         <div class="modal-section-title">Informations générales</div>
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
-          <div style="width:56px;height:56px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);overflow:hidden;flex-shrink:0">
-            ${uAv ? `<img src="${uAv}" style="width:100%;height:100%;object-fit:cover">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">👤</div>'}
-          </div>
-          <div>
-            <div style="font-family:Syne,sans-serif;font-size:1.1rem;font-weight:700">${uPr}</div>
-            <div style="color:var(--muted);font-size:0.8rem">${uEm}</div>
-          </div>
-          <div style="margin-left:auto;display:flex;gap:8px">
-            ${user.is_premium ? '<span class="badge badge-premium">Premium</span>' : ''}
-            ${user.is_banned ? '<span class="badge badge-banned">Banni</span>' : ''}
-          </div>
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);overflow:hidden;flex-shrink:0">${uAv?`<img src="${uAv}" style="width:100%;height:100%;object-fit:cover">`:'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">👤</div>'}</div>
+          <div><div style="font-family:Syne,sans-serif;font-size:1.1rem;font-weight:700">${uPr}</div><div style="color:var(--muted);font-size:.8rem">${uEm}</div></div>
+          <div style="margin-left:auto;display:flex;gap:8px">${user.is_premium?'<span class="badge badge-premium">Premium</span>':''}${user.is_banned?'<span class="badge badge-banned">Banni</span>':''}</div>
         </div>
         <div class="info-grid">
-          <div class="info-row">
-            <span class="info-key">Ville</span>
-            <span class="info-val">${uVi}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-key">Code promo utilisé</span>
-            <span class="info-val">${uPc ? `<code style="color:var(--gold)">${uPc}</code>` : '—'}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-key">Inscrit le</span>
-            <span class="info-val">${formatDateFull(user.created_at)}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-key">Welcome email</span>
-            <span class="info-val">${user.welcome_email_sent ? '✓ Envoyé' : '✗ Non envoyé'}</span>
-          </div>
+          <div class="info-row"><span class="info-key">Ville</span><span class="info-val">${uVi}</span></div>
+          <div class="info-row"><span class="info-key">Code promo utilisé</span><span class="info-val">${uPc?`<code style="color:var(--gold)">${uPc}</code>`:'—'}</span></div>
+          <div class="info-row"><span class="info-key">Inscrit le</span><span class="info-val">${fdf(user.created_at)}</span></div>
+          <div class="info-row"><span class="info-key">Welcome email</span><span class="info-val">${user.welcome_email_sent?'✓ Envoyé':'✗ Non envoyé'}</span></div>
         </div>
       </div>
-
-      <!-- POINTS -->
       <div class="modal-section">
         <div class="modal-section-title">Points</div>
-        <div style="font-size:2rem;font-family:Syne,sans-serif;font-weight:700;color:var(--gold);margin-bottom:16px">${user.points ?? 0} pts</div>
-        <div style="color:var(--muted);font-size:0.75rem;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">Modifier les points</div>
+        <div style="font-size:2rem;font-family:Syne,sans-serif;font-weight:700;color:var(--gold);margin-bottom:16px">${user.points??0} pts</div>
+        <div style="color:var(--muted);font-size:.75rem;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">Modifier les points</div>
         <div class="points-edit-row">
-          <input class="points-edit-input" type="number" id="modal-points-input" value="${user.points ?? 0}">
+          <input class="points-edit-input" type="number" id="modal-points-input" value="${user.points??0}">
           <button class="btn-primary" style="height:38px" onclick="saveUserPoints('${user.id}')">Enregistrer</button>
-          <button class="btn-toggle" onclick="adjustPoints('${user.id}', 50)">+50</button>
-          <button class="btn-toggle" onclick="adjustPoints('${user.id}', -50)">-50</button>
+          <button class="btn-toggle" onclick="adjustPoints(50)">+50</button>
+          <button class="btn-toggle" onclick="adjustPoints(-50)">-50</button>
         </div>
       </div>
-
-      <!-- HISTORIQUE POINTS -->
-      <div class="modal-section">
-        <div class="modal-section-title">Historique des points</div>
-        ${historyHtml}
-      </div>
-
-      <!-- PHOTOS -->
-      <div class="modal-section">
-        <div class="modal-section-title">Photos (${photos ? photos.length : 0})</div>
-        ${photosHtml}
-      </div>
-
-      <!-- VOTES DONNÉS -->
-      <div class="modal-section">
-        <div class="modal-section-title">Votes donnés (${votes ? votes.length : 0})</div>
-        ${votesHtml}
-      </div>
-
-      <!-- ACTIONS MODÉRATION -->
+      <div class="modal-section"><div class="modal-section-title">Historique des points</div>${historyHtml}</div>
+      <div class="modal-section"><div class="modal-section-title">Photos (${photos?photos.length:0})</div>${photosHtml}</div>
       <div class="modal-section">
         <div class="modal-section-title">Modération</div>
         <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <button class="btn-danger" onclick="banUser('${user.id}', ${!user.is_banned})">
-            ${user.is_banned ? 'Débannir le compte' : 'Bannir le compte'}
-          </button>
+          <button class="btn-danger" onclick="banUser('${user.id}',${!user.is_banned})">${user.is_banned?'Débannir le compte':'Bannir le compte'}</button>
           <button class="btn-toggle" onclick="resetUserPoints('${user.id}')">Remettre points à 0</button>
           <button class="btn-toggle" onclick="resendWelcomeEmail('${user.id}')">Renvoyer email bienvenue</button>
         </div>
-      </div>
-    `;
+      </div>`;
   }
 
-  function closeUserModal() {
-    document.getElementById('user-modal').classList.remove('open');
+  function closeUserModal(){document.getElementById('user-modal').classList.remove('open');}
+
+  async function saveUserPoints(userId){
+    const val=parseInt(document.getElementById('modal-points-input').value);
+    if(isNaN(val)||val<0)return showToast('Valeur invalide',true);
+    const{error}=await sb.from('users').update({points:val}).eq('id',userId);
+    if(error)return showToast('Erreur: '+error.message,true);
+    showToast('✓ Points mis à jour → '+val);
+    const u=allUsers.find(u=>u.id===userId);if(u)u.points=val;renderUsersTable();
   }
 
-  async function saveUserPoints(userId) {
-    const val = parseInt(document.getElementById('modal-points-input').value);
-    if (isNaN(val) || val < 0) return showToast('Valeur invalide', true);
-    const { error } = await sb.from('users').update({ points: val }).eq('id', userId);
-    if (error) return showToast('Erreur: ' + error.message, true);
-    showToast('✓ Points mis à jour → ' + val);
-    // Update local data
-    const u = allUsers.find(u => u.id === userId);
-    if (u) u.points = val;
-    renderUsersTable();
+  function adjustPoints(delta){
+    const input=document.getElementById('modal-points-input');
+    input.value=Math.max(0,(parseInt(input.value)||0)+delta);
   }
 
-  async function adjustPoints(userId, delta) {
-    const input = document.getElementById('modal-points-input');
-    const current = parseInt(input.value) || 0;
-    const newVal = Math.max(0, current + delta);
-    input.value = newVal;
+  async function resetUserPoints(userId){
+    if(!confirm('Remettre les points à 0 ?'))return;
+    const{error}=await sb.from('users').update({points:0}).eq('id',userId);
+    if(error)return showToast('Erreur',true);
+    showToast('✓ Points remis à 0');document.getElementById('modal-points-input').value=0;
   }
 
-  async function resetUserPoints(userId) {
-    if (!confirm('Remettre les points à 0 ?')) return;
-    const { error } = await sb.from('users').update({ points: 0 }).eq('id', userId);
-    if (error) return showToast('Erreur', true);
-    showToast('✓ Points remis à 0');
-    document.getElementById('modal-points-input').value = 0;
+  async function banUser(userId,ban){
+    if(!confirm(ban?'Bannir cet utilisateur ?':'Débannir cet utilisateur ?'))return;
+    const{error}=await sb.from('users').update({is_banned:ban}).eq('id',userId);
+    if(error)return showToast('Erreur: '+error.message,true);
+    showToast(ban?'✓ Utilisateur banni':'✓ Utilisateur débanni');closeUserModal();loadUsers();
   }
 
-  async function banUser(userId, ban) {
-    if (!confirm(ban ? 'Bannir cet utilisateur ?' : 'Débannir cet utilisateur ?')) return;
-    const { error } = await sb.from('users').update({ is_banned: ban }).eq('id', userId);
-    if (error) return showToast('Erreur: ' + error.message, true);
-    showToast(ban ? '✓ Utilisateur banni' : '✓ Utilisateur débanni');
-    closeUserModal();
-    loadUsers();
-  }
-
-  async function resendWelcomeEmail(userId) {
-    const { error } = await sb.from('users').update({ welcome_email_sent: false }).eq('id', userId);
-    if (error) return showToast('Erreur: ' + error.message, true);
-    showToast('✓ Email bienvenue sera renvoyé au prochain passage du cron');
+  async function resendWelcomeEmail(userId){
+    const{error}=await sb.from('users').update({welcome_email_sent:false}).eq('id',userId);
+    if(error)return showToast('Erreur: '+error.message,true);
+    showToast('✓ Email bienvenue sera renvoyé au prochain cron');
   }
 
   // ─── PHOTOS ───────────────────────────────────────────────
-  async function loadPhotos() {
-    document.getElementById('photos-mod-grid').innerHTML = '<div class="loader">Chargement...</div>';
-    const filter = document.getElementById('filter-photos').value;
-    try {
-      let query = sb.from('photos')
-        .select('id, url, active, nb_votes, note_moyenne, created_at, user_id, users(prenom, email, avatar_url)')
-        .order('created_at', { ascending: false })
-        .limit(200);
-
-      if (filter === 'active') query = query.eq('active', true);
-      if (filter === 'inactive') query = query.eq('active', false);
-
-      const { data: photos, error } = await query;
-      if (error) throw error;
-      allPhotos = photos || [];
-
-      document.getElementById('photo-count-label').textContent = `${allPhotos.length} photo(s)`;
-      photosPage = 0;
-      renderPhotosGrid();
-    } catch (e) {
-      console.error('[admin] loadPhotos:', e);
-      document.getElementById('photos-mod-grid').innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
-    }
+  async function loadPhotos(){
+    document.getElementById('photos-mod-grid').innerHTML='<div class="loader">Chargement...</div>';
+    const filter=document.getElementById('filter-photos').value;
+    try{
+      let q=sb.from('photos').select('id,url,active,nb_votes,note_moyenne,created_at,user_id,users(prenom,email,avatar_url)').order('created_at',{ascending:false}).limit(200);
+      if(filter==='active')q=q.eq('active',true);if(filter==='inactive')q=q.eq('active',false);
+      const{data:photos,error}=await q;if(error)throw error;
+      allPhotos=photos||[];document.getElementById('photo-count-label').textContent=`${allPhotos.length} photo(s)`;
+      photosPage=0;renderPhotosGrid();
+    }catch(e){console.error('[admin] loadPhotos:',e);document.getElementById('photos-mod-grid').innerHTML='<div class="loader" style="color:var(--red)">Erreur</div>';}
   }
 
-  function renderPhotosGrid() {
-    const start = photosPage * 24;
-    const page = allPhotos.slice(start, start + 24);
-    const grid = document.getElementById('photos-mod-grid');
-
-    if (!page.length) {
-      grid.innerHTML = '<div class="loader">Aucune photo</div>';
-      renderPhotosPagination();
-      return;
-    }
-
-    grid.innerHTML = page.map(p => {
-      const pu=safeUrl(p.url); const uAv=safeUrl(p.users?.avatar_url); const uPr=escapeHtml(p.users?.prenom||'—'); const uEm=escapeHtml(p.users?.email||'—');
-      return `
-      <div class="photo-mod-card">
-        ${pu ? `<img src="${pu}" alt="photo" loading="lazy">` : '<div style="width:100%;height:200px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.8rem">Pas d\'image</div>'}
-        <div class="photo-mod-card-body">
-          <div class="photo-mod-meta">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-              <span class="avatar-circle" style="width:20px;height:20px">
-                ${uAv ? `<img src="${uAv}">` : '👤'}
-              </span>
-              <span style="color:var(--text)">${uPr}</span>
-            </div>
-            <div>${uEm}</div>
-            <div>★ ${(p.note_moyenne || 0).toFixed(1)} · ${p.nb_votes || 0} votes</div>
-            <div>${formatDate(p.created_at)}</div>
-            <div><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Active' : 'Désactivée'}</span></div>
-          </div>
-          <div class="photo-mod-actions">
-            <button class="${p.active ? 'btn-danger' : 'btn-green'}" onclick="togglePhoto('${p.id}', ${p.active})">
-              ${p.active ? 'Désactiver' : 'Activer'}
-            </button>
-          </div>
-        </div>
-      </div>
-    `;}).join('');
-
+  function renderPhotosGrid(){
+    const page=allPhotos.slice(photosPage*24,(photosPage+1)*24);const grid=document.getElementById('photos-mod-grid');
+    if(!page.length){grid.innerHTML='<div class="loader">Aucune photo</div>';renderPhotosPagination();return;}
+    grid.innerHTML=page.map(p=>{
+      const pu=safeUrl(p.url);const uAv=safeUrl(p.users?.avatar_url);const uPr=esc(p.users?.prenom||'—');const uEm=esc(p.users?.email||'—');
+      return`<div class="photo-mod-card">${pu?`<img src="${pu}" alt="photo" loading="lazy">`:'<div style="width:100%;height:200px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem">Pas d\'image</div>'}<div class="photo-mod-card-body"><div class="photo-mod-meta"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="avatar-circle" style="width:20px;height:20px">${uAv?`<img src="${uAv}">`:'👤'}</span><span style="color:var(--text)">${uPr}</span></div><div>${uEm}</div><div>★ ${(p.note_moyenne||0).toFixed(1)} · ${p.nb_votes||0} votes</div><div>${fd(p.created_at)}</div><div><span class="badge ${p.active?'badge-active':'badge-inactive'}">${p.active?'Active':'Désactivée'}</span></div></div><div class="photo-mod-actions"><button class="${p.active?'btn-danger':'btn-green'}" onclick="togglePhoto('${p.id}',${p.active})">${p.active?'Désactiver':'Activer'}</button></div></div></div>`;
+    }).join('');
     renderPhotosPagination();
   }
 
-  function renderPhotosPagination() {
-    const total = Math.ceil(allPhotos.length / 24);
-    const pag = document.getElementById('photos-pagination');
-    if (total <= 1) { pag.innerHTML = ''; return; }
-    let html = `<button class="page-btn" onclick="goPhotosPage(${photosPage - 1})" ${photosPage === 0 ? 'disabled' : ''}>← Préc</button>`;
-    html += `<span style="color:var(--muted);font-size:0.75rem">${photosPage + 1} / ${total}</span>`;
-    html += `<button class="page-btn" onclick="goPhotosPage(${photosPage + 1})" ${photosPage >= total - 1 ? 'disabled' : ''}>Suiv →</button>`;
-    pag.innerHTML = html;
+  function renderPhotosPagination(){
+    const total=Math.ceil(allPhotos.length/24);const pag=document.getElementById('photos-pagination');
+    if(total<=1){pag.innerHTML='';return;}
+    pag.innerHTML=`<button class="page-btn" onclick="goPhotosPage(${photosPage-1})" ${photosPage===0?'disabled':''}>← Préc</button><span style="color:var(--muted);font-size:.75rem">${photosPage+1} / ${total}</span><button class="page-btn" onclick="goPhotosPage(${photosPage+1})" ${photosPage>=total-1?'disabled':''}>Suiv →</button>`;
   }
 
-  function goPhotosPage(p) {
-    photosPage = p;
-    renderPhotosGrid();
+  function goPhotosPage(p){photosPage=p;renderPhotosGrid();}
+
+  async function togglePhoto(photoId,currentActive){
+    const{error}=await sb.from('photos').update({active:!currentActive}).eq('id',photoId);
+    if(error)return showToast('Erreur',true);
+    showToast(currentActive?'✓ Photo désactivée':'✓ Photo activée');loadPhotos();
   }
 
-  async function togglePhoto(photoId, currentActive) {
-    const { error } = await sb.from('photos').update({ active: !currentActive }).eq('id', photoId);
-    if (error) return showToast('Erreur', true);
-    showToast(currentActive ? '✓ Photo désactivée' : '✓ Photo activée');
-    loadPhotos();
+  // ─── MESSAGES ─────────────────────────────────────────────
+  async function loadConversations(){
+    document.getElementById('conv-list-wrap').innerHTML='<div class="loader">Chargement...</div>';
+    try{
+      const{data:messages,error}=await sb.from('messages')
+        .select('id,sender_id,receiver_id,content,read,created_at,users_sender:users!messages_sender_id_fkey(prenom,email),users_receiver:users!messages_receiver_id_fkey(prenom,email)')
+        .order('created_at',{ascending:false}).limit(500);
+      if(error)throw error;
+      const convMap={};
+      (messages||[]).forEach(m=>{
+        const key=[m.sender_id,m.receiver_id].sort().join('_');
+        if(!convMap[key])convMap[key]={key,user1:m.users_sender,user2:m.users_receiver,user1_id:m.sender_id,user2_id:m.receiver_id,messages:[],unread:0,last_at:m.created_at};
+        convMap[key].messages.push(m);if(!m.read)convMap[key].unread++;
+        if(m.created_at>convMap[key].last_at)convMap[key].last_at=m.created_at;
+      });
+      allConversations=Object.values(convMap).sort((a,b)=>new Date(b.last_at)-new Date(a.last_at));
+      filteredConversations=allConversations;renderConversations();
+    }catch(e){console.error('[admin] loadConversations:',e);document.getElementById('conv-list-wrap').innerHTML='<div class="loader" style="color:var(--red)">Erreur</div>';}
   }
 
-  // ─── MESSAGES / CONVERSATIONS ─────────────────────────────
-  async function loadConversations() {
-    document.getElementById('conv-list-wrap').innerHTML = '<div class="loader">Chargement...</div>';
-    try {
-    const { data: messages, error } = await sb.from('messages')
-      .select('id, sender_id, receiver_id, content, read, created_at, users_sender:users!messages_sender_id_fkey(prenom, email), users_receiver:users!messages_receiver_id_fkey(prenom, email)')
-      .order('created_at', { ascending: false })
-      .limit(500);
-
-    if (error) throw error;
-
-    // Groupe par paire sender/receiver
-    const convMap = {};
-    (messages || []).forEach(m => {
-      const key = [m.sender_id, m.receiver_id].sort().join('_');
-      if (!convMap[key]) {
-        convMap[key] = {
-          key,
-          user1: m.users_sender,
-          user2: m.users_receiver,
-          user1_id: m.sender_id,
-          user2_id: m.receiver_id,
-          messages: [],
-          unread: 0,
-          last_at: m.created_at
-        };
-      }
-      convMap[key].messages.push(m);
-      if (!m.read) convMap[key].unread++;
-      if (m.created_at > convMap[key].last_at) convMap[key].last_at = m.created_at;
+  function filterConversations(){
+    const q=(document.getElementById('search-conv').value||'').toLowerCase();
+    const filter=document.getElementById('filter-conv').value;
+    filteredConversations=allConversations.filter(c=>{
+      const names=`${c.user1?.prenom||''} ${c.user2?.prenom||''} ${c.user1?.email||''} ${c.user2?.email||}`.toLowerCase();
+      return(!q||names.includes(q))&&(filter==='all'||(filter==='unread'&&c.unread>0));
     });
-
-    allConversations = Object.values(convMap).sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
-    filteredConversations = allConversations;
-    renderConversations();
-    } catch (e) {
-      console.error('[admin] loadConversations:', e);
-      document.getElementById('conv-list-wrap').innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
-    }
-  }
-
-  function filterConversations() {
-    const q = (document.getElementById('search-conv').value || '').toLowerCase();
-    const filter = document.getElementById('filter-conv').value;
-
-    filteredConversations = allConversations.filter(c => {
-      const names = `${c.user1?.prenom || ''} ${c.user2?.prenom || ''} ${c.user1?.email || ''} ${c.user2?.email || ''}`.toLowerCase();
-      const matchQ = !q || names.includes(q);
-      const matchFilter = filter === 'all' || (filter === 'unread' && c.unread > 0);
-      return matchQ && matchFilter;
-    });
-
     renderConversations();
   }
 
-  function renderConversations() {
-    const wrap = document.getElementById('conv-list-wrap');
-    if (!filteredConversations.length) {
-      wrap.innerHTML = '<div class="loader">Aucune conversation</div>';
-      return;
-    }
-
-    wrap.innerHTML = `<div>` + filteredConversations.map(c => {
-      const lastMsg = c.messages[0];
-      const rawPreview = lastMsg ? lastMsg.content.substring(0, 60) + (lastMsg.content.length > 60 ? '...' : '') : '';
-      const preview = escapeHtml(rawPreview);
-      const p1 = escapeHtml(c.user1?.prenom || 'Inconnu'); const p2 = escapeHtml(c.user2?.prenom || 'Inconnu');
-      return `
-        <div class="conv-item" onclick="openConvModal('${c.key}')">
-          ${c.unread > 0 ? '<div class="unread-dot"></div>' : '<div style="width:8px;flex-shrink:0"></div>'}
-          <div class="conv-names">
-            <div style="font-size:0.85rem">
-              ${p1} <span style="color:var(--muted)">↔</span> ${p2}
-            </div>
-            <div class="conv-preview">${preview}</div>
-          </div>
-          <div class="conv-count">
-            <div style="text-align:right">${c.messages.length} msg</div>
-            <div style="color:var(--muted)">${formatDate(c.last_at)}</div>
-            ${c.unread > 0 ? `<div style="color:var(--gold);font-size:0.65rem">${c.unread} non lu${c.unread > 1 ? 's' : ''}</div>` : ''}
-          </div>
-        </div>
-      `;
-    }).join('') + '</div>';
+  function renderConversations(){
+    const wrap=document.getElementById('conv-list-wrap');
+    if(!filteredConversations.length){wrap.innerHTML='<div class="loader">Aucune conversation</div>';return;}
+    wrap.innerHTML='<div>'+filteredConversations.map(c=>{
+      const lastMsg=c.messages[0];const preview=esc(lastMsg?lastMsg.content.substring(0,60)+(lastMsg.content.length>60?'...':''):'');
+      const p1=esc(c.user1?.prenom||'Inconnu');const p2=esc(c.user2?.prenom||'Inconnu');
+      return`<div class="conv-item" onclick="openConvModal('${c.key}')">
+        ${c.unread>0?'<div class="unread-dot"></div>':'<div style="width:8px;flex-shrink:0"></div>'}
+        <div class="conv-names"><div>${p1} <span style="color:var(--muted)">↔</span> ${p2}</div><div class="conv-preview">${preview}</div></div>
+        <div class="conv-count"><div style="text-align:right">${c.messages.length} msg</div><div style="color:var(--muted)">${fd(c.last_at)}</div>${c.unread>0?`<div style="color:var(--gold);font-size:.65rem">${c.unread} non lu${c.unread>1?'s':''}</div>`:''}</div>
+      </div>`;
+    }).join('')+'</div>';
   }
 
-  function openConvModal(convKey) {
-    const conv = allConversations.find(c => c.key === convKey);
-    if (!conv) return;
-
-    const cp1=escapeHtml(conv.user1?.prenom||'Inconnu'); const cp2=escapeHtml(conv.user2?.prenom||'Inconnu');
-    const ce1=escapeHtml(conv.user1?.email||'—'); const ce2=escapeHtml(conv.user2?.email||'—');
-    document.getElementById('conv-modal-title').textContent =
-      `${conv.user1?.prenom || 'Inconnu'} ↔ ${conv.user2?.prenom || 'Inconnu'}`;
+  function openConvModal(convKey){
+    const conv=allConversations.find(c=>c.key===convKey);if(!conv)return;
+    const cp1=esc(conv.user1?.prenom||'Inconnu');const cp2=esc(conv.user2?.prenom||'Inconnu');
+    const ce1=esc(conv.user1?.email||'—');const ce2=esc(conv.user2?.email||'—');
+    document.getElementById('conv-modal-title').textContent=`${conv.user1?.prenom||'Inconnu'} ↔ ${conv.user2?.prenom||'Inconnu'}`;
     document.getElementById('conv-modal').classList.add('open');
-
-    const sorted = [...conv.messages].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-    document.getElementById('conv-modal-body').innerHTML = `
-      <div style="margin-bottom:12px;color:var(--muted);font-size:0.75rem;letter-spacing:1px">
-        ${conv.messages.length} message(s) · ${conv.unread} non lu(s)
+    const sorted=[...conv.messages].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+    document.getElementById('conv-modal-body').innerHTML=`
+      <div style="margin-bottom:12px;color:var(--muted);font-size:.75rem;letter-spacing:1px">${conv.messages.length} message(s) · ${conv.unread} non lu(s)</div>
+      <div style="margin-bottom:8px;font-size:.75rem;color:var(--muted)">
+        <span style="display:inline-block;width:12px;height:12px;background:rgba(245,200,66,.15);border:1px solid rgba(245,200,66,.2);margin-right:4px"></span>${cp1} (${ce1})
+        &nbsp;&nbsp;<span style="display:inline-block;width:12px;height:12px;background:var(--bg2);border:1px solid var(--border);margin-right:4px"></span>${cp2} (${ce2})
       </div>
-      <div style="margin-bottom:8px;font-size:0.75rem;color:var(--muted)">
-        <span style="display:inline-block;width:12px;height:12px;background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.2);margin-right:4px"></span>
-        ${cp1} (${ce1})
-        &nbsp;&nbsp;
-        <span style="display:inline-block;width:12px;height:12px;background:var(--bg2);border:1px solid var(--border);margin-right:4px"></span>
-        ${cp2} (${ce2})
-      </div>
-      <div class="messages-thread">
-        ${sorted.map(m => `
-          <div style="align-self:${m.sender_id === conv.user1_id ? 'flex-end' : 'flex-start'}">
-            <div class="message-bubble ${m.sender_id === conv.user1_id ? 'sent' : 'received'}">
-              ${escapeHtml(m.content)}
-            </div>
-            <div class="message-meta" style="text-align:${m.sender_id === conv.user1_id ? 'right' : 'left'}">
-              ${formatDateFull(m.created_at)} ${m.read ? '· Lu' : '· Non lu'}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
+      <div class="messages-thread">${sorted.map(m=>`<div style="align-self:${m.sender_id===conv.user1_id?'flex-end':'flex-start'}"><div class="message-bubble ${m.sender_id===conv.user1_id?'sent':'received'}">${esc(m.content)}</div><div class="message-meta" style="text-align:${m.sender_id===conv.user1_id?'right':'left'}">${fdf(m.created_at)} ${m.read?'· Lu':'· Non lu'}</div></div>`).join('')}</div>`;
   }
 
-  function closeConvModal() {
-    document.getElementById('conv-modal').classList.remove('open');
-  }
+  function closeConvModal(){document.getElementById('conv-modal').classList.remove('open');}
 
   // ─── PREMIUM ──────────────────────────────────────────────
-  async function loadPremium() {
-    try {
-      const { data: premiums, error } = await sb.from('users')
-        .select('id, email, prenom, points, ville, avatar_url, premium_since, created_at')
-        .eq('is_premium', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const count = premiums ? premiums.length : 0;
-      const revenue = count * 9.99;
-
-      document.getElementById('premium-stats-grid').innerHTML = `
-        ${statCard('Abonnés actifs', count, '', '')}
-        ${statCard('Revenu mensuel est.', revenue.toFixed(2) + ' €', 'basé sur 9,99€/mois', 'green')}
-        ${statCard('Revenu annuel est.', (revenue * 12).toFixed(0) + ' €', 'projection', 'green')}
-      `;
-
-      const tbody = document.getElementById('premium-tbody');
-      if (!premiums || !premiums.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="loader">Aucun abonné</td></tr>';
-      } else {
-        tbody.innerHTML = premiums.map(u => {
-          const av=safeUrl(u.avatar_url); const pr=escapeHtml(u.prenom||'—'); const em=escapeHtml(u.email||'—'); const vi=escapeHtml(u.ville||'—');
-          return `
-          <tr>
-            <td>
-              <div style="display:flex;align-items:center">
-                <span class="avatar-circle">${av ? `<img src="${av}">` : '👤'}</span>
-                ${pr}
-              </div>
-            </td>
-            <td style="color:var(--muted);font-size:0.75rem">${em}</td>
-            <td style="color:var(--muted);font-size:0.75rem">${u.premium_since ? formatDate(u.premium_since) : formatDate(u.created_at)}</td>
-            <td><span style="color:var(--gold)">${u.points ?? 0}</span> pts</td>
-            <td>${vi}</td>
-            <td>
-              <button class="btn-danger" onclick="revokePremium('${u.id}')">Révoquer</button>
-            </td>
-          </tr>
-        `;}).join('');
-      }
-    } catch (e) {
-      console.error('[admin] loadPremium:', e);
-      document.getElementById('premium-tbody').innerHTML = '<tr><td colspan="6" class="loader" style="color:var(--red)">Erreur de chargement</td></tr>';
-    }
+  async function loadPremium(){
+    try{
+      const{data:premiums,error}=await sb.from('users').select('id,email,prenom,points,ville,avatar_url,premium_since,created_at').eq('is_premium',true).order('created_at',{ascending:false});
+      if(error)throw error;
+      const count=premiums?premiums.length:0;const revenue=count*9.99;
+      document.getElementById('premium-stats-grid').innerHTML=statCard('Abonnés actifs',count,'','')+statCard('Revenu mensuel est.',revenue.toFixed(2)+' €','basé sur 9,99€/mois','green')+statCard('Revenu annuel est.',(revenue*12).toFixed(0)+' €','projection','green');
+      const tbody=document.getElementById('premium-tbody');
+      if(!premiums||!premiums.length){tbody.innerHTML='<tr><td colspan="6" class="loader">Aucun abonné</td></tr>';return;}
+      tbody.innerHTML=premiums.map(u=>{
+        const av=safeUrl(u.avatar_url);const pr=esc(u.prenom||'—');const em=esc(u.email||'—');const vi=esc(u.ville||'—');
+        return`<tr><td><div style="display:flex;align-items:center"><span class="avatar-circle">${av?`<img src="${av}">`:'👤'}</span>${pr}</div></td><td style="color:var(--muted);font-size:.75rem">${em}</td><td style="color:var(--muted);font-size:.75rem">${u.premium_since?fd(u.premium_since):fd(u.created_at)}</td><td><span style="color:var(--gold)">${u.points??0}</span> pts</td><td>${vi}</td><td><button class="btn-danger" onclick="revokePremium('${u.id}')">Révoquer</button></td></tr>`;
+      }).join('');
+    }catch(e){console.error('[admin] loadPremium:',e);document.getElementById('premium-tbody').innerHTML='<tr><td colspan="6" class="loader" style="color:var(--red)">Erreur</td></tr>';}
   }
 
-  async function revokePremium(userId) {
-    if (!confirm('Révoquer le premium de cet utilisateur ?')) return;
-    const { error } = await sb.from('users').update({ is_premium: false }).eq('id', userId);
-    if (error) return showToast('Erreur', true);
-    showToast('✓ Premium révoqué');
-    loadPremium();
+  async function revokePremium(userId){
+    if(!confirm('Révoquer le premium ?'))return;
+    const{error}=await sb.from('users').update({is_premium:false}).eq('id',userId);
+    if(error)return showToast('Erreur',true);
+    showToast('✓ Premium révoqué');loadPremium();
   }
 
   // ─── POINTS CONFIG ────────────────────────────────────────
-  async function loadPointsConfig() {
-    const grid = document.getElementById('config-grid');
-    try {
-      const { data, error } = await sb.from('points_config').select('*').order('id');
-      if (error) throw error;
-      if (!data) { grid.innerHTML = '<div class="loader">Aucune configuration</div>'; return; }
-
-      grid.innerHTML = data.map(cfg => {
-        const lbl=escapeHtml(cfg.label||'');
-        return `
-        <div class="config-card">
-          <div class="config-label">${lbl}</div>
-          <div class="config-input-wrap">
-            <input class="config-input" type="number" value="${cfg.points}" id="cfg-${cfg.id}">
-            <button class="btn-save-config" onclick="savePointsConfig('${cfg.id}', '${lbl}')">OK</button>
-          </div>
-        </div>
-      `;}).join('');
-    } catch (e) {
-      console.error('[admin] loadPointsConfig:', e);
-      grid.innerHTML = '<div class="loader" style="color:var(--red)">Erreur de chargement</div>';
-    }
+  async function loadPointsConfig(){
+    const grid=document.getElementById('config-grid');
+    try{
+      const{data,error}=await sb.from('points_config').select('*').order('id');if(error)throw error;
+      if(!data){grid.innerHTML='<div class="loader">Aucune configuration</div>';return;}
+      grid.innerHTML=data.map(cfg=>{const lbl=esc(cfg.label||'');return`<div class="config-card"><div class="config-label">${lbl}</div><div class="config-input-wrap"><input class="config-input" type="number" value="${cfg.points}" id="cfg-${cfg.id}"><button class="btn-save-config" onclick="savePointsConfig('${cfg.id}','${lbl}')">OK</button></div></div>`;}).join('');
+    }catch(e){console.error('[admin] loadPointsConfig:',e);grid.innerHTML='<div class="loader" style="color:var(--red)">Erreur</div>';}
   }
 
-  async function savePointsConfig(id, label) {
-    const val = parseInt(document.getElementById('cfg-' + id).value);
-    if (isNaN(val)) return showToast('Valeur invalide', true);
-    const { error } = await sb.from('points_config').update({ points: val }).eq('id', id);
-    if (error) return showToast('Erreur: ' + error.message, true);
+  async function savePointsConfig(id,label){
+    const val=parseInt(document.getElementById('cfg-'+id).value);
+    if(isNaN(val))return showToast('Valeur invalide',true);
+    const{error}=await sb.from('points_config').update({points:val}).eq('id',id);
+    if(error)return showToast('Erreur: '+error.message,true);
     showToast(`✓ ${label} → ${val} pts`);
   }
 
   // ─── PROMO CODES ──────────────────────────────────────────
-  async function loadPromoCodes() {
-    const tbody = document.getElementById('promos-tbody');
-    try {
-      const { data, error } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
-      if (!data || !data.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun code créé</td></tr>';
+  async function loadPromoCodes(){
+    const tbody=document.getElementById('promos-tbody');
+    tbody.innerHTML='<tr><td colspan="7" class="loader">Chargement...</td></tr>';
+    try{
+      const{data,error}=await sb.from('promo_codes').select('*').order('created_at',{ascending:false});
+      if(error)throw error;
+      if(!data||!data.length){
+        tbody.innerHTML='<tr><td colspan="7" class="loader">Aucun code créé</td></tr>';
+        document.getElementById('promo-stats').innerHTML='';
         return;
       }
-      tbody.innerHTML = data.map(p => {
-        const pc=escapeHtml(p.code||''); const pn=escapeHtml(p.influencer_name||'—');
-        return `
-        <tr>
-          <td><code style="color:var(--gold);font-size:0.9rem">${pc}</code></td>
+      // Stats
+      const totalCodes=data.length;const activeCodes=data.filter(p=>p.active).length;const totalUses=data.reduce((s,p)=>s+(p.uses||0),0);
+      document.getElementById('promo-stats').innerHTML=`
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:12px 20px;font-size:.75rem;color:var(--muted)"><span style="color:var(--text);font-size:1rem;font-weight:700">${totalCodes}</span> codes créés</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:12px 20px;font-size:.75rem;color:var(--muted)"><span style="color:var(--green);font-size:1rem;font-weight:700">${activeCodes}</span> actifs</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:12px 20px;font-size:.75rem;color:var(--muted)"><span style="color:var(--gold);font-size:1rem;font-weight:700">${totalUses}</span> utilisations totales</div>`;
+      tbody.innerHTML=data.map(p=>{
+        const pc=esc(p.code||'');const pn=esc(p.influencer_name||'—');
+        return`<tr>
+          <td><code style="color:var(--gold);font-size:.9rem">${pc}</code></td>
           <td>${pn}</td>
-          <td>+${p.points_bonus} pts</td>
-          <td>${p.uses}</td>
-          <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Actif' : 'Désactivé'}</span></td>
-          <td>${formatDate(p.created_at)}</td>
-          <td><button class="btn-toggle" onclick="togglePromo('${p.id}', ${p.active})">${p.active ? 'Désactiver' : 'Activer'}</button></td>
-        </tr>
-      `;}).join('');
-    } catch (e) {
-      console.error('[admin] loadPromoCodes:', e);
-      tbody.innerHTML = '<tr><td colspan="7" class="loader" style="color:var(--red)">Erreur de chargement</td></tr>';
+          <td style="color:var(--green)">+${p.points_bonus} pts</td>
+          <td><span style="color:var(--text);font-weight:500">${p.uses||0}</span> <span style="color:var(--muted);font-size:.7rem">utilisations</span></td>
+          <td><span class="badge ${p.active?'badge-active':'badge-inactive'}">${p.active?'Actif':'Désactivé'}</span></td>
+          <td style="color:var(--muted);font-size:.75rem">${fd(p.created_at)}</td>
+          <td>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn-toggle" onclick="togglePromo('${p.id}',${p.active})">${p.active?'Désactiver':'Activer'}</button>
+              <button class="btn-danger" onclick="deletePromo('${p.id}','${pc}')">Supprimer</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }catch(e){
+      console.error('[admin] loadPromoCodes:',e);
+      tbody.innerHTML=`<tr><td colspan="7" class="loader" style="color:var(--red)">Erreur: ${esc(e.message)}</td></tr>`;
     }
   }
 
-  async function createPromoCode() {
-    const code = document.getElementById('promo-code').value.trim().toUpperCase();
-    const influencer = document.getElementById('promo-influencer').value.trim();
-    const points = parseInt(document.getElementById('promo-points').value);
-    if (!code || !influencer || isNaN(points)) return showToast('Remplis tous les champs', true);
-
-    const { error } = await sb.from('promo_codes').insert({ code, influencer_name: influencer, points_bonus: points });
-    if (error) return showToast('Erreur: ' + (error.message.includes('unique') ? 'Code déjà existant' : error.message), true);
-
-    showToast('✓ Code ' + code + ' créé !');
-    document.getElementById('promo-code').value = '';
-    document.getElementById('promo-influencer').value = '';
-    loadPromoCodes();
+  async function createPromoCode(){
+    const code=document.getElementById('promo-code').value.trim().toUpperCase();
+    const influencer=document.getElementById('promo-influencer').value.trim();
+    const points=parseInt(document.getElementById('promo-points').value);
+    if(!code||!influencer||isNaN(points))return showToast('Remplis tous les champs',true);
+    try{
+      const{error}=await sb.from('promo_codes').insert({code,influencer_name:influencer,points_bonus:points,uses:0,active:true});
+      if(error)return showToast('Erreur: '+(error.message.includes('unique')?'Code déjà existant':error.message),true);
+      showToast('✓ Code '+code+' créé !');
+      document.getElementById('promo-code').value='';document.getElementById('promo-influencer').value='';
+      loadPromoCodes();
+    }catch(e){showToast('Erreur inattendue',true);}
   }
 
-  async function togglePromo(id, currentActive) {
-    const { error } = await sb.from('promo_codes').update({ active: !currentActive }).eq('id', id);
-    if (error) return showToast('Erreur', true);
-    showToast(currentActive ? 'Code désactivé' : 'Code activé');
-    loadPromoCodes();
+  async function togglePromo(id,currentActive){
+    try{
+      const{error}=await sb.from('promo_codes').update({active:!currentActive}).eq('id',id);
+      if(error){console.error('[admin] togglePromo:',error);return showToast('Erreur: '+error.message,true);}
+      showToast(currentActive?'✓ Code désactivé':'✓ Code activé');loadPromoCodes();
+    }catch(e){console.error('[admin] togglePromo:',e);showToast('Erreur inattendue',true);}
+  }
+
+  async function deletePromo(id,code){
+    if(!confirm('Supprimer définitivement le code '+code+' ?\nCette action est irréversible.'))return;
+    try{
+      const{error}=await sb.from('promo_codes').delete().eq('id',id);
+      if(error){console.error('[admin] deletePromo:',error);return showToast('Erreur: '+error.message,true);}
+      showToast('✓ Code '+code+' supprimé');loadPromoCodes();
+    }catch(e){console.error('[admin] deletePromo:',e);showToast('Erreur inattendue',true);}
   }
 
   // ─── REPORTS ──────────────────────────────────────────────
-  async function loadReports() {
-    const tbody = document.getElementById('reports-tbody');
-    try {
-      const { data, error } = await sb.from('reports')
-        .select('id, raison, created_at, photo_id, reporter_id, photos(url, user_id, users(prenom)), reporter:users!reports_reporter_id_fkey(prenom, email)')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      if (!data || !data.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="loader">Aucun signalement</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.map(r => {
-        const pu=safeUrl(r.photos?.url); const rp=escapeHtml(r.reporter?.prenom||'—'); const re=escapeHtml(r.reporter?.email||''); const ra=escapeHtml(r.raison||'—');
-        return `
-        <tr>
-          <td>
-            ${pu ? `<img src="${pu}" style="width:56px;height:56px;object-fit:cover;border:1px solid var(--border)">` : '—'}
-          </td>
-          <td style="color:var(--muted);font-size:0.75rem">
-            ${rp}<br>
-            <span style="font-size:0.65rem">${re}</span>
-          </td>
-          <td>${ra}</td>
-          <td>${formatDate(r.created_at)}</td>
+  async function loadReports(){
+    const tbody=document.getElementById('reports-tbody');
+    try{
+      const{data,error}=await sb.from('reports')
+        .select('id,raison,created_at,photo_id,reporter_id,photos(url,user_id,users(prenom)),reporter:users!reports_reporter_id_fkey(prenom,email)')
+        .order('created_at',{ascending:false}).limit(50);
+      if(error)throw error;
+      if(!data||!data.length){tbody.innerHTML='<tr><td colspan="5" class="loader">Aucun signalement</td></tr>';return;}
+      tbody.innerHTML=data.map(r=>{
+        const pu=safeUrl(r.photos?.url);const rp=esc(r.reporter?.prenom||'—');const re=esc(r.reporter?.email||'');const ra=esc(r.raison||'—');
+        return`<tr>
+          <td>${pu?`<img src="${pu}" style="width:56px;height:56px;object-fit:cover;border:1px solid var(--border)">`:'—'}</td>
+          <td style="color:var(--muted);font-size:.75rem">${rp}<br><span style="font-size:.65rem">${re}</span></td>
+          <td>${ra}</td><td>${fd(r.created_at)}</td>
           <td style="display:flex;gap:8px">
-            <button class="btn-danger" onclick="deletePhoto('${r.photo_id}', '${r.id}')">Supprimer photo</button>
+            <button class="btn-danger" onclick="deletePhoto('${r.photo_id}','${r.id}')">Supprimer photo</button>
             <button class="btn-toggle" onclick="dismissReport('${r.id}')">Ignorer</button>
           </td>
-        </tr>
-      `;}).join('');
-    } catch (e) {
-      console.error('[admin] loadReports:', e);
-      tbody.innerHTML = '<tr><td colspan="5" class="loader" style="color:var(--red)">Erreur de chargement</td></tr>';
-    }
+        </tr>`;
+      }).join('');
+    }catch(e){console.error('[admin] loadReports:',e);tbody.innerHTML='<tr><td colspan="5" class="loader" style="color:var(--red)">Erreur</td></tr>';}
   }
 
-  async function deletePhoto(photoId, reportId) {
-    if (!confirm('Supprimer cette photo ?')) return;
-    const { error: e1 } = await sb.from('photos').update({ active: false }).eq('id', photoId);
-    if (e1) return showToast('Erreur: ' + e1.message, true);
-    const { error: e2 } = await sb.from('reports').delete().eq('id', reportId);
-    if (e2) return showToast('Erreur: ' + e2.message, true);
-    showToast('✓ Photo supprimée');
-    loadReports();
+  async function deletePhoto(photoId,reportId){
+    if(!confirm('Supprimer cette photo ?'))return;
+    const{error:e1}=await sb.from('photos').update({active:false}).eq('id',photoId);
+    if(e1)return showToast('Erreur: '+e1.message,true);
+    const{error:e2}=await sb.from('reports').delete().eq('id',reportId);
+    if(e2)return showToast('Erreur: '+e2.message,true);
+    showToast('✓ Photo supprimée');loadReports();
   }
 
-  async function dismissReport(reportId) {
-    const { error } = await sb.from('reports').delete().eq('id', reportId);
-    if (error) return showToast('Erreur: ' + error.message, true);
-    showToast('✓ Signalement ignoré');
-    loadReports();
+  async function dismissReport(reportId){
+    const{error}=await sb.from('reports').delete().eq('id',reportId);
+    if(error)return showToast('Erreur: '+error.message,true);
+    showToast('✓ Signalement ignoré');loadReports();
   }
 
   // ─── UTILS ────────────────────────────────────────────────
-  function formatDate(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
-  }
-
-  function formatDateFull(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
-  }
-
-  function escapeHtml(str) {
-    if (str == null) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-  function safeUrl(url) { if (!url) return null; try { const u = new URL(url); return u.protocol === 'https:' ? url : null; } catch { return null; } }
+  function fd(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'});}
+  function fdf(iso){if(!iso)return'—';return new Date(iso).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});}
+  function esc(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+  function safeUrl(url){if(!url)return null;try{const u=new URL(url);return u.protocol==='https:'?url:null;}catch{return null;}}
 
   let toastTimer;
-  function showToast(msg, isError = false) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show' + (isError ? ' error' : '');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.className = 'toast', 3000);
+  function showToast(msg,isError=false){
+    const t=document.getElementById('toast');t.textContent=msg;
+    t.className='toast show'+(isError?' error':'');
+    clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.className='toast',3000);
   }
 
-  // Fermer modals en cliquant en dehors
-  document.getElementById('user-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeUserModal();
-  });
-  document.getElementById('conv-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeConvModal();
-  });
+  document.getElementById('user-modal').addEventListener('click',function(e){if(e.target===this)closeUserModal();});
+  document.getElementById('conv-modal').addEventListener('click',function(e){if(e.target===this)closeConvModal();});
 
-  // ─── INIT ─────────────────────────────────────────────────
   checkAuth();
 </script>
 </body>
