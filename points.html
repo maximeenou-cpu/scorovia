@@ -372,14 +372,14 @@ async function applyPromo(){
       return;
     }
 
-    // 4. Vérifie le nombre d'utilisations max (colonne uses = max autorisé, -1 = illimité)
-    if(promo.uses!==-1){
-      const{count}=await sb
+    // 4. Vérifie le nombre d'utilisations max (uses > 0 = limité, 0 = illimité)
+    if(promo.uses>0){
+      const{data:usageData}=await sb
         .from('points_history')
-        .select('id',{count:'exact',head:true})
+        .select('id')
         .eq('action','Code promo')
-        .ilike('description','%'+code+'%');
-      if(count>=promo.uses){
+        .like('description','%'+code+'%');
+      if(usageData&&usageData.length>=promo.uses){
         showPromoMsg('❌ Ce code promo a atteint son nombre maximum d\'utilisations.','error');
         return;
       }
