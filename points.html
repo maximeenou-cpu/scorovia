@@ -89,6 +89,31 @@
 .already-premium-text h3{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.06em;color:var(--green);margin-bottom:4px}
 .already-premium-text p{font-size:13px;color:var(--muted)}
 .toast.gold{border-color:rgba(245,200,66,0.3)}
+
+/* ===== TABS ===== */
+.tabs-nav{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:4px;margin-bottom:28px}
+.tab-btn{flex:1;padding:10px 16px;border:none;background:transparent;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.tab-btn.active{background:rgba(245,200,66,0.12);color:var(--gold2);border:1px solid rgba(245,200,66,0.2)}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ===== CODE PROMO ===== */
+.promo-card{background:linear-gradient(135deg,rgba(34,212,160,0.07),rgba(139,92,246,0.05));border:1px solid rgba(34,212,160,0.2);border-radius:24px;padding:32px;text-align:center}
+.promo-icon{font-size:48px;margin-bottom:14px}
+.promo-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.08em;color:var(--green);margin-bottom:6px}
+.promo-desc{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.promo-input-wrap{display:flex;gap:10px;max-width:380px;margin:0 auto 16px}
+.promo-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);text-transform:uppercase;letter-spacing:0.08em;outline:none;transition:border-color 0.2s;text-align:center}
+.promo-input:focus{border-color:rgba(34,212,160,0.4)}
+.promo-input::placeholder{text-transform:none;letter-spacing:0;font-size:13px;color:var(--muted)}
+.btn-promo{background:linear-gradient(135deg,var(--green),#1aaa7a);border:none;border-radius:12px;padding:14px 22px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.08em;color:#000;cursor:pointer;transition:opacity 0.2s;white-space:nowrap}
+.btn-promo:hover{opacity:0.88}
+.btn-promo:disabled{opacity:0.4;cursor:not-allowed}
+.promo-msg{font-size:13px;min-height:20px;margin-bottom:0;transition:all 0.2s}
+.promo-msg.success{color:var(--green)}
+.promo-msg.error{color:var(--pink)}
+.promo-already-used{background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.2);border-radius:14px;padding:16px 20px;max-width:380px;margin:0 auto;font-size:13px;color:var(--gold2);display:none}
+
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0)}
@@ -99,6 +124,8 @@
   .premium-features{grid-template-columns:1fr}
   .topbar{padding:14px 16px}
   .already-premium-card{flex-direction:column;text-align:center}
+  .promo-input-wrap{flex-direction:column}
+  .tabs-nav{overflow-x:auto}
 }
 @media(max-width:768px){
   .mobile-bottom-nav{display:block}
@@ -176,59 +203,95 @@
       <div class="balance-num" id="balance-num">—</div>
       <div class="balance-sub">points disponibles</div>
       <div class="balance-actions">
-        <button class="btn-action btn-gold" onclick="scrollToPacks()">💳 Acheter des points</button>
+        <button class="btn-action btn-gold" onclick="setTab('acheter')">💳 Acheter des points</button>
         <button class="btn-action btn-purple" onclick="openAd()">📺 Regarder une pub (<span data-pts-key="pub">+5 pts</span>)</button>
         <button class="btn-action btn-green" onclick="copyInvite()">👥 Inviter un ami (<span data-pts-key="parrainage">+50 pts</span>)</button>
+        <button class="btn-action" onclick="setTab('promo')" style="background:rgba(34,212,160,0.08);border:1px solid rgba(34,212,160,0.2);color:var(--green);">🎟️ Code promo</button>
       </div>
     </div>
 
-    <!-- PACKS -->
-    <div id="packs-section" style="margin-bottom:28px;">
-      <div class="section-title">Acheter des points</div>
-      <div id="packs-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:12px;"></div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;">🔒 Paiement sécurisé par Stripe · SSL · Points crédités automatiquement</div>
+    <!-- TABS -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" id="tab-btn-acheter" onclick="setTab('acheter')">💳 Acheter</button>
+      <button class="tab-btn" id="tab-btn-gagner" onclick="setTab('gagner')">⚡ Gagner</button>
+      <button class="tab-btn" id="tab-btn-promo" onclick="setTab('promo')">🎟️ Code promo</button>
+      <button class="tab-btn" id="tab-btn-historique" onclick="setTab('historique')">📋 Historique</button>
     </div>
 
-    <!-- EARN -->
-    <div class="section-title">Comment gagner des points</div>
-    <div style="margin-bottom:20px;text-align:center;">
-      <div style="font-size:10px;color:rgba(240,238,248,0.2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Publicité</div>
-      <ins class="adsbygoogle" style="display:block;min-height:90px;background:var(--card);border:1px solid var(--border);border-radius:12px;" data-ad-client="ca-pub-8229912245519123" data-ad-slot="XXXXXXXXXX" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+    <!-- TAB : ACHETER -->
+    <div class="tab-pane active" id="tab-acheter">
+      <div id="packs-section" style="margin-bottom:28px;">
+        <div class="section-title">Acheter des points</div>
+        <div id="packs-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:12px;"></div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;">🔒 Paiement sécurisé par Stripe · SSL · Points crédités automatiquement</div>
+      </div>
+      <div id="premium-section"></div>
     </div>
-    <div class="earn-grid">
-      <div class="earn-card" onclick="window.location.href='noter.html'">
-        <div class="earn-icon">⭐</div><div class="earn-card-title">Noter quelqu'un</div>
-        <div class="earn-card-desc">Notez des profils de 1 à 10</div>
-        <div class="earn-pts pts-green" data-pts-key="vote">+1 pt / note</div>
+
+    <!-- TAB : GAGNER -->
+    <div class="tab-pane" id="tab-gagner">
+      <div class="section-title">Comment gagner des points</div>
+      <div style="margin-bottom:20px;text-align:center;">
+        <div style="font-size:10px;color:rgba(240,238,248,0.2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Publicité</div>
+        <ins class="adsbygoogle" style="display:block;min-height:90px;background:var(--card);border:1px solid var(--border);border-radius:12px;" data-ad-client="ca-pub-8229912245519123" data-ad-slot="XXXXXXXXXX" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
       </div>
-      <div class="earn-card" onclick="openAd()">
-        <div class="earn-icon">📺</div><div class="earn-card-title">Regarder une pub</div>
-        <div class="earn-card-desc">Vidéo de 30 secondes</div>
-        <div class="earn-pts pts-purple" data-pts-key="pub">+5 pts / pub</div>
-      </div>
-      <div class="earn-card" onclick="copyInvite()">
-        <div class="earn-icon">👥</div><div class="earn-card-title">Inviter un ami</div>
-        <div class="earn-card-desc">Lien de parrainage unique</div>
-        <div class="earn-pts pts-gold" data-pts-key="parrainage">+50 pts / ami</div>
-      </div>
-      <div class="earn-card" onclick="window.location.href='mesnotes.html'">
-        <div class="earn-icon">📸</div><div class="earn-card-title">Soumettre une photo</div>
-        <div class="earn-card-desc">Recevez des notes</div>
-        <div class="earn-pts" style="color:var(--pink)" data-pts-key="upload_photo">1ère gratuite · -20 pts</div>
+      <div class="earn-grid">
+        <div class="earn-card" onclick="window.location.href='noter.html'">
+          <div class="earn-icon">⭐</div><div class="earn-card-title">Noter quelqu'un</div>
+          <div class="earn-card-desc">Notez des profils de 1 à 10</div>
+          <div class="earn-pts pts-green" data-pts-key="vote">+1 pt / note</div>
+        </div>
+        <div class="earn-card" onclick="openAd()">
+          <div class="earn-icon">📺</div><div class="earn-card-title">Regarder une pub</div>
+          <div class="earn-card-desc">Vidéo de 30 secondes</div>
+          <div class="earn-pts pts-purple" data-pts-key="pub">+5 pts / pub</div>
+        </div>
+        <div class="earn-card" onclick="copyInvite()">
+          <div class="earn-icon">👥</div><div class="earn-card-title">Inviter un ami</div>
+          <div class="earn-card-desc">Lien de parrainage unique</div>
+          <div class="earn-pts pts-gold" data-pts-key="parrainage">+50 pts / ami</div>
+        </div>
+        <div class="earn-card" onclick="window.location.href='mesnotes.html'">
+          <div class="earn-icon">📸</div><div class="earn-card-title">Soumettre une photo</div>
+          <div class="earn-card-desc">Recevez des notes</div>
+          <div class="earn-pts" style="color:var(--pink)" data-pts-key="upload_photo">1ère gratuite · -20 pts</div>
+        </div>
+        <div class="earn-card" onclick="setTab('promo')">
+          <div class="earn-icon">🎟️</div><div class="earn-card-title">Code promo</div>
+          <div class="earn-card-desc">Entre un code et reçois des points bonus</div>
+          <div class="earn-pts pts-green">Points offerts</div>
+        </div>
       </div>
     </div>
 
-    <!-- Section Premium -->
-    <div id="premium-section"></div>
+    <!-- TAB : CODE PROMO -->
+    <div class="tab-pane" id="tab-promo">
+      <div class="promo-card">
+        <div class="promo-icon">🎟️</div>
+        <div class="promo-title">CODE PROMO</div>
+        <div class="promo-desc">Tu as reçu un code promo ?<br>Entre-le ci-dessous pour recevoir tes points bonus.<br><span style="color:rgba(240,238,248,0.3);font-size:12px;">Chaque code ne peut être utilisé qu'une seule fois.</span></div>
 
-    <!-- HISTORY -->
-    <div class="history-card">
-      <div class="history-header">
-        <div class="section-title" style="margin:0">Historique des points</div>
+        <div class="promo-input-wrap">
+          <input class="promo-input" id="promo-input" type="text" placeholder="Entre ton code ici..." maxlength="30" autocomplete="off" spellcheck="false" oninput="this.value=this.value.toUpperCase()">
+          <button class="btn-promo" id="btn-promo" onclick="applyPromo()">VALIDER</button>
+        </div>
+        <div class="promo-msg" id="promo-msg"></div>
+        <div class="promo-already-used" id="promo-already-used">
+          ✓ Tu as déjà utilisé un code promo.
+        </div>
       </div>
-      <div class="history-list" id="history-list">
-        <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Chargement...</div>
+    </div>
+
+    <!-- TAB : HISTORIQUE -->
+    <div class="tab-pane" id="tab-historique">
+      <div class="history-card">
+        <div class="history-header">
+          <div class="section-title" style="margin:0">Historique des points</div>
+        </div>
+        <div class="history-list" id="history-list">
+          <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Chargement...</div>
+        </div>
       </div>
     </div>
 
@@ -250,6 +313,135 @@ function stripeLink(base,userId){return base+'?client_reference_id='+userId;}
 
 let currentUser=null,userProfile=null,adTimer=null,adSeconds=30;
 
+// ===== TABS =====
+function setTab(name){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('tab-btn-'+name).classList.add('active');
+  if(name==='historique') loadHistory();
+}
+
+// ===== CODE PROMO =====
+async function applyPromo(){
+  const input=document.getElementById('promo-input');
+  const btn=document.getElementById('btn-promo');
+  const msg=document.getElementById('promo-msg');
+  const code=input.value.trim().toUpperCase();
+
+  if(!code){
+    showPromoMsg('Merci d\'entrer un code promo.','error');
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent='...';
+  msg.textContent='';
+
+  try{
+    // 1. Vérifie si l'utilisateur a déjà utilisé un code promo
+    const{data:alreadyUsed}=await sb
+      .from('points_history')
+      .select('id')
+      .eq('user_id',currentUser.id)
+      .eq('action','Code promo')
+      .limit(1);
+
+    if(alreadyUsed&&alreadyUsed.length>0){
+      showPromoMsg('Tu as déjà utilisé un code promo.','error');
+      document.getElementById('promo-already-used').style.display='block';
+      return;
+    }
+
+    // 2. Recherche le code dans la table promo_codes
+    const{data:promo,error:promoErr}=await sb
+      .from('promo_codes')
+      .select('*')
+      .eq('code',code)
+      .eq('active',true)
+      .single();
+
+    if(promoErr||!promo){
+      showPromoMsg('❌ Code invalide ou expiré.','error');
+      return;
+    }
+
+    // 3. Vérifie la date d'expiration
+    if(promo.expires_at&&new Date(promo.expires_at)<new Date()){
+      showPromoMsg('❌ Ce code promo a expiré.','error');
+      return;
+    }
+
+    // 4. Vérifie le nombre d'utilisations max (colonne uses = max autorisé, -1 = illimité)
+    if(promo.uses!==-1){
+      const{count}=await sb
+        .from('points_history')
+        .select('id',{count:'exact',head:true})
+        .eq('action','Code promo')
+        .ilike('description','%'+code+'%');
+      if(count>=promo.uses){
+        showPromoMsg('❌ Ce code promo a atteint son nombre maximum d\'utilisations.','error');
+        return;
+      }
+    }
+
+    // 5. Crédite les points
+    const bonus=promo.points_bonus||0;
+    const newPts=(userProfile.points||0)+bonus;
+
+    await sb.from('users').update({points:newPts}).eq('id',currentUser.id);
+    await sb.from('points_history').insert({
+      user_id:currentUser.id,
+      action:'Code promo',
+      points:bonus,
+      description:'Code : '+code+(promo.influencer_name?' — '+promo.influencer_name:'')
+    });
+
+    userProfile.points=newPts;
+    document.getElementById('pts-display').textContent=newPts;
+    document.getElementById('user-pts').textContent=newPts;
+    document.getElementById('balance-num').textContent=newPts;
+
+    input.value='';
+    input.disabled=true;
+    btn.style.display='none';
+    document.getElementById('promo-already-used').style.display='block';
+    showPromoMsg('🎉 +'+bonus+' points crédités ! Merci d\'utiliser Scorovia.','success');
+    showToast('🎟️ Code promo validé ! +'+bonus+' pts','success');
+
+  }catch(e){
+    console.error('[promo] applyPromo:',e);
+    showPromoMsg('❌ Une erreur est survenue. Réessaie.','error');
+  }finally{
+    btn.disabled=false;
+    btn.textContent='VALIDER';
+  }
+}
+
+function showPromoMsg(text,type){
+  const el=document.getElementById('promo-msg');
+  el.textContent=text;
+  el.className='promo-msg '+(type||'');
+}
+
+// Vérifie au chargement si le user a déjà utilisé un code
+async function checkPromoUsed(){
+  try{
+    const{data}=await sb
+      .from('points_history')
+      .select('id')
+      .eq('user_id',currentUser.id)
+      .eq('action','Code promo')
+      .limit(1);
+    if(data&&data.length>0){
+      document.getElementById('promo-already-used').style.display='block';
+      document.getElementById('promo-input').disabled=true;
+      document.getElementById('btn-promo').style.display='none';
+    }
+  }catch(e){console.error('[promo] checkPromoUsed:',e);}
+}
+
+// ===== INIT =====
 async function init(){
   try{
     const{data:{session}}=await sb.auth.getSession();
@@ -315,7 +507,13 @@ async function init(){
     }
 
     await loadHistory();
+    await checkPromoUsed();
     document.getElementById('loading').style.display='none';
+
+    // Ouvre l'onglet promo si ?tab=promo dans l'URL
+    const params=new URLSearchParams(window.location.search);
+    if(params.get('tab')==='promo') setTab('promo');
+
   }catch(e){
     console.error('[points] init:',e);
     document.getElementById('loading').style.display='none';
@@ -345,20 +543,14 @@ function buildPacksGrid(userId){
     </a>`).join('');
 }
 
-function scrollToPacks(){
-  const el=document.getElementById('packs-section');
-  if(!el)return;
-  const topbarH=document.querySelector('.topbar')?.offsetHeight||57;
-  const y=el.getBoundingClientRect().top+window.scrollY-topbarH-16;
-  window.scrollTo({top:y,behavior:'smooth'});
-}
+function scrollToPacks(){setTab('acheter');}
 
 async function loadHistory(){
   try{
     const{data}=await sb.from('points_history').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
     const list=document.getElementById('history-list');
     if(!data||data.length===0){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Aucune transaction pour l\'instant</div>';return;}
-    const icons={'Note donnée':{icon:'⭐',bg:'rgba(245,200,66,0.1)'},'Pub regardée':{icon:'📺',bg:'rgba(139,92,246,0.1)'},'Photo soumise':{icon:'📸',bg:'rgba(255,77,141,0.1)'},'Parrainage':{icon:'👥',bg:'rgba(34,212,160,0.1)'},'Bonus inscription':{icon:'🎁',bg:'rgba(245,200,66,0.1)'},'Bonus profil':{icon:'✅',bg:'rgba(34,212,160,0.1)'}};
+    const icons={'Note donnée':{icon:'⭐',bg:'rgba(245,200,66,0.1)'},'Pub regardée':{icon:'📺',bg:'rgba(139,92,246,0.1)'},'Photo soumise':{icon:'📸',bg:'rgba(255,77,141,0.1)'},'Parrainage':{icon:'👥',bg:'rgba(34,212,160,0.1)'},'Bonus inscription':{icon:'🎁',bg:'rgba(245,200,66,0.1)'},'Bonus profil':{icon:'✅',bg:'rgba(34,212,160,0.1)'},'Code promo':{icon:'🎟️',bg:'rgba(34,212,160,0.1)'}};
     list.innerHTML=data.map(item=>{
       const meta=icons[item.action]||{icon:'⚡',bg:'rgba(245,200,66,0.1)'};
       const dateStr=new Date(item.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
