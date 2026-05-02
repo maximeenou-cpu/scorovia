@@ -641,7 +641,7 @@
     const q=(document.getElementById('search-conv').value||'').toLowerCase();
     const filter=document.getElementById('filter-conv').value;
     filteredConversations=allConversations.filter(c=>{
-      const names=`${c.user1?.prenom||''} ${c.user2?.prenom||''} ${c.user1?.email||''} ${c.user2?.email||}`.toLowerCase();
+      const names=`${c.user1?.prenom||''} ${c.user2?.prenom||''} ${c.user1?.email||''} ${c.user2?.email||''}`.toLowerCase();
       return(!q||names.includes(q))&&(filter==='all'||(filter==='unread'&&c.unread>0));
     });
     renderConversations();
