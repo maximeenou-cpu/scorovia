@@ -358,30 +358,27 @@ async function applyPromo(){
       return;
     }
 
-    // 3. Compte combien de fois CET utilisateur a utilisé CE code
-    const{data:myUsages}=await sb
-      .from('points_history')
-      .select('id')
-      .eq('user_id',currentUser.id)
-      .eq('action','Code promo')
-      .like('description','%'+code+'%');
-    const myUseCount=myUsages?myUsages.length:0;
-
-    // 4. Logique cumulable / non-cumulable
-    // Par défaut (NULL) = non cumulable, max 1 utilisation par personne
+    // 3. Vérification via table dédiée promo_code_uses (fiable, pas de dépendance à description)
     const cumulable = promo.cumulable === true;
-    const maxPerUser = (promo.max_uses_per_user === null || promo.max_uses_per_user === undefined) ? 1 : promo.max_uses_per_user;
+    const maxPerUser = (promo.max_uses_per_user === null || promo.max_uses_per_user === undefined) ? 1 : Number(promo.max_uses_per_user);
+
+    // Compte les utilisations de CE code par CET utilisateur
+    const{data:myUsages, error:usageErr}=await sb
+      .from('promo_code_uses')
+      .select('id')
+      .eq('user_id', currentUser.id)
+      .eq('promo_code_id', promo.id);
+
+    const myUseCount = myUsages ? myUsages.length : 0;
+    console.log('[promo] myUseCount:', myUseCount, 'cumulable:', cumulable, 'maxPerUser:', maxPerUser);
 
     if(!cumulable){
-      // Non cumulable : 1 seule utilisation de CE code par personne
       if(myUseCount > 0){
         showPromoMsg('❌ Tu as déjà utilisé ce code promo.','error');
         return;
       }
     } else {
-      // Cumulable : vérifie le max d'utilisations par personne (0 = illimité)
       if(maxPerUser > 0 && myUseCount >= maxPerUser){
-        const fois = maxPerUser === 1 ? 'fois' : 'fois';
         showPromoMsg('❌ Tu as atteint la limite de '+maxPerUser+' utilisation(s) pour ce code.','error');
         return;
       }
@@ -399,7 +396,12 @@ async function applyPromo(){
       description:'Code : '+code+(promo.influencer_name?' — '+promo.influencer_name:'')
     });
 
-    // 6. Incrémente le compteur global
+    // 6. Enregistre l'utilisation dans la table dédiée + incrémente compteur global
+    await sb.from('promo_code_uses').insert({
+      user_id: currentUser.id,
+      promo_code_id: promo.id,
+      code: code
+    });
     await sb.from('promo_codes').update({uses:(promo.uses||0)+1}).eq('id',promo.id);
 
     userProfile.points=newPts;
