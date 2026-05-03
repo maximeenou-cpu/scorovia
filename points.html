@@ -339,21 +339,7 @@ async function applyPromo(){
   msg.textContent='';
 
   try{
-    // 1. Vérifie si l'utilisateur a déjà utilisé un code promo
-    const{data:alreadyUsed}=await sb
-      .from('points_history')
-      .select('id')
-      .eq('user_id',currentUser.id)
-      .eq('action','Code promo')
-      .limit(1);
-
-    if(alreadyUsed&&alreadyUsed.length>0){
-      showPromoMsg('Tu as déjà utilisé un code promo.','error');
-      document.getElementById('promo-already-used').style.display='block';
-      return;
-    }
-
-    // 2. Recherche le code dans la table promo_codes
+    // 1. Recherche le code dans promo_codes
     const{data:promo,error:promoErr}=await sb
       .from('promo_codes')
       .select('*')
@@ -366,21 +352,45 @@ async function applyPromo(){
       return;
     }
 
-    // 3. Vérifie la date d'expiration
+    // 2. Vérifie la date d'expiration
     if(promo.expires_at&&new Date(promo.expires_at)<new Date()){
       showPromoMsg('❌ Ce code promo a expiré.','error');
       return;
     }
 
-    // 4. Vérifie le nombre d'utilisations max (uses > 0 = limité, 0 = illimité)
-    if(promo.uses>0){
-      const{data:usageData}=await sb
+    // 3. Compte combien de fois CET utilisateur a utilisé CE code
+    const{data:myUsages}=await sb
+      .from('points_history')
+      .select('id')
+      .eq('user_id',currentUser.id)
+      .eq('action','Code promo')
+      .like('description','%'+code+'%');
+    const myUseCount=myUsages?myUsages.length:0;
+
+    // 4. Logique cumulable / non-cumulable
+    const maxPerUser=promo.max_uses_per_user??1; // 0 = illimité
+    const cumulable=promo.cumulable===true;
+
+    if(!cumulable){
+      // Non cumulable : bloque si déjà utilisé CE code OU tout autre code non-cumulable
+      if(myUseCount>0){
+        showPromoMsg('❌ Tu as déjà utilisé ce code promo.','error');
+        return;
+      }
+      const{data:anyPromoUsed}=await sb
         .from('points_history')
         .select('id')
+        .eq('user_id',currentUser.id)
         .eq('action','Code promo')
-        .like('description','%'+code+'%');
-      if(usageData&&usageData.length>=promo.uses){
-        showPromoMsg('❌ Ce code promo a atteint son nombre maximum d\'utilisations.','error');
+        .limit(1);
+      if(anyPromoUsed&&anyPromoUsed.length>0){
+        showPromoMsg('❌ Un seul code non-cumulable autorisé par compte.','error');
+        return;
+      }
+    } else {
+      // Cumulable : vérifie le max d'utilisations par personne (0 = illimité)
+      if(maxPerUser>0&&myUseCount>=maxPerUser){
+        showPromoMsg('❌ Tu as déjà utilisé ce code '+myUseCount+' fois (maximum : '+maxPerUser+').','error');
         return;
       }
     }
@@ -397,7 +407,7 @@ async function applyPromo(){
       description:'Code : '+code+(promo.influencer_name?' — '+promo.influencer_name:'')
     });
 
-    // 6. Incrémente le compteur d'utilisations du code
+    // 6. Incrémente le compteur global
     await sb.from('promo_codes').update({uses:(promo.uses||0)+1}).eq('id',promo.id);
 
     userProfile.points=newPts;
@@ -429,19 +439,7 @@ function showPromoMsg(text,type){
 
 // Vérifie au chargement si le user a déjà utilisé un code
 async function checkPromoUsed(){
-  try{
-    const{data}=await sb
-      .from('points_history')
-      .select('id')
-      .eq('user_id',currentUser.id)
-      .eq('action','Code promo')
-      .limit(1);
-    if(data&&data.length>0){
-      document.getElementById('promo-already-used').style.display='block';
-      document.getElementById('promo-input').disabled=true;
-      document.getElementById('btn-promo').style.display='none';
-    }
-  }catch(e){console.error('[promo] checkPromoUsed:',e);}
+  // Ne bloque plus l'interface — chaque code est vérifié individuellement à la soumission
 }
 
 // ===== INIT =====

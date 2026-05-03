@@ -276,7 +276,7 @@
     <!-- PROMO CODES -->
     <div class="section" id="section-promos">
       <div class="section-title">Créer un code promo</div>
-      <div class="promo-form">
+      <div class="promo-form" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr auto">
         <div class="form-group">
           <label>Code (ex: LENA50)</label>
           <input type="text" id="promo-code" placeholder="LENA50" style="text-transform:uppercase">
@@ -289,6 +289,23 @@
           <label>Points bonus</label>
           <input type="number" id="promo-points" value="50" min="1">
         </div>
+        <div class="form-group">
+          <label>Max utilisations / personne</label>
+          <select id="promo-max-uses" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:'DM Mono',monospace;font-size:.85rem">
+            <option value="1">1 fois</option>
+            <option value="3">3 fois</option>
+            <option value="5">5 fois</option>
+            <option value="10">10 fois</option>
+            <option value="0">Illimité</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Cumulable ?</label>
+          <select id="promo-cumulable" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:'DM Mono',monospace;font-size:.85rem">
+            <option value="true">✅ Oui — story récurrente</option>
+            <option value="false">❌ Non — 1 seul code valide</option>
+          </select>
+        </div>
         <button class="btn-primary" onclick="createPromoCode()">Créer</button>
       </div>
 
@@ -297,7 +314,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Code</th><th>Influenceur</th><th>Points bonus</th><th>Utilisations</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr>
+            <tr><th>Code</th><th>Influenceur</th><th>Points bonus</th><th>Max / personne</th><th>Utilisations totales</th><th>Cumulable</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr>
           </thead>
           <tbody id="promos-tbody">
             <tr><td colspan="7" class="loader">Chargement...</td></tr>
@@ -740,11 +757,15 @@
         <div style="background:var(--bg2);border:1px solid var(--border);padding:12px 20px;font-size:.75rem;color:var(--muted)"><span style="color:var(--gold);font-size:1rem;font-weight:700">${totalUses}</span> utilisations totales</div>`;
       tbody.innerHTML=data.map(p=>{
         const pc=esc(p.code||'');const pn=esc(p.influencer_name||'—');
+        const maxLabel=p.max_uses_per_user===0?'Illimité':(p.max_uses_per_user||1)+' fois';
+        const cumLabel=p.cumulable?'<span style="color:var(--green)">✅ Oui</span>':'<span style="color:var(--muted)">❌ Non</span>';
         return`<tr>
           <td><code style="color:var(--gold);font-size:.9rem">${pc}</code></td>
           <td>${pn}</td>
           <td style="color:var(--green)">+${p.points_bonus} pts</td>
-          <td><span style="color:var(--text);font-weight:500">${p.uses||0}</span> <span style="color:var(--muted);font-size:.7rem">utilisations</span></td>
+          <td style="color:var(--muted)">${maxLabel}</td>
+          <td><span style="color:var(--text);font-weight:500">${p.uses||0}</span> <span style="color:var(--muted);font-size:.7rem">fois</span></td>
+          <td>${cumLabel}</td>
           <td><span class="badge ${p.active?'badge-active':'badge-inactive'}">${p.active?'Actif':'Désactivé'}</span></td>
           <td style="color:var(--muted);font-size:.75rem">${fd(p.created_at)}</td>
           <td>
@@ -765,9 +786,14 @@
     const code=document.getElementById('promo-code').value.trim().toUpperCase();
     const influencer=document.getElementById('promo-influencer').value.trim();
     const points=parseInt(document.getElementById('promo-points').value);
+    const maxUses=parseInt(document.getElementById('promo-max-uses').value); // 0 = illimité
+    const cumulable=document.getElementById('promo-cumulable').value==='true';
     if(!code||!influencer||isNaN(points))return showToast('Remplis tous les champs',true);
     try{
-      const{error}=await sb.from('promo_codes').insert({code,influencer_name:influencer,points_bonus:points,uses:0,active:true});
+      const{error}=await sb.from('promo_codes').insert({
+        code,influencer_name:influencer,points_bonus:points,
+        uses:0,active:true,max_uses_per_user:maxUses,cumulable
+      });
       if(error)return showToast('Erreur: '+(error.message.includes('unique')?'Code déjà existant':error.message),true);
       showToast('✓ Code '+code+' créé !');
       document.getElementById('promo-code').value='';document.getElementById('promo-influencer').value='';
