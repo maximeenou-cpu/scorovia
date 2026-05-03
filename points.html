@@ -368,29 +368,21 @@ async function applyPromo(){
     const myUseCount=myUsages?myUsages.length:0;
 
     // 4. Logique cumulable / non-cumulable
-    const maxPerUser=promo.max_uses_per_user??1; // 0 = illimité
-    const cumulable=promo.cumulable===true;
+    // Par défaut (NULL) = non cumulable, max 1 utilisation par personne
+    const cumulable = promo.cumulable === true;
+    const maxPerUser = (promo.max_uses_per_user === null || promo.max_uses_per_user === undefined) ? 1 : promo.max_uses_per_user;
 
     if(!cumulable){
-      // Non cumulable : bloque si déjà utilisé CE code OU tout autre code non-cumulable
-      if(myUseCount>0){
+      // Non cumulable : 1 seule utilisation de CE code par personne
+      if(myUseCount > 0){
         showPromoMsg('❌ Tu as déjà utilisé ce code promo.','error');
-        return;
-      }
-      const{data:anyPromoUsed}=await sb
-        .from('points_history')
-        .select('id')
-        .eq('user_id',currentUser.id)
-        .eq('action','Code promo')
-        .limit(1);
-      if(anyPromoUsed&&anyPromoUsed.length>0){
-        showPromoMsg('❌ Un seul code non-cumulable autorisé par compte.','error');
         return;
       }
     } else {
       // Cumulable : vérifie le max d'utilisations par personne (0 = illimité)
-      if(maxPerUser>0&&myUseCount>=maxPerUser){
-        showPromoMsg('❌ Tu as déjà utilisé ce code '+myUseCount+' fois (maximum : '+maxPerUser+').','error');
+      if(maxPerUser > 0 && myUseCount >= maxPerUser){
+        const fois = maxPerUser === 1 ? 'fois' : 'fois';
+        showPromoMsg('❌ Tu as atteint la limite de '+maxPerUser+' utilisation(s) pour ce code.','error');
         return;
       }
     }
