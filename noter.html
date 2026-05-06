@@ -722,7 +722,7 @@ async function loadTodayStats() {
   try {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
-    const { data: todayVotes } = await sb.from('votes').select('note, created_at, photos(*)').eq('voter_id', currentUser.id).gte('created_at', todayStart.toISOString()).order('created_at', { ascending: true });
+    const { data: todayVotes } = await sb.from('votes').select('note, created_at, photos!photo_id(*, users(prenom, ville))').eq('voter_id', currentUser.id).gte('created_at', todayStart.toISOString()).order('created_at', { ascending: true });
     if (todayVotes && todayVotes.length > 0) {
       sessionRated = todayVotes.length;
       sessionPts = todayVotes.length;
