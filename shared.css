@@ -24,6 +24,9 @@ body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans
 .loading-spinner { width: 32px; height: 32px; border: 3px solid rgba(245,200,66,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── Layout ── */
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
 /* ── Sidebar ── */
 .sidebar { width: 220px; flex-shrink: 0; background: var(--deep); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40; transition: transform 0.3s; }
 .sidebar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.15em; background: linear-gradient(135deg, var(--gold), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px; padding-left: 8px; text-decoration: none; display: block; }
