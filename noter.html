@@ -722,7 +722,7 @@ async function loadTodayStats() {
   try {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
-    const { data: todayVotes } = await sb.from('votes').select('note, created_at').eq('voter_id', currentUser.id).gte('created_at', todayStart.toISOString());
+    const { data: todayVotes } = await sb.from('votes').select('note, created_at, photos(*)').eq('voter_id', currentUser.id).gte('created_at', todayStart.toISOString()).order('created_at', { ascending: true });
     if (todayVotes && todayVotes.length > 0) {
       sessionRated = todayVotes.length;
       sessionPts = todayVotes.length;
@@ -731,6 +731,7 @@ async function loadTodayStats() {
       document.getElementById('s-rated').textContent = sessionRated;
       document.getElementById('s-avg').textContent = avg + '/10';
       document.getElementById('s-pts').textContent = '+' + sessionPts + ' pt' + (sessionPts > 1 ? 's' : '');
+      todayVotes.forEach(v => { if (v.photos) addToHistory(v.photos, v.note); });
     }
   } catch(e) {
     console.warn('[noter] loadTodayStats:', e);
